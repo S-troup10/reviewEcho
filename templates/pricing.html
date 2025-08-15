@@ -1,0 +1,358 @@
+
+{% extends "base.html" %}
+
+{% block title %}Pricing - Review Management{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <div class="p-6 max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-16 pt-8">
+            <h1 class="text-5xl font-bold text-gray-900 mb-6">
+                Choose Your Plan
+            </h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                Start your journey with our comprehensive review management platform. 
+                <br>Select the plan that best fits your business needs.
+            </p>
+        </div>
+
+        <!-- Current Subscription Status -->
+        {% if subscription_status %}
+        <div class="relative mb-12">
+            <div class="card p-8">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                    <div class="flex items-center space-x-6">
+                        <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                            <i class="fas fa-crown text-white text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-900 mb-2">
+                                Current Plan: {{ subscription_status.tier.title() if subscription_status.tier else 'None' }}
+                            </h3>
+                            <div class="flex items-center space-x-4">
+                                {% if subscription_status.in_trial %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 border border-green-200">
+                                    <i class="fas fa-gift mr-2"></i>None
+                                </span>
+                                <span class="text-gray-600">{{ subscription_status.trial_days_left }} days remaining</span>
+                                {% elif subscription_status.has_active_subscription %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 border border-green-200">
+                                    <i class="fas fa-check-circle mr-2"></i>Active
+                                </span>
+                                {% if subscription_status.expires_at %}
+                                <span class="text-gray-600">Renews {{ subscription_status.expires_at.strftime('%B %d, %Y') }}</span>
+                                {% endif %}
+                                {% else %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800 border border-red-200">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i>Expired
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% if subscription_status.has_active_subscription and not subscription_status.in_trial %}
+                    <form method="POST" action="{{ url_for('create_customer_portal') }}" class="mt-6 lg:mt-0">
+                        <button type="submit" class="btn-secondary">
+                            <i class="fas fa-cog mr-2"></i>Manage Subscription
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Pricing Plans -->
+        <div class="grid lg:grid-cols-2 gap-8 mb-16">
+            <!-- Base Plan -->
+            <div class="relative group">
+                <div class="card p-8 h-full {% if subscription_status and subscription_status.tier == 'base' %}ring-2 ring-indigo-400{% endif %} hover:shadow-lg transition-all duration-300">
+                    
+                    <div class="text-center mb-8">
+                        <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                            <i class="fas fa-rocket text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-3xl font-bold text-gray-900 mb-4">Base</h3>
+                        <div class="mb-4">
+                            <span class="text-5xl font-bold text-indigo-600">$34</span>
+                            <span class="text-gray-500 text-lg ml-2">/month</span>
+                        </div>
+                        <p class="text-gray-600">Perfect for small businesses getting started</p>
+                    </div>
+
+                    <ul class="space-y-4 mb-10">
+                        <li class="flex items-center space-x-3">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-check text-green-600 text-sm"></i>
+                            </div>
+                            <span class="text-gray-700">Complete review management system</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-check text-green-600 text-sm"></i>
+                            </div>
+                            <span class="text-gray-700">Smart review filtering & sorting</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-check text-green-600 text-sm"></i>
+                            </div>
+                            <span class="text-gray-700">Custom review forms & QR codes</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-check text-green-600 text-sm"></i>
+                            </div>
+                            <span class="text-gray-700">Professional marketing materials</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-check text-green-600 text-sm"></i>
+                            </div>
+                            <span class="text-gray-700">Comprehensive dashboard analytics</span>
+                        </li>
+                        <li class="flex items-center space-x-3 opacity-60">
+                            <div class="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-times text-red-600 text-sm"></i>
+                            </div>
+                            <span class="text-gray-500">Customer SMS/Email outreach</span>
+                        </li>
+                        <li class="flex items-center space-x-3 opacity-60">
+                            <div class="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-times text-red-600 text-sm"></i>
+                            </div>
+                            <span class="text-gray-500">AI-powered insights & reports</span>
+                        </li>
+
+                    </ul>
+
+                    <div class="mt-auto">
+                        {% if subscription_status and subscription_status.tier == 'base' %}
+                        <button class="w-full py-4 bg-gray-100 border border-gray-300 rounded-lg font-medium text-gray-500 cursor-not-allowed">
+                            <i class="fas fa-check mr-2"></i>Current Plan
+                        </button>
+                        {% elif subscription_status and subscription_status.in_trial %}
+                        <form method="POST" action="{{ url_for('create_checkout_session') }}">
+                            <input type="hidden" name="tier" value="base">
+                            <button type="submit" class="w-full btn-primary py-4">
+                                <i class="fas fa-rocket mr-2"></i>Subscribe to Base
+                            </button>
+                        </form>
+                        {% else %}
+                        <form method="POST" action="{{ url_for('create_checkout_session') }}">
+                            <input type="hidden" name="tier" value="base">
+                            <button type="submit" class="w-full btn-primary py-4">
+                                <i class="fas fa-rocket mr-2"></i>{% if not subscription_status %}Subscribe to Base{% else %}Upgrade to Base{% endif %}
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pro Plan -->
+            <div class="relative group">
+                <div class="card p-8 h-full {% if subscription_status and subscription_status.tier == 'pro' %}ring-2 ring-purple-400{% endif %} hover:shadow-lg transition-all duration-300">
+                    
+                    <!-- Popular Badge -->
+                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                        <div class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg">
+                            <i class="fas fa-star mr-2"></i>Most Popular
+                        </div>
+                    </div>
+
+                    <div class="text-center mb-8 mt-4">
+                        <div class="w-20 h-20 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                            <i class="fas fa-crown text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-3xl font-bold text-gray-900 mb-4">Pro</h3>
+                        <div class="mb-4">
+                            <span class="text-5xl font-bold text-purple-600">$48</span>
+                            <span class="text-gray-500 text-lg ml-2">/month</span>
+                        </div>
+                        <p class="text-gray-600">Advanced features for growing businesses</p>
+                    </div>
+
+                    <ul class="space-y-4 mb-10">
+                        <li class="flex items-center space-x-3">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-check text-green-600 text-sm"></i>
+                            </div>
+                            <span class="text-gray-700">Everything in Base plan</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <div class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-paper-plane text-purple-600 text-sm"></i>
+                            </div>
+                            <span class="text-gray-700"><strong>Customer outreach via SMS & Email</strong></span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <div class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-users text-purple-600 text-sm"></i>
+                            </div>
+                            <span class="text-gray-700">Automated feedback request campaigns</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <div class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-brain text-purple-600 text-sm"></i>
+                            </div>
+                            <span class="text-gray-700"><strong>AI-powered review analysis & reports</strong></span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <div class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-chart-line text-purple-600 text-sm"></i>
+                            </div>
+                            <span class="text-gray-700">Advanced SWOT analysis & business insights</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <div class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-headset text-purple-600 text-sm"></i>
+                            </div>
+                            <span class="text-gray-700"><strong>Priority customer support</strong></span>
+                        </li>
+                    </ul>
+
+                    <div class="mt-auto">
+                        {% if subscription_status and subscription_status.tier == 'pro' %}
+                        <button class="w-full py-4 bg-gray-100 border border-gray-300 rounded-lg font-medium text-gray-500 cursor-not-allowed">
+                            <i class="fas fa-check mr-2"></i>Current Plan
+                        </button>
+                        {% elif subscription_status and subscription_status.in_trial %}
+                        <form method="POST" action="{{ url_for('create_checkout_session') }}">
+                            <input type="hidden" name="tier" value="pro">
+                            <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-4 rounded-lg font-semibold hover:from-purple-700 hover:to-indigo-700 transition-all">
+                                <i class="fas fa-crown mr-2"></i>Subscribe to Pro
+                            </button>
+                        </form>
+                        {% else %}
+                        <form method="POST" action="{{ url_for('create_checkout_session') }}">
+                            <input type="hidden" name="tier" value="pro">
+                            <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-4 rounded-lg font-semibold hover:from-purple-700 hover:to-indigo-700 transition-all">
+                                <i class="fas fa-crown mr-2"></i>{% if not subscription_status %}Subscribe to Pro{% else %}Upgrade to Pro{% endif %}
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Comparison -->
+        <div class="card p-8 mb-16">
+            <h2 class="text-3xl font-bold text-center text-gray-900 mb-10">
+                Feature Comparison
+            </h2>
+
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b-2 border-gray-200">
+                            <th class="text-left p-6 text-gray-900 font-semibold text-lg">Features</th>
+                            <th class="text-center p-6 text-indigo-600 font-semibold text-lg">Base ($34)</th>
+                            <th class="text-center p-6 text-purple-600 font-semibold text-lg">Pro ($48)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                            <td class="p-6 text-gray-700">Review Management System</td>
+                            <td class="text-center p-6"><i class="fas fa-check text-green-600 text-xl"></i></td>
+                            <td class="text-center p-6"><i class="fas fa-check text-green-600 text-xl"></i></td>
+                        </tr>
+                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                            <td class="p-6 text-gray-700">Smart Review Filtering</td>
+                            <td class="text-center p-6"><i class="fas fa-check text-green-600 text-xl"></i></td>
+                            <td class="text-center p-6"><i class="fas fa-check text-green-600 text-xl"></i></td>
+                        </tr>
+                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                            <td class="p-6 text-gray-700">Custom Forms & QR Codes</td>
+                            <td class="text-center p-6"><i class="fas fa-check text-green-600 text-xl"></i></td>
+                            <td class="text-center p-6"><i class="fas fa-check text-green-600 text-xl"></i></td>
+                        </tr>
+                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                            <td class="p-6 text-gray-700">Marketing Materials</td>
+                            <td class="text-center p-6"><i class="fas fa-check text-green-600 text-xl"></i></td>
+                            <td class="text-center p-6"><i class="fas fa-check text-green-600 text-xl"></i></td>
+                        </tr>
+                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                            <td class="p-6 text-gray-700">Customer SMS & Email Outreach</td>
+                            <td class="text-center p-6"><i class="fas fa-times text-red-500 text-xl"></i></td>
+                            <td class="text-center p-6"><i class="fas fa-check text-purple-600 text-xl"></i></td>
+                        </tr>
+                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                            <td class="p-6 text-gray-700">AI-Powered Analysis & Reports</td>
+                            <td class="text-center p-6"><i class="fas fa-times text-red-500 text-xl"></i></td>
+                            <td class="text-center p-6"><i class="fas fa-check text-purple-600 text-xl"></i></td>
+                        </tr>
+                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                            <td class="p-6 text-gray-700">Priority Customer Support</td>
+                            <td class="text-center p-6"><i class="fas fa-times text-red-500 text-xl"></i></td>
+                            <td class="text-center p-6"><i class="fas fa-check text-purple-600 text-xl"></i></td>
+                        </tr>
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="p-6 text-gray-700">SWOT Reports & Business Insights</td>
+                            <td class="text-center p-6"><i class="fas fa-times text-red-500 text-xl"></i></td>
+                            <td class="text-center p-6"><i class="fas fa-check text-purple-600 text-xl"></i></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- FAQ Section -->
+        <div class="card p-8">
+            <h2 class="text-3xl font-bold text-center text-gray-900 mb-10">
+                Frequently Asked Questions
+            </h2>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="space-y-6">
+                    <div class="p-6 rounded-lg bg-gray-50 border border-gray-200">
+                        <h3 class="text-gray-900 font-semibold mb-3 flex items-center">
+                            <i class="fas fa-credit-card text-indigo-600 mr-3"></i>
+                            What payment methods do you accept?
+                        </h3>
+                        <p class="text-gray-600 leading-relaxed">
+                            We accept all major credit cards and debit cards through our secure payment processor. Your billing information is encrypted and protected.
+                        </p>
+                    </div>
+
+                    <div class="p-6 rounded-lg bg-gray-50 border border-gray-200">
+                        <h3 class="text-gray-900 font-semibold mb-3 flex items-center">
+                            <i class="fas fa-sync-alt text-indigo-600 mr-3"></i>
+                            Can I change my plan anytime?
+                        </h3>
+                        <p class="text-gray-600 leading-relaxed">
+                            Absolutely! You can upgrade or downgrade your plan at any time. Changes take effect immediately and billing adjusts accordingly.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="p-6 rounded-lg bg-gray-50 border border-gray-200">
+                        <h3 class="text-gray-900 font-semibold mb-3 flex items-center">
+                            <i class="fas fa-shield-alt text-green-600 mr-3"></i>
+                            What happens if I cancel?
+                        </h3>
+                        <p class="text-gray-600 leading-relaxed">
+                            You'll continue to have access to your paid features until the end of your current billing period. Your data is safely stored and you can reactivate anytime.
+                        </p>
+                    </div>
+
+                    <div class="p-6 rounded-lg bg-gray-50 border border-gray-200">
+                        <h3 class="text-gray-900 font-semibold mb-3 flex items-center">
+                            <i class="fas fa-headset text-purple-600 mr-3"></i>
+                            Do you offer customer support?
+                        </h3>
+                        <p class="text-gray-600 leading-relaxed">
+                            Yes! All plans include customer support. Pro subscribers get priority support with faster response times and dedicated assistance.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://js.stripe.com/v3/"></script>
+{% endblock %}

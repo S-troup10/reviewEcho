@@ -1,0 +1,74 @@
+
+{% extends "base.html" %}
+{% block title %}Sign In - Quantum Platform{% endblock %}
+
+{% block content %}
+<div class="bg-white -mx-4 -my-8 px-4 py-16 text-gray-900 min-h-screen">
+  <div class="max-w-md mx-auto space-y-8 fade-in">
+    <!-- Header -->
+    <div class="text-center">
+      <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+        <i class="fas fa-sign-in-alt text-white text-2xl"></i>
+      </div>
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
+      <p class="text-gray-600">Sign in to your Quantum account</p>
+    </div>
+
+    <!-- Login Form -->
+    <div class="card p-8">
+      <form method="POST" class="space-y-6">
+        <div>
+          <label for="email" class="block text-gray-900 font-semibold mb-2">
+            <i class="fas fa-envelope mr-2 text-indigo-600"></i>Email Address
+          </label>
+          <input 
+            type="email" 
+            name="email" 
+            id="email"
+            required 
+            class="input-field text-gray-900"
+            placeholder="your@email.com">
+        </div>
+
+        <div>
+          <label for="password" class="block text-gray-900 font-semibold mb-2">
+            <i class="fas fa-lock mr-2 text-indigo-600"></i>Password
+          </label>
+          <input 
+            type="password" 
+            name="password" 
+            id="password"
+            required 
+            class="input-field text-gray-900"
+            placeholder="Enter your password">
+        </div>
+
+        <button type="submit" class="btn-primary w-full text-lg py-3">
+          <i class="fas fa-sign-in-alt mr-2"></i>Sign In
+        </button>
+      </form>
+
+      <!-- Divider -->
+      <div class="flex items-center my-6">
+        <div class="flex-1 border-t border-gray-300"></div>
+        <span class="px-4 text-gray-500 text-sm">or</span>
+        <div class="flex-1 border-t border-gray-300"></div>
+      </div>
+
+      <!-- Google Sign In -->
+      <a href="/auth/google" 
+         class="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 font-medium">
+        <i class="fab fa-google mr-3 text-red-500"></i>Continue with Google
+      </a>
+    </div>
+
+    <!-- Sign Up Link -->
+    <div class="text-center">
+      <p class="text-gray-600">
+        Don't have an account? 
+        <a href="/signup" class="text-indigo-600 hover:text-indigo-700 font-medium">Sign up here</a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

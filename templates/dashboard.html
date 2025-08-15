@@ -1,0 +1,545 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - ReviewEcho{% endblock %}
+
+{% block content %}
+
+<!-- Welcome Demo Modal -->
+{% if show_welcome_demo %}
+<div id="welcomeModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl p-4 sm:p-6 lg:p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+    <div class="text-center mb-4 sm:mb-6">
+      <div class="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+        <i class="fas fa-rocket text-white text-2xl sm:text-3xl"></i>
+      </div>
+      <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Welcome to ReviewEcho!</h2>
+      <p class="text-gray-600 text-sm sm:text-base">Your 7-day free trial has started. Let's get you set up in 3 easy steps.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+      <!-- Step 1 -->
+      <div class="flex flex-col items-center p-4 bg-blue-50 rounded-lg text-center">
+        <div class="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold mb-3">1</div>
+        <h3 class="font-semibold text-gray-900 mb-2">Configure Your Business</h3>
+        <p class="text-gray-600 text-sm mb-3 flex-1">Set up your business name and Google Review link to start collecting reviews.</p>
+        <a href="/business-settings" class="text-blue-600 hover:text-blue-700 text-sm font-medium">Configure Now →</a>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="flex flex-col items-center p-4 bg-green-50 rounded-lg text-center">
+        <div class="w-10 h-10 bg-green-600 text-white rounded-full flex items-center justify-center font-bold mb-3">2</div>
+        <h3 class="font-semibold text-gray-900 mb-2">Share Your Review Link</h3>
+        <p class="text-gray-600 text-sm mb-3 flex-1">Get your custom review form link and start collecting feedback from customers.</p>
+        <span class="text-green-600 text-sm font-medium">Available after step 1</span>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="flex flex-col items-center p-4 bg-purple-50 rounded-lg text-center">
+        <div class="w-10 h-10 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold mb-3">3</div>
+        <h3 class="font-semibold text-gray-900 mb-2">Monitor & Improve</h3>
+        <p class="text-gray-600 text-sm mb-3 flex-1">Watch positive reviews go to Google while private feedback helps you improve.</p>
+        <span class="text-purple-600 text-sm font-medium">Coming soon</span>
+      </div>
+    </div>
+
+    <div class="mt-6 sm:mt-8 text-center">
+      <button onclick="closeWelcomeModal()" class="bg-gradient-to-r from-green-600 to-blue-600 text-white px-6 sm:px-8 py-3 rounded-lg font-semibold hover:from-green-700 hover:to-blue-700 transition-all">
+        Let's Get Started!
+      </button>
+      <p class="text-gray-500 text-xs sm:text-sm mt-2">You can access this guide anytime from the help menu</p>
+    </div>
+  </div>
+</div>
+
+<script>
+function closeWelcomeModal() {
+  document.getElementById('welcomeModal').style.display = 'none';
+}
+
+// Close modal when clicking outside
+document.getElementById('welcomeModal').addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeWelcomeModal();
+  }
+});
+</script>
+{% endif %}
+<div class="space-y-6 fade-in">
+  <!-- Welcome Header -->
+  <div class="card p-6">
+    <div class="flex flex-col md:flex-row items-start justify-between">
+      <div class="flex items-center space-x-4 mb-4 md:mb-0">
+        <div
+          class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+          <span class="text-2xl font-semibold text-white">{{ current_user.first_name[0] }}{{ current_user.last_name[0]
+            }}</span>
+        </div>
+        <div>
+          <h1 class="text-2xl font-normal text-gray-900">
+            Welcome back, <span class="font-medium text-primary">{{ current_user.first_name }}</span>
+          </h1>
+          <p class="text-secondary">Manage your business reviews and settings</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-3">
+        <div class="flex items-center space-x-2 px-3 py-1 bg-green-100 rounded-full">
+
+          <span class="text-sm text-success font-medium">Online</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Stats -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="card p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+          <i class="fas fa-star text-primary text-lg"></i>
+        </div>
+      </div>
+      <h3 class="text-2xl font-semibold text-gray-900 mb-1">{{ stats.average_rating or 0 }}</h3>
+      <p class="text-secondary text-sm">Average Rating</p>
+    </div>
+
+    <div class="card p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+          <i class="fas fa-chart-line text-success text-lg"></i>
+        </div>
+      </div>
+      <h3 class="text-2xl font-semibold text-gray-900 mb-1">{{ stats.total_reviews }}</h3>
+      <p class="text-secondary text-sm">Total Reviews</p>
+    </div>
+
+    <div class="card p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+          <i class="fas fa-eye text-warning text-lg"></i>
+        </div>
+      </div>
+      <h3 class="text-2xl font-semibold text-gray-900 mb-1">{{ stats.public_reviews + stats.private_reviews }}</h3>
+      <p class="text-secondary text-sm">Public/Private</p>
+    </div>
+
+    <div class="card p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+          <i class="fas fa-thumbs-up text-purple-600 text-lg"></i>
+        </div>
+        {% if stats.satisfaction_rate >= 90 %}
+        <span class="text-sm font-medium text-success">Excellent</span>
+        {% elif stats.satisfaction_rate >= 75 %}
+        <span class="text-sm font-medium text-yellow-600">Good</span>
+        {% elif stats.satisfaction_rate > 0 %}
+        <span class="text-sm font-medium text-orange-600">Fair</span>
+        {% else %}
+        <span class="text-sm font-medium text-gray-500">--</span>
+        {% endif %}
+      </div>
+      <h3 class="text-2xl font-semibold text-gray-900 mb-1">{{ stats.satisfaction_rate }}%</h3>
+      <p class="text-secondary text-sm">Satisfaction</p>
+    </div>
+  </div>
+
+  <!-- Main Content Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Profile Information -->
+    <div class="lg:col-span-2 card p-6">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-semibold text-gray-900">Profile Information</h2>
+        <a  href="{{ url_for('settings')}}" class="btn-secondary text-sm">
+          <i class="fas fa-edit mr-2"></i>Edit Profile
+        </a>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-4">
+        <div class="p-4 bg-gray-50 rounded-lg">
+          <div class="flex items-center mb-3">
+            <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+              <i class="fas fa-user text-primary text-sm"></i>
+            </div>
+            <h3 class="font-medium text-gray-900">Full Name</h3>
+          </div>
+          <p class="text-gray-700">{{ current_user.first_name }} {{ current_user.last_name }}</p>
+        </div>
+
+        <div class="p-4 bg-gray-50 rounded-lg">
+          <div class="flex items-center mb-3">
+            <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+              <i class="fas fa-building text-success text-sm"></i>
+            </div>
+            <h3 class="font-medium text-gray-900">Business</h3>
+          </div>
+          <p class="text-gray-700">{{ current_user.business }}</p>
+        </div>
+
+        <div class="p-4 bg-gray-50 rounded-lg">
+          <div class="flex items-center mb-3">
+            <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center mr-3">
+              <i class="fas fa-envelope text-red-500 text-sm"></i>
+            </div>
+            <h3 class="font-medium text-gray-900">Email</h3>
+          </div>
+          <p class="text-gray-700">{{ current_user.email }}</p>
+        </div>
+
+        <div class="p-4 bg-gray-50 rounded-lg">
+          <div class="flex items-center mb-3">
+            <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+              <i class="fas fa-shield-alt text-success text-sm"></i>
+            </div>
+            <h3 class="font-medium text-gray-900">Status</h3>
+          </div>
+          <div class="flex items-center">
+            <div class="w-2 h-2 bg-success rounded-full mr-2"></div>
+            <p class="text-success font-medium">Active & Verified</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="card p-6">
+      <h2 class="text-xl font-semibold text-gray-900 mb-6">Recent Activity</h2>
+
+      <div class="space-y-4">
+        {% for activity in recent_activity %}
+        <div class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+          <div class="w-8 h-8 bg-{{ activity.color }}-100 rounded-full flex items-center justify-center mr-3">
+            <i
+              class="{{ activity.icon }} text-{% if activity.color == 'green' %}success{% elif activity.color == 'blue' %}primary{% elif activity.color == 'yellow' %}warning{% else %}gray-600{% endif %} text-sm"></i>
+          </div>
+          <div class="flex-1">
+            <p class="font-medium text-gray-900">{{ activity.title }}</p>
+            <p class="text-secondary text-sm">{{ activity.description }}</p>
+          </div>
+          <span class="text-xs text-gray-500">{{ activity.time }}</span>
+        </div>
+        {% endfor %}
+
+        {% if not recent_activity %}
+        <div class="text-center p-6 text-gray-500">
+          <i class="fas fa-clock text-3xl mb-3"></i>
+          <p>No recent activity yet</p>
+          <p class="text-sm">Activity will appear here as you use the platform</p>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="mt-6 space-y-3">
+        <a href="{{ url_for('view_reviews') }}" class="w-full btn-secondary py-2 inline-block text-center">
+          <i class="fas fa-history mr-2"></i>View All Reviews
+        </a>
+        {% if stats.total_reviews >= 2 %}
+        <a href="{{ url_for('ai_reports_history') }}"
+          class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-2 rounded-lg font-semibold hover:from-purple-600 hover:to-pink-600 transition-all inline-block text-center">
+          <i class="fas fa-brain mr-2"></i>AI Review Insights
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Business Overview -->
+  <div class="card p-6">
+    <h2 class="text-xl font-semibold text-gray-900 mb-6">Business Review Management</h2>
+
+    {% if business_settings %}
+    <div class="space-y-6">
+      <div class="p-6 bg-blue-50 rounded-lg border border-blue-200">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center space-x-4">
+            <div class="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
+              <i class="fas fa-store text-black text-lg"></i>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold text-gray-900">{{ business_settings.business_name }}</h3>
+              <p class="text-secondary">Review management is active</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-2">
+            <div class="w-2 h-2 bg-success rounded-full"></div>
+            <span class="text-success font-medium text-sm">Active</span>
+          </div>
+        </div>
+
+        <!-- Side-by-side layout for Review Link and QR Code -->
+        <div class="flex flex-col sm:flex-row gap-6  rounded-xl p-6 mb-8">
+
+          <!-- Review Link Section -->
+          <div class="flex-1 bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+              <label class="font-semibold text-gray-900 flex items-center text-lg">
+                <i class="fas fa-link mr-2 text-primary"></i>
+                Your Custom Review Link
+              </label>
+              <button type="button"
+                onclick="copyToClipboard(this, '{{ request.url_root }}review-form/{{ business_settings.id }}')"
+                class="btn-primary text-sm transition-transform duration-300 ease-in-out active:scale-95">
+                <i class="fas fa-copy mr-2"></i>Copy
+              </button>
+
+            </div>
+            <code class="text-sm text-gray-700 break-all block bg-gray-100 p-3 rounded-md border border-gray-200">
+      {{ request.url_root }}review-form/{{ business_settings.id }}
+    </code>
+            <p class="text-sm text-gray-600 mt-3 flex items-start">
+              <i class="fas fa-info-circle mr-2 text-primary mt-0.5"></i>
+              Share this link with customers. Ratings of 4+ stars will redirect to Google Reviews. Lower ratings stay
+              private.
+            </p>
+          </div>
+
+          <!-- QR Code Section -->
+          <div
+            class="flex-1 bg-white rounded-xl p-5 flex flex-col items-center justify-between border border-gray-200 shadow-sm">
+            <label class="font-semibold text-gray-900 flex items-center text-lg mb-3">
+              <i class="fas fa-qrcode mr-2 text-primary"></i>
+              Scan to Leave a Review
+            </label>
+            <canvas id="qr-code" width="200" height="200" class="mb-4 border border-gray-300 rounded-md shadow">
+            </canvas>
+            <div class="flex gap-3 mt-2">
+              <button onclick="downloadQRCode()"
+                class="btn-secondary text-sm px-4 py-2 rounded-md shadow hover:shadow-md">
+                <i class="fas fa-download mr-2"></i>Download
+              </button>
+              <a href="/poster/{{ business_settings.id }}"
+                class="btn-primary text-sm px-4 py-2 rounded-md shadow hover:shadow-md text-center">
+                <i class="fas fa-file-image mr-2"></i>Poster
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+
+        <!-- Navigation Buttons -->
+        <div class="flex flex-col sm:flex-row gap-3">
+          <a href="{{ url_for('view_reviews') }}" class="flex-1 btn-primary text-center py-3">
+            <i class="fas fa-chart-bar mr-2"></i>View Reviews Dashboard
+          </a>
+          <a href="{{ url_for('business_settings') }}" class="flex-1 btn-secondary text-center py-3">
+            <i class="fas fa-cog mr-2"></i>Edit Settings
+          </a>
+          <a href="{{ url_for('form_customization') }}" class="flex-1 btn-secondary text-center py-3">
+            <i class="fas fa-palette mr-2"></i>Customize Form
+          </a>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="text-center p-8 bg-yellow-50 rounded-lg border border-yellow-200">
+      <div class="w-16 h-16 bg-warning rounded-lg flex items-center justify-center mx-auto mb-4">
+        <i class="fas fa-exclamation-triangle text-white text-xl"></i>
+      </div>
+      <h3 class="text-lg font-semibold text-gray-900 mb-2">Setup Required</h3>
+      <p class="text-secondary mb-6">Configure your business settings to start collecting and managing reviews</p>
+      <a href="{{ url_for('business_settings') }}" class="btn-primary text-lg px-8 py-3">
+        <i class="fas fa-rocket mr-2"></i>Get Started
+      </a>
+    </div>
+    {% endif %}
+  </div>
+
+
+
+
+
+  <!-- AI Insights Summary -->
+  {% if ai_summary and ai_summary.review_count > 0 %}
+  <div
+    class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 border border-purple-200 shadow-lg">
+    <div class="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-blue-500/5"></div>
+    <div class="relative p-8">
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center space-x-4">
+          <div
+            class="w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+            <i class="fas fa-chart-line text-white text-2xl"></i>
+          </div>
+          <div>
+            <h2 class="text-2xl font-bold text-gray-900 mb-1">Latest AI Business Intelligence</h2>
+            <div class="flex items-center gap-3">
+              <span
+                class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold
+                {% if ai_summary.overall_sentiment == 'positive' %}bg-emerald-100 text-emerald-800{% elif ai_summary.overall_sentiment == 'negative' %}bg-red-100 text-red-800{% else %}bg-amber-100 text-amber-800{% endif %}">
+                {% if ai_summary.overall_sentiment == 'positive' %}
+                <i class="fas fa-smile mr-2"></i>Positive Sentiment
+                {% elif ai_summary.overall_sentiment == 'negative' %}
+                <i class="fas fa-frown mr-2"></i>Negative Sentiment
+                {% else %}
+                <i class="fas fa-meh mr-2"></i>Mixed Sentiment
+                {% endif %}
+              </span>
+              <span class="text-sm text-gray-600">{{ ai_summary.review_count }} reviews analyzed</span>
+            </div>
+          </div>
+        </div>
+        <div class="flex flex-col gap-2">
+          <a href="{{ url_for('ai_reports_history') }}"
+            class="px-4 py-2 border border-purple-300 text-purple-700 rounded-lg font-medium hover:bg-purple-50 transition-all text-sm">
+            <i class="fas fa-history mr-2"></i>View History
+          </a>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <!-- Executive Summary -->
+        {% if ai_summary.get('executive_summary') %}
+        <div class="bg-white/90 backdrop-blur-sm rounded-xl p-6 border border-white/20 shadow-sm">
+          <h3 class="font-bold text-gray-900 mb-3 flex items-center text-lg">
+            <i class="fas fa-chart-bar text-purple-600 mr-3"></i>Executive Summary
+          </h3>
+          <p class="text-gray-800 leading-relaxed font-medium">{{ ai_summary.executive_summary }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Analysis Preview -->
+        {% if ai_summary.get('detailed_analysis') %}
+        <div class="bg-white/90 backdrop-blur-sm rounded-xl p-6 border border-white/20 shadow-sm">
+          <h3 class="font-bold text-gray-900 mb-3 flex items-center text-lg">
+            <i class="fas fa-microscope text-purple-600 mr-3"></i>Business Analysis Preview
+          </h3>
+          <p class="text-gray-800 leading-relaxed mb-4">{{ ai_summary.detailed_analysis[:300] }}{% if ai_summary.detailed_analysis|length > 300 %}...{% endif %}</p>
+
+          <!-- Quick Metrics -->
+          <div class="flex flex-wrap gap-2">
+            {% if ai_summary.get('key_strengths') %}
+            <span class="text-xs bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full font-semibold">
+              {{ ai_summary.key_strengths|length }} Key Strengths
+            </span>
+            {% endif %}
+            {% if ai_summary.get('areas_for_improvement') %}
+            <span class="text-xs bg-amber-100 text-amber-800 px-3 py-1 rounded-full font-semibold">
+              {{ ai_summary.areas_for_improvement|length }} Improvements
+            </span>
+            {% endif %}
+            {% if ai_summary.get('actionable_recommendations') %}
+            <span class="text-xs bg-purple-100 text-purple-800 px-3 py-1 rounded-full font-semibold">
+              {{ ai_summary.actionable_recommendations|length }} Action Items
+            </span>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 pt-4 border-t border-purple-200">
+          <a href="{{ url_for('ai_reports_history') }}"
+            class="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-indigo-700 transition-all text-center shadow-lg">
+            <i class="fas fa-chart-line mr-2"></i>View Full Report
+          </a>
+          <a href="{{ url_for('ai_reports_history') }}" onclick="showLoadingSpinner('Generating fresh AI analysis...')"
+            class="flex-1 border border-purple-300 text-purple-700 py-3 rounded-xl font-semibold hover:bg-purple-50 transition-all text-center">
+            <i class="fas fa-brain mr-2"></i>Generate New Report
+          </a>
+        </div>
+
+        <div class="text-center">
+          <span class="text-sm text-gray-600">
+            Report generated {{ ai_summary.generated_at[:19] | replace('T', ' at ') }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% elif stats.total_reviews >= 2 %}
+  <!-- No AI reports yet but enough reviews -->
+  <div class="card p-8 text-center bg-gradient-to-br from-purple-50 to-blue-50 border border-purple-200">
+    <div
+      class="w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+      <i class="fas fa-chart-line text-white text-2xl"></i>
+    </div>
+    <h3 class="text-xl font-semibold text-gray-900 mb-3">Generate Your First AI Report</h3>
+    <p class="text-gray-600 mb-6 max-w-md mx-auto">You have {{ stats.total_reviews }} reviews ready for AI analysis.
+      Generate comprehensive business insights, SWOT analysis, and actionable recommendations.</p>
+    <a href="{{ url_for('ai_reports_history') }}" onclick="showLoadingSpinner('Generating comprehensive AI analysis...')"
+      class="btn-primary text-lg px-8 py-3">
+      <i class="fas fa-brain mr-2"></i>Generate AI Report
+    </a>
+  </div>
+  {% endif %}
+
+  <!-- Quick Actions -->
+  <div class="card p-6">
+    <h2 class="text-xl font-semibold text-gray-900 mb-6">Quick Actions</h2>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <a href="{{ url_for('business_settings') }}"
+        class="flex flex-col items-center p-6 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group">
+        <div
+          class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+          <i class="fas fa-store text-white text-lg"></i>
+        </div>
+        <p class="font-medium text-gray-900 text-center">Business Settings</p>
+      </a>
+
+      <a href="{{ url_for('export') }}" class="flex flex-col items-center p-6 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group">
+        <div
+          class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+          <i class="fas fa-download text-white text-lg"></i>
+        </div>
+        <p class="font-medium text-gray-900 text-center">Export Data</p>
+      </a>
+
+      <a href="{{ url_for('view_reviews') }}"
+        class="flex flex-col items-center p-6 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group">
+        <div
+          class="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+          <i class="fas fa-star text-white text-lg"></i>
+        </div>
+        <p class="font-medium text-gray-900 text-center">Manage Reviews</p>
+      </a>
+
+      <a href="{{ url_for('ai_reports_history') }}"
+        class="flex flex-col items-center p-6 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group">
+        <div
+          class="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+          <i class="fas fa-history text-white text-lg"></i>
+        </div>
+        <p class="font-medium text-gray-900 text-center">AI Reports</p>
+      </a>
+
+      <a href="{{ url_for('customer_management') }}"
+        class="flex flex-col items-center p-6 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group">
+        <div
+          class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+          <i class="fas fa-paper-plane text-white text-lg"></i>
+        </div>
+        <p class="font-medium text-gray-900 text-center">Request Feedback</p>
+      </a>
+
+      <a href="{{ url_for('support') }}"
+      class="flex flex-col items-center p-6 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group">
+        <div
+          class="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+          <i class="fas fa-headset text-white text-lg"></i>
+        </div>
+        <p class="font-medium text-gray-900 text-center">Support</p>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- QRious Script -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+<script>
+  const qr = new QRious({
+    element: document.getElementById('qr-code'),
+    value: "{{ request.url_root }}review-form/{{ business_settings.id }}",
+    size: 200
+  });
+
+  function downloadQRCode() {
+    const canvas = document.getElementById('qr-code');
+    const link = document.createElement('a');
+    link.download = 'review-qr.png';
+    link.href = canvas.toDataURL();
+    link.click();
+  }
+</script>
+
+{% endblock %}

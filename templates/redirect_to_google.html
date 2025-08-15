@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Thank You! - {{ business_name }}{% endblock %}
+
+{% block content %}
+<div class="bg-white -mx-4 -my-8 px-4 py-16 text-gray-900 min-h-screen">
+  <div class="max-w-2xl mx-auto text-center space-y-8 fade-in">
+    <!-- Success Icon -->
+    <div class="w-24 h-24 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-8">
+      <i class="fas fa-check text-white text-4xl"></i>
+    </div>
+
+    <!-- Thank You Message -->
+    <div class="space-y-4">
+      <h1 class="text-4xl font-bold text-gray-900">Thank You!</h1>
+      <p class="text-xl text-gray-700">We appreciate your positive review of <strong class="text-green-600">{{ business_name }}</strong></p>
+    </div>
+
+    <!-- Google Review CTA -->
+    <div class="card p-8">
+      <div class="space-y-6">
+        <div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center mx-auto">
+          <i class="fab fa-google text-white text-2xl"></i>
+        </div>
+
+        <div>
+          <h2 class="text-2xl font-bold text-gray-900 mb-4">Share Your Experience on Google</h2>
+          <p class="text-gray-600 mb-6">Help others discover our business by sharing your review on Google. It only takes a moment and helps us tremendously!</p>
+        </div>
+
+        <a href="{{ google_link }}"
+           target="_blank"
+           class="btn-primary text-xl px-10 py-4 inline-block">
+          <i class="fab fa-google mr-3"></i>Leave Google Review
+        </a>
+
+        <p class="text-gray-500 text-sm">Opens in a new tab • Completely optional</p>
+      </div>
+    </div>
+
+    <!-- Alternative Actions -->
+    <div class="space-y-4">
+      <p class="text-gray-600">You can close this page if you prefer not to leave a Google review.</p>
+      <p class="text-sm text-gray-500">Thank you again for choosing {{ business_name }}!</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// Optional: Auto-redirect after a delay
+setTimeout(function() {
+  const userConfirmed = confirm("Would you like to be redirected to Google Reviews now?");
+  if (userConfirmed) {
+    window.open("{{ google_link }}", '_blank');
+  }
+}, 5000); // 5 second delay
+</script>
+{% endblock %}

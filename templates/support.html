@@ -1,0 +1,241 @@
+
+{% extends "base.html" %}
+
+{% block title %}Contact Support{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-12 px-4">
+  <div class="max-w-4xl mx-auto">
+    
+    <!-- Header Section -->
+    <div class="text-center mb-12 fade-in">
+      <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl mb-6 shadow-xl">
+        <i class="fas fa-headset text-3xl text-white"></i>
+      </div>
+      <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">
+        Get Support
+      </h1>
+      <p class="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+        Our dedicated support team is here to help you succeed. Send us a message and we'll get back to you within 24 hours.
+      </p>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-8">
+      <!-- Main Contact Form -->
+      <div class="lg:col-span-2">
+        {% if complete == 0 %}
+        <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden fade-in">
+          <!-- Form Header -->
+          <div class="bg-gradient-to-r from-indigo-500 to-purple-600 px-8 py-6">
+            <h2 class="text-2xl font-bold text-white flex items-center">
+              <i class="fas fa-paper-plane mr-3"></i>
+              Send us a message
+            </h2>
+            <p class="text-indigo-100 mt-2">Fill out the form below and we'll respond promptly</p>
+          </div>
+
+          <!-- Flash Messages -->
+          {% with messages = get_flashed_messages() %}
+          {% if messages %}
+          <div class="px-8 pt-6">
+            {% for message in messages %}
+            <div class="mb-4 p-4 bg-red-50 border border-red-200 text-red-800 rounded-xl flex items-start">
+              <i class="fas fa-exclamation-triangle text-red-500 mt-0.5 mr-3"></i>
+              <p class="font-medium">{{ message }}</p>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+          {% endwith %}
+
+          <!-- Form -->
+          <div class="px-8 py-6">
+            <form method="POST" action="{{ url_for('support') }}" class="space-y-6">
+              <!-- Name Field -->
+              <div class="group">
+                <label for="name" class="block text-sm font-semibold text-gray-800 mb-2 flex items-center">
+                  <i class="fas fa-user text-indigo-500 mr-2"></i>
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  placeholder="Enter your full name"
+                  required
+                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-0 transition-all duration-200 bg-gray-50 focus:bg-white group-hover:border-gray-300"
+                  value="{{ request.form.name or '' }}"
+                >
+              </div>
+
+              <!-- Email Field -->
+              <div class="group">
+                <label for="email" class="block text-sm font-semibold text-gray-800 mb-2 flex items-center">
+                  <i class="fas fa-envelope text-indigo-500 mr-2"></i>
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  placeholder="you@company.com"
+                  required
+                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-0 transition-all duration-200 bg-gray-50 focus:bg-white group-hover:border-gray-300"
+                  value="{{ request.form.email or '' }}"
+                >
+              </div>
+
+              <!-- Message Field -->
+              <div class="group">
+                <label for="message" class="block text-sm font-semibold text-gray-800 mb-2 flex items-center">
+                  <i class="fas fa-comment-dots text-indigo-500 mr-2"></i>
+                  Message
+                </label>
+                <textarea
+                  id="message"
+                  name="message"
+                  rows="6"
+                  placeholder="Tell us about your question or issue. Be as detailed as possible so we can provide the best help..."
+                  required
+                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-0 transition-all duration-200 bg-gray-50 focus:bg-white resize-y group-hover:border-gray-300"
+                >{{ request.form.message or '' }}</textarea>
+              </div>
+
+              <!-- Submit Button -->
+              <button
+                type="submit"
+                class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-xl transition-all duration-200 transform hover:scale-[1.02] hover:shadow-xl flex items-center justify-center space-x-3"
+              >
+                <i class="fas fa-paper-plane text-lg"></i>
+                <span class="text-lg">Send Message</span>
+              </button>
+            </form>
+          </div>
+        </div>
+
+        {% elif complete == 1 %}
+        <!-- Success State -->
+        <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden text-center py-16 px-8 fade-in">
+          <div class="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full mb-8 shadow-xl">
+            <i class="fas fa-check text-4xl text-white"></i>
+          </div>
+          <h2 class="text-3xl font-bold text-gray-900 mb-4">Message Sent Successfully!</h2>
+          <p class="text-xl text-gray-600 max-w-md mx-auto leading-relaxed mb-8">
+            Thank you for reaching out! Your message has been received and our support team will get back to you within 24 hours.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/dashboard" class="btn-primary inline-flex items-center px-6 py-3 rounded-xl font-semibold">
+              <i class="fas fa-arrow-left mr-2"></i>
+              Back to Dashboard
+            </a>
+            <a href="/support" class="btn-secondary inline-flex items-center px-6 py-3 rounded-xl font-semibold">
+              <i class="fas fa-plus mr-2"></i>
+              Send Another Message
+            </a>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Sidebar -->
+      <div class="space-y-6">
+        <!-- Contact Info Card -->
+        <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 fade-in">
+          <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+            <i class="fas fa-info-circle text-indigo-500 mr-3"></i>
+            Contact Information
+          </h3>
+          <div class="space-y-4">
+            <div class="flex items-start space-x-3">
+              <div class="flex-shrink-0 w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-clock text-indigo-600"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-900">Response Time</h4>
+                <p class="text-gray-600 text-sm">Within 24 hours</p>
+              </div>
+            </div>
+            <div class="flex items-start space-x-3">
+              <div class="flex-shrink-0 w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-users text-green-600"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-900">Support Team</h4>
+                <p class="text-gray-600 text-sm">Dedicated specialists</p>
+              </div>
+            </div>
+            <div class="flex items-start space-x-3">
+              <div class="flex-shrink-0 w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-shield-alt text-purple-600"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-900">Privacy</h4>
+                <p class="text-gray-600 text-sm">Your data is secure</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- How It Works Card -->
+        <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl border border-indigo-100 p-6 fade-in">
+          <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+            <i class="fas fa-question-circle text-indigo-500 mr-3"></i>
+            How It Works
+          </h3>
+          <div class="space-y-4">
+            <div class="flex items-start space-x-3">
+              <div class="flex-shrink-0 w-8 h-8 bg-indigo-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                1
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-900">Write Your Message</h4>
+                <p class="text-gray-600 text-sm">Fill out the form with detailed information</p>
+              </div>
+            </div>
+            <div class="flex items-start space-x-3">
+              <div class="flex-shrink-0 w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                2
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-900">Send to Our Team</h4>
+                <p class="text-gray-600 text-sm">Your message goes directly to our specialists</p>
+              </div>
+            </div>
+            <div class="flex items-start space-x-3">
+              <div class="flex-shrink-0 w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                3
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-900">Get Expert Help</h4>
+                <p class="text-gray-600 text-sm">Receive a personalized response quickly</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Tips Card -->
+        <div class="bg-amber-50 rounded-2xl border border-amber-200 p-6 fade-in">
+          <h3 class="text-lg font-bold text-amber-900 mb-4 flex items-center">
+            <i class="fas fa-lightbulb text-amber-600 mr-3"></i>
+            Quick Tips
+          </h3>
+          <ul class="space-y-2 text-sm">
+            <li class="flex items-start space-x-2">
+              <i class="fas fa-check-circle text-amber-600 mt-0.5"></i>
+              <span class="text-amber-800">Be specific about your issue</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <i class="fas fa-check-circle text-amber-600 mt-0.5"></i>
+              <span class="text-amber-800">Include relevant details</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <i class="fas fa-check-circle text-amber-600 mt-0.5"></i>
+              <span class="text-amber-800">Check your email for our response</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

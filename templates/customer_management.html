@@ -1,0 +1,1559 @@
+
+{% extends "base.html" %}
+{% block title %}Customer Management - Quantum{% endblock %}
+
+{% block content %}
+<div class="space-y-6 fade-in">
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row items-start md:items-center justify-between">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">Customer Management</h1>
+      <p class="text-gray-600">Add and manage customer contacts</p>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="card p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+          <i class="fas fa-users text-primary text-lg"></i>
+        </div>
+      </div>
+      <h3 class="text-2xl font-semibold text-gray-900 mb-1">{{ customers|length }}</h3>
+      <p class="text-secondary text-sm">Total Customers</p>
+    </div>
+
+    <div class="card p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+          <i class="fas fa-envelope text-success text-lg"></i>
+        </div>
+      </div>
+      <h3 class="text-2xl font-semibold text-gray-900 mb-1">{{ customers|selectattr("email")|list|length }}</h3>
+      <p class="text-secondary text-sm">With Email</p>
+    </div>
+
+    <div class="card p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+          <i class="fas fa-phone text-purple-600 text-lg"></i>
+        </div>
+      </div>
+      <h3 class="text-2xl font-semibold text-gray-900 mb-1">{{ customers|selectattr("phone")|list|length }}</h3>
+      <p class="text-secondary text-sm">With Phone</p>
+    </div>
+
+    <div class="card p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+          <i class="fas fa-paper-plane text-warning text-lg"></i>
+        </div>
+      </div>
+      <h3 class="text-2xl font-semibold text-gray-900 mb-1">{{ feedback_requests|length }}</h3>
+      <p class="text-secondary text-sm">Requests Sent</p>
+    </div>
+  </div>
+
+  <!-- Add Customers Section -->
+  <div class="card">
+    <div class="p-6 border-b border-gray-200">
+      <h2 class="text-xl font-semibold text-gray-900">Add Customers</h2>
+      <p class="text-gray-600 mt-1">Add customers manually or upload a CSV file</p>
+    </div>
+
+    <div class="p-6">
+      <!-- Tab Navigation -->
+      <div class="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-6">
+        <button id="manualTab"
+          class="flex-1 py-3 px-4 text-sm font-medium text-center rounded-md bg-white text-blue-600 shadow-sm transform transition-all duration-300 hover:scale-105">
+          <i class="fas fa-plus mr-2"></i>Manual Entry
+        </button>
+        <button id="csvTab"
+          class="flex-1 py-3 px-4 text-sm font-medium text-center rounded-md text-gray-500 hover:text-gray-700 transform transition-all duration-300 hover:scale-105">
+          <i class="fas fa-upload mr-2"></i>CSV Upload
+        </button>
+      </div>
+
+      <!-- Manual Entry Tab -->
+      <div id="manualEntrySection" class="tab-content">
+        <div id="manualEntryForm" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Name (Optional)</label>
+            <input type="text" id="manualName"
+              class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+            <div id="nameError" class="text-red-500 text-sm mt-1 hidden"></div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+            <input type="email" id="manualEmail"
+              class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+            <div id="emailError" class="text-red-500 text-sm mt-1 hidden"></div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+            <input type="tel" id="manualPhone"
+              class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+            <div id="phoneError" class="text-red-500 text-sm mt-1 hidden"></div>
+          </div>
+          <div class="md:col-span-3">
+            <button type="button" id="addToListBtn" class="btn-primary transform transition-all duration-200 hover:scale-105">
+              <i class="fas fa-plus mr-2"></i>Add to List
+            </button>
+            <p class="text-sm text-gray-600 mt-2">* Either email or phone is required</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CSV Upload Tab -->
+      <div id="csvUploadSection" class="tab-content hidden">
+        <div class="space-y-6">
+          <div class="bg-white border-2 border-gray-200 rounded-xl p-6 shadow-sm">
+            <div class="text-center mb-4">
+              <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <i class="fas fa-file-csv text-blue-600 text-xl"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">Upload CSV File</h3>
+              <p class="text-sm text-gray-600">Select your customer data file - we'll help you map the columns next</p>
+            </div>
+            
+            <div class="relative mb-4">
+              <input type="file" id="csvFileInput" accept=".csv" class="hidden">
+              <button type="button" onclick="document.getElementById('csvFileInput').click()" 
+                class="w-full bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 hover:bg-blue-50 transition-all duration-300 group">
+                <div class="flex flex-col items-center space-y-2">
+                  <div class="w-12 h-12 bg-gray-200 group-hover:bg-blue-200 rounded-lg flex items-center justify-center group-hover:scale-105 transition-all duration-300">
+                    <i class="fas fa-cloud-upload-alt text-gray-500 group-hover:text-blue-600 text-xl"></i>
+                  </div>
+                  <div>
+                    <p class="text-base font-medium text-gray-900">Choose CSV File</p>
+                    <p class="text-sm text-gray-500">or drag and drop here</p>
+                  </div>
+                </div>
+              </button>
+            </div>
+            
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <h4 class="text-sm font-medium text-blue-900 mb-2 flex items-center">
+                <i class="fas fa-info-circle mr-2"></i>
+                CSV Requirements
+              </h4>
+              <ul class="text-xs text-blue-800 space-y-1">
+                <li class="flex items-center"><i class="fas fa-check text-blue-600 mr-2 w-3"></i>Must have header row with column names</li>
+                <li class="flex items-center"><i class="fas fa-check text-blue-600 mr-2 w-3"></i>At least email OR phone column required</li>
+                <li class="flex items-center"><i class="fas fa-check text-blue-600 mr-2 w-3"></i>Name column is optional (auto-generated if missing)</li>
+                <li class="flex items-center"><i class="fas fa-check text-blue-600 mr-2 w-3"></i>File size limit: 10MB</li>
+              </ul>
+            </div>
+          </div>
+
+          <div id="columnMappingSection" class="hidden animate-slide-down">
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 shadow-sm">
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center">
+                  <div class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">2</div>
+                  <h4 class="text-lg font-semibold text-gray-900">Map Your CSV Columns</h4>
+                </div>
+                <div class="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">Step 2 of 3</div>
+              </div>
+              
+              <p class="text-sm text-gray-600 mb-4">Tell us which columns in your CSV contain the customer information:</p>
+              
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                    <i class="fas fa-user text-gray-500 mr-2"></i>
+                    Name Column (Optional)
+                  </label>
+                  <select id="nameColumnSelect" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all duration-200">
+                    <option value="">-- Skip Name --</option>
+                  </select>
+                  <p class="text-xs text-gray-500 mt-1">We'll auto-generate names if not provided</p>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                    <i class="fas fa-envelope text-blue-500 mr-2"></i>
+                    Email Column
+                  </label>
+                  <select id="emailColumnSelect" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all duration-200">
+                    <option value="">-- No Email Column --</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                    <i class="fas fa-phone text-green-500 mr-2"></i>
+                    Phone Column
+                  </label>
+                  <select id="phoneColumnSelect" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all duration-200">
+                    <option value="">-- No Phone Column --</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div class="bg-amber-50 border-l-4 border-amber-400 p-4 mb-4">
+                <div class="flex items-center">
+                  <i class="fas fa-exclamation-triangle text-amber-500 mr-2"></i>
+                  <p class="text-sm text-amber-700">
+                    <strong>Required:</strong> You must select either an Email OR Phone column (or both)
+                  </p>
+                </div>
+              </div>
+              
+              <button type="button" id="generatePreview" class="btn-primary transform transition-all duration-200 hover:scale-105">
+                <i class="fas fa-eye mr-2"></i>Generate Preview
+              </button>
+            </div>
+          </div>
+
+          <div id="csvPreviewSection" class="hidden animate-slide-down">
+            <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+              <div class="p-6 border-b border-gray-100">
+                <div class="flex items-center justify-between mb-2">
+                  <div class="flex items-center">
+                    <div class="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">3</div>
+                    <h4 class="text-lg font-semibold text-gray-900">Review & Select Data</h4>
+                  </div>
+                  <div class="text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full">Step 3 of 3</div>
+                </div>
+                <p class="text-sm text-gray-600">Review your mapped data and uncheck any rows you don't want to import</p>
+              </div>
+              <div class="overflow-x-auto max-h-96">
+                <table id="csvPreviewTable" class="min-w-full divide-y divide-gray-200">
+                  <thead class="bg-gray-50">
+                    <tr>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <input type="checkbox" id="selectAllRows" class="rounded border-gray-300">
+                      </th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="csvPreviewBody" class="bg-white divide-y divide-gray-200">
+                  </tbody>
+                </table>
+              </div>
+              <div class="p-6 bg-gray-50 border-t border-gray-200">
+                <div class="flex gap-3">
+                  <button type="button" id="addCsvToList" class="btn-primary transform transition-all duration-200 hover:scale-105">
+                    <i class="fas fa-plus mr-2"></i>Add Selected Rows to List
+                  </button>
+                  <button type="button" id="regeneratePreview" class="btn-secondary transform transition-all duration-200 hover:scale-105">
+                    <i class="fas fa-sync mr-2"></i>Update Preview
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Customer List Preview -->
+      <div id="customerListSection" class="mt-8">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-semibold text-gray-900">
+            Customers to Add (<span id="customerCount">0</span>)
+          </h3>
+          <div class="space-x-3">
+            <button id="clearAllBtn" class="btn-secondary text-sm transform transition-all duration-200 hover:scale-105" disabled>
+              <i class="fas fa-trash mr-2"></i>Clear All
+            </button>
+            <button id="saveAllBtn" class="btn-primary text-sm transform transition-all duration-200 hover:scale-105" disabled>
+              <i class="fas fa-save mr-2"></i>Save All Customers
+            </button>
+          </div>
+        </div>
+
+        <div id="emptyListMessage" class="text-center py-12 text-gray-500">
+          <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-users text-gray-400 text-2xl"></i>
+          </div>
+          <p class="text-lg font-medium">No customers added yet</p>
+          <p class="text-sm">Use the form above or upload a CSV file to get started</p>
+        </div>
+
+        <div id="customerListTable" class="hidden">
+          <div class="overflow-x-auto bg-white rounded-lg border border-gray-200">
+            <table class="w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                </tr>
+              </thead>
+              <tbody id="customerListBody" class="bg-white divide-y divide-gray-200">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Existing Customers Table -->
+  {% if customers %}
+  <div class="card">
+    <div class="p-6 border-b border-gray-200">
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4 md:mb-0">Existing Customers</h2>
+
+        <div class="flex gap-3">
+          <button onclick="selectAllCustomers()" class="btn-secondary text-sm transform transition-all duration-200 hover:scale-105">
+            <i class="fas fa-check-square mr-2"></i>Select All
+          </button>
+          <button onclick="clearSelection()" class="btn-secondary text-sm transform transition-all duration-200 hover:scale-105">
+            <i class="fas fa-square mr-2"></i>Clear Selection
+          </button>
+          <button onclick="sendFeedbackModal()" class="btn-primary text-sm transform transition-all duration-200 hover:scale-105" id="sendFeedbackBtn" disabled>
+            <i class="fas fa-paper-plane mr-2"></i>Send Feedback Request
+          </button>
+          <button onclick="deleteSelected()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm transform transition-all duration-200 hover:scale-105"
+            id="deleteBtn" disabled>
+            <i class="fas fa-trash mr-2"></i>Delete Selected
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()">
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Added</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody" class="divide-y divide-gray-200">
+          {% for customer in customers %}
+          <tr class="hover:bg-gray-50 customer-row transition-colors duration-200" data-customer-id="{{ customer.id }}">
+            <td class="px-6 py-4">
+              <input type="checkbox" class="customer-checkbox rounded border-gray-300" value="{{ customer.id }}"
+                onchange="updateSelectionButtons()">
+            </td>
+            <td class="px-6 py-4">
+              <div class="flex items-center">
+                <div
+                  class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center mr-4">
+                  <span class="text-white font-semibold text-sm">{{ customer.name[0].upper() }}</span>
+                </div>
+                <div>
+                  <div class="font-medium text-gray-900">{{ customer.name }}</div>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <div class="space-y-1">
+                {% if customer.email %}
+                <div class="flex items-center text-sm text-gray-600">
+                  <i class="fas fa-envelope mr-2"></i>{{ customer.email }}
+                </div>
+                {% endif %}
+                {% if customer.phone %}
+                <div class="flex items-center text-sm text-gray-600">
+                  <i class="fas fa-phone mr-2"></i>{{ customer.phone }}
+                </div>
+                {% endif %}
+              </div>
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-500" data-timestamp="{{ customer.created_at }}">
+              {{ customer.created_at if customer.created_at else 'Unknown' }}
+            </td>
+            <td class="px-6 py-4">
+              {% set has_feedback = feedback_requests|selectattr("customer_id", "equalto", customer.id)|list|length > 0
+              %}
+              {% if has_feedback %}
+              <span
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                <i class="fas fa-check mr-1"></i>Contacted
+              </span>
+              {% else %}
+              <span
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                <i class="fas fa-clock mr-1"></i>Not Contacted
+              </span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% else %}
+  <div class="card">
+    <div class="text-center py-12">
+      <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i class="fas fa-users text-gray-400 text-2xl"></i>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No customers yet</h3>
+      <p class="text-gray-600">Use the form above to add your first customers</p>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Recent Feedback Requests -->
+  {% if feedback_requests %}
+  <div class="card">
+    <div class="p-6 border-b border-gray-200">
+      <h2 class="text-xl font-semibold text-gray-900">Recent Feedback Requests</h2>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Method</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sent</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          {% for request in feedback_requests[:10] %}
+          <tr class="hover:bg-gray-50 transition-colors duration-200">
+            <td class="px-6 py-4">
+              <div class="font-medium text-gray-900">{{ request.customer_name }}</div>
+            </td>
+            <td class="px-6 py-4">
+              <div class="flex items-center text-sm text-gray-600">
+                {% if request.method == 'email' %}
+                <i class="fas fa-envelope mr-2 text-blue-500"></i>Email
+                {% elif request.method == 'sms' %}
+                <i class="fas fa-sms mr-2 text-green-500"></i>SMS
+                {% else %}
+                <i class="fas fa-paper-plane mr-2 text-purple-500"></i>Both
+                {% endif %}
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              {% if request.status == 'sent' %}
+              <span
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                <i class="fas fa-check mr-1"></i>Sent
+              </span>
+              {% else %}
+              <span
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                <i class="fas fa-times mr-1"></i>Failed
+              </span>
+              {% endif %}
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-500" data-timestamp="{{ request.sent_at }}">
+              {{ request.sent_at if request.sent_at else 'Unknown' }}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Custom Success/Error Modal -->
+<div id="customModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 animate-fade-in">
+  <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95" id="modalContent">
+    <div class="text-center">
+      <div id="modalIcon" class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center">
+        <i id="modalIconClass" class="text-3xl"></i>
+      </div>
+      <h3 id="modalTitle" class="text-xl font-semibold mb-2"></h3>
+      <p id="modalMessage" class="text-gray-600 mb-6"></p>
+      <button onclick="closeCustomModal()" class="btn-primary transform transition-all duration-200 hover:scale-105">
+        <i class="fas fa-check mr-2"></i>OK
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Send Feedback Modal -->
+<div id="sendFeedbackModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+  <div class="bg-white rounded-2xl p-8 max-w-lg w-full mx-4 transform transition-all duration-300">
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="text-xl font-semibold text-gray-900">Send Feedback Requests</h3>
+      <button onclick="hideSendFeedbackModal()" class="text-gray-400 hover:text-gray-600 transition-colors duration-200">
+        <i class="fas fa-times text-xl"></i>
+      </button>
+    </div>
+
+    <form id="sendFeedbackForm" class="space-y-4">
+      <div>
+        <p class="text-sm text-gray-600 mb-4">
+          Sending to <span id="selectedCount">0</span> selected customers via all available contact methods
+        </p>
+      </div>
+
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div class="flex items-start">
+          <i class="fas fa-info-circle text-blue-600 mr-2 mt-0.5"></i>
+          <div class="text-sm text-blue-800">
+            <p class="font-medium">Automatic Contact Method:</p>
+            <p>We'll send feedback requests to customers using all their available contact methods (email and/or phone).</p>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Custom Message (Optional)</label>
+        <textarea name="custom_message" rows="4"
+          class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+          placeholder="Add a personal message to your feedback request..."></textarea>
+      </div>
+
+      <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+        <div class="flex items-start">
+          <i class="fas fa-exclamation-triangle text-yellow-600 mr-2 mt-0.5"></i>
+          <div class="text-sm text-yellow-800">
+            <p class="font-medium">Note:</p>
+            <p>This will send customers a request to leave a review. The message will include your review form link.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex gap-3 pt-4">
+        <button type="button" onclick="hideSendFeedbackModal()" class="flex-1 btn-secondary transform transition-all duration-200 hover:scale-105">Cancel</button>
+        <button type="submit" class="flex-1 btn-primary transform transition-all duration-200 hover:scale-105">Send Requests</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+<script>
+  // Global variables
+  let customersToAdd = [];
+  let csvData = [];
+
+  // Custom modal functions
+  function showCustomModal(type, title, message) {
+    const modal = document.getElementById('customModal');
+    const modalContent = document.getElementById('modalContent');
+    const icon = document.getElementById('modalIcon');
+    const iconClass = document.getElementById('modalIconClass');
+    const titleEl = document.getElementById('modalTitle');
+    const messageEl = document.getElementById('modalMessage');
+
+    // Configure modal based on type
+    if (type === 'success') {
+      icon.className = 'w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-green-100';
+      iconClass.className = 'fas fa-check text-3xl text-green-500';
+    } else if (type === 'error') {
+      icon.className = 'w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-red-100';
+      iconClass.className = 'fas fa-times text-3xl text-red-500';
+    } else if (type === 'warning') {
+      icon.className = 'w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-yellow-100';
+      iconClass.className = 'fas fa-exclamation-triangle text-3xl text-yellow-500';
+    } else {
+      icon.className = 'w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-blue-100';
+      iconClass.className = 'fas fa-info text-3xl text-blue-500';
+    }
+
+    titleEl.textContent = title;
+    messageEl.textContent = message;
+
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+      modalContent.classList.remove('scale-95');
+      modalContent.classList.add('scale-100');
+    }, 10);
+  }
+
+  function closeCustomModal() {
+    const modal = document.getElementById('customModal');
+    const modalContent = document.getElementById('modalContent');
+    
+    modalContent.classList.remove('scale-100');
+    modalContent.classList.add('scale-95');
+    
+    setTimeout(() => {
+      modal.classList.add('hidden');
+    }, 200);
+  }
+
+  // Format timestamps to readable format
+  function formatTimestamp(timestamp) {
+    if (!timestamp || timestamp === 'Unknown') return 'Unknown';
+    
+    try {
+      const date = new Date(timestamp);
+      const now = new Date();
+      const diffInSeconds = Math.floor((now - date) / 1000);
+      
+      if (diffInSeconds < 60) {
+        return 'Just now';
+      } else if (diffInSeconds < 3600) {
+        const minutes = Math.floor(diffInSeconds / 60);
+        return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`;
+      } else if (diffInSeconds < 86400) {
+        const hours = Math.floor(diffInSeconds / 3600);
+        return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
+      } else if (diffInSeconds < 2592000) {
+        const days = Math.floor(diffInSeconds / 86400);
+        return `${days} day${days !== 1 ? 's' : ''} ago`;
+      } else {
+        return date.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        });
+      }
+    } catch (e) {
+      return 'Unknown';
+    }
+  }
+
+  // Format all timestamps on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('[data-timestamp]').forEach(element => {
+      const timestamp = element.getAttribute('data-timestamp');
+      element.textContent = formatTimestamp(timestamp);
+    });
+  });
+
+  // Tab switching with animations
+  document.getElementById('manualTab').addEventListener('click', function () {
+    switchTab('manual');
+  });
+
+  document.getElementById('csvTab').addEventListener('click', function () {
+    switchTab('csv');
+  });
+
+  function switchTab(tab) {
+    const manualTab = document.getElementById('manualTab');
+    const csvTab = document.getElementById('csvTab');
+    const manualSection = document.getElementById('manualEntrySection');
+    const csvSection = document.getElementById('csvUploadSection');
+
+    // Remove active classes
+    manualTab.className = "flex-1 py-3 px-4 text-sm font-medium text-center rounded-md text-gray-500 hover:text-gray-700 transform transition-all duration-300 hover:scale-105";
+    csvTab.className = "flex-1 py-3 px-4 text-sm font-medium text-center rounded-md text-gray-500 hover:text-gray-700 transform transition-all duration-300 hover:scale-105";
+
+    if (tab === 'manual') {
+      manualTab.className = "flex-1 py-3 px-4 text-sm font-medium text-center rounded-md bg-white text-blue-600 shadow-sm transform transition-all duration-300 hover:scale-105";
+      
+      // Animate transition
+      csvSection.classList.add('animate-slide-up');
+      setTimeout(() => {
+        csvSection.classList.add('hidden');
+        csvSection.classList.remove('animate-slide-up');
+        manualSection.classList.remove('hidden');
+        manualSection.classList.add('animate-slide-down');
+        setTimeout(() => {
+          manualSection.classList.remove('animate-slide-down');
+        }, 300);
+      }, 150);
+    } else {
+      csvTab.className = "flex-1 py-3 px-4 text-sm font-medium text-center rounded-md bg-white text-blue-600 shadow-sm transform transition-all duration-300 hover:scale-105";
+      
+      // Animate transition
+      manualSection.classList.add('animate-slide-up');
+      setTimeout(() => {
+        manualSection.classList.add('hidden');
+        manualSection.classList.remove('animate-slide-up');
+        csvSection.classList.remove('hidden');
+        csvSection.classList.add('animate-slide-down');
+        setTimeout(() => {
+          csvSection.classList.remove('animate-slide-down');
+        }, 300);
+      }, 150);
+    }
+  }
+
+  // Validation functions
+  function validateEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  }
+
+  function validatePhone(phone) {
+    // Remove all non-digit characters except + at the beginning
+    const cleaned = phone.replace(/[\s\-\(\)\.]/g, '');
+    // Allow numbers starting with 0 (like Australian mobile numbers) or + for international
+    const re = /^(\+?[1-9]\d{1,14}|0\d{8,14})$/;
+    return re.test(cleaned);
+  }
+
+  function showError(fieldId, message) {
+    const errorElement = document.getElementById(fieldId + 'Error');
+    errorElement.textContent = message;
+    errorElement.classList.remove('hidden');
+  }
+
+  function hideError(fieldId) {
+    const errorElement = document.getElementById(fieldId + 'Error');
+    errorElement.classList.add('hidden');
+  }
+
+  // Function to check if email or phone already exists in database
+  function checkExistingCustomer(email, phone) {
+    const existingCustomers = document.querySelectorAll('.customer-row');
+    
+    for (let row of existingCustomers) {
+      const rowData = row.textContent.toLowerCase();
+      
+      // Check email
+      if (email && rowData.includes(email.toLowerCase())) {
+        return { exists: true, type: 'email', value: email };
+      }
+      
+      // Check phone (normalize phone numbers for comparison)
+      if (phone) {
+        const normalizedPhone = phone.replace(/[\s\-\(\)\.]/g, '');
+        const rowPhone = rowData.match(/[\d\+\-\(\)\s\.]+/g);
+        
+        if (rowPhone) {
+          for (let existingPhone of rowPhone) {
+            const normalizedExisting = existingPhone.replace(/[\s\-\(\)\.]/g, '');
+            if (normalizedPhone === normalizedExisting) {
+              return { exists: true, type: 'phone', value: phone };
+            }
+          }
+        }
+      }
+    }
+    
+    return { exists: false };
+  }
+
+  // Manual entry button click handler with client-side validation
+  document.getElementById('addToListBtn').addEventListener('click', function () {
+    const name = document.getElementById('manualName').value.trim();
+    const email = document.getElementById('manualEmail').value.trim();
+    const phone = document.getElementById('manualPhone').value.trim();
+
+    // Clear previous errors
+    hideError('name');
+    hideError('email');
+    hideError('phone');
+
+    let hasErrors = false;
+
+    // Check if at least email or phone is provided FIRST
+    if (!email && !phone) {
+      showError('phone', 'Either email or phone is required');
+      showCustomModal('error', 'Missing Information', 'Please provide either an email address or phone number before adding to the list.');
+      return;
+    }
+
+    // Validate email if provided
+    if (email && !validateEmail(email)) {
+      showError('email', 'Please enter a valid email address');
+      hasErrors = true;
+    }
+
+    // Validate phone if provided
+    if (phone && !validatePhone(phone)) {
+      showError('phone', 'Please enter a valid phone number (e.g., 0402859778 or +61402859778)');
+      hasErrors = true;
+    }
+
+    if (hasErrors) {
+      showCustomModal('error', 'Validation Error', 'Please fix the highlighted fields before continuing.');
+      return;
+    }
+
+    // Check if customer already exists in database
+    const existingCheck = checkExistingCustomer(email, phone);
+    if (existingCheck.exists) {
+      if (existingCheck.type === 'email') {
+        showError('email', 'This email already exists in your database');
+        showCustomModal('warning', 'Duplicate Email', `A customer with the email "${existingCheck.value}" already exists in your database.`);
+      } else {
+        showError('phone', 'This phone number already exists in your database');
+        showCustomModal('warning', 'Duplicate Phone', `A customer with the phone number "${existingCheck.value}" already exists in your database.`);
+      }
+      return;
+    }
+
+    // Check for duplicates in current list
+    const isDuplicateInList = customersToAdd.some(customer =>
+      (email && customer.email === email) ||
+      (phone && customer.phone === phone)
+    );
+
+    if (isDuplicateInList) {
+      showCustomModal('warning', 'Duplicate Customer', 'A customer with this email or phone already exists in the list.');
+      return;
+    }
+
+    // Use email prefix as name if no name provided
+    const finalName = name || (email ? email.split('@')[0] : 'Unknown');
+
+    // Add to list
+    customersToAdd.push({
+      name: finalName,
+      email: email || null,
+      phone: phone || null
+    });
+
+    // Clear inputs
+    document.getElementById('manualName').value = '';
+    document.getElementById('manualEmail').value = '';
+    document.getElementById('manualPhone').value = '';
+
+    // Update display
+    updateCustomerList();
+    
+    // Show success message with smooth animation
+    const button = this;
+    const originalContent = button.innerHTML;
+    
+    // Temporary success state
+    button.innerHTML = '<i class="fas fa-check mr-2"></i>Added!';
+    button.classList.add('bg-green-500', 'hover:bg-green-600');
+    button.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+    
+    setTimeout(() => {
+      button.innerHTML = originalContent;
+      button.classList.remove('bg-green-500', 'hover:bg-green-600');
+      button.classList.add('bg-blue-500', 'hover:bg-blue-600');
+    }, 1500);
+  });
+
+  // CSV file handling with drag and drop
+  const csvFileInput = document.getElementById('csvFileInput');
+  let csvHeaders = [];
+  let rawCsvData = [];
+
+  // Drag and drop functionality
+  const dropZone = document.querySelector('[onclick="document.getElementById(\'csvFileInput\').click()"]');
+
+  dropZone.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    dropZone.classList.add('border-blue-500', 'bg-blue-100');
+  });
+
+  dropZone.addEventListener('dragleave', function(e) {
+    e.preventDefault();
+    dropZone.classList.remove('border-blue-500', 'bg-blue-100');
+  });
+
+  dropZone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    dropZone.classList.remove('border-blue-500', 'bg-blue-100');
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0 && files[0].type === 'text/csv') {
+      csvFileInput.files = files;
+      handleCsvFile(files[0]);
+    } else {
+      showCustomModal('error', 'Invalid File', 'Please drop a valid CSV file.');
+    }
+  });
+
+  csvFileInput.addEventListener('change', function (e) {
+    const file = e.target.files[0];
+    if (!file) {
+      hideColumnMappingSection();
+      return;
+    }
+    handleCsvFile(file);
+  });
+
+  function handleCsvFile(file) {
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: function (results) {
+        rawCsvData = results.data;
+        csvHeaders = results.meta.fields || [];
+        
+        if (csvHeaders.length === 0) {
+          showCustomModal('error', 'Invalid CSV', 'No headers found in CSV file. Please ensure your file has a header row.');
+          return;
+        }
+
+        setupColumnMapping(csvHeaders);
+        showColumnMappingSection();
+        showCustomModal('success', 'CSV Loaded', `Successfully loaded CSV with ${csvHeaders.length} columns and ${rawCsvData.length} rows.`);
+      },
+      error: function (error) {
+        showCustomModal('error', 'CSV Parse Error', 'Error parsing CSV: ' + error.message);
+        hideColumnMappingSection();
+      }
+    });
+  }
+
+  function setupColumnMapping(headers) {
+    const nameSelect = document.getElementById('nameColumnSelect');
+    const emailSelect = document.getElementById('emailColumnSelect');
+    const phoneSelect = document.getElementById('phoneColumnSelect');
+
+    // Clear existing options (keep the default "skip" options)
+    nameSelect.innerHTML = '<option value="">-- Skip Name --</option>';
+    emailSelect.innerHTML = '<option value="">-- No Email Column --</option>';
+    phoneSelect.innerHTML = '<option value="">-- No Phone Column --</option>';
+
+    // Add header options to each select
+    headers.forEach(header => {
+      const nameOption = document.createElement('option');
+      nameOption.value = header;
+      nameOption.textContent = header;
+      nameSelect.appendChild(nameOption);
+
+      const emailOption = document.createElement('option');
+      emailOption.value = header;
+      emailOption.textContent = header;
+      emailSelect.appendChild(emailOption);
+
+      const phoneOption = document.createElement('option');
+      phoneOption.value = header;
+      phoneOption.textContent = header;
+      phoneSelect.appendChild(phoneOption);
+    });
+
+    // Auto-select common column names
+    const lowerHeaders = headers.map(h => h.toLowerCase());
+    
+    // Auto-select name column
+    const nameIndex = lowerHeaders.findIndex(h => 
+      h.includes('name') || h.includes('customer') || h.includes('client')
+    );
+    if (nameIndex !== -1) {
+      nameSelect.value = headers[nameIndex];
+    }
+
+    // Auto-select email column
+    const emailIndex = lowerHeaders.findIndex(h => h.includes('email') || h.includes('mail'));
+    if (emailIndex !== -1) {
+      emailSelect.value = headers[emailIndex];
+    }
+
+    // Auto-select phone column
+    const phoneIndex = lowerHeaders.findIndex(h => 
+      h.includes('phone') || h.includes('mobile') || h.includes('cell') || h.includes('tel')
+    );
+    if (phoneIndex !== -1) {
+      phoneSelect.value = headers[phoneIndex];
+    }
+  }
+
+  function showColumnMappingSection() {
+    const section = document.getElementById('columnMappingSection');
+    section.classList.remove('hidden');
+    section.classList.add('animate-slide-down');
+    setTimeout(() => {
+      section.classList.remove('animate-slide-down');
+    }, 300);
+  }
+
+  function hideColumnMappingSection() {
+    document.getElementById('columnMappingSection').classList.add('hidden');
+    document.getElementById('csvPreviewSection').classList.add('hidden');
+  }
+
+  // Generate preview button
+  document.getElementById('generatePreview').addEventListener('click', updateCsvPreview);
+  document.getElementById('regeneratePreview').addEventListener('click', updateCsvPreview);
+
+  function updateCsvPreview() {
+    const nameCol = document.getElementById('nameColumnSelect').value;
+    const emailCol = document.getElementById('emailColumnSelect').value;
+    const phoneCol = document.getElementById('phoneColumnSelect').value;
+
+    // Validate that at least email or phone is selected
+    if (!emailCol && !phoneCol) {
+      showCustomModal('error', 'Column Mapping Required', 'Please select at least one of Email or Phone column before generating preview.');
+      return;
+    }
+
+    displayCsvPreview(rawCsvData, nameCol, emailCol, phoneCol);
+  }
+
+  function displayCsvPreview(data, nameCol, emailCol, phoneCol) {
+    const previewSection = document.getElementById('csvPreviewSection');
+    const previewBody = document.getElementById('csvPreviewBody');
+
+    previewSection.classList.remove('hidden');
+    previewSection.classList.add('animate-slide-down');
+    setTimeout(() => {
+      previewSection.classList.remove('animate-slide-down');
+    }, 300);
+    
+    previewBody.innerHTML = '';
+
+    // Process data with selected columns
+    csvData = data.map(row => ({
+      name: nameCol ? (row[nameCol] || '') : '',
+      email: emailCol ? (row[emailCol] || '') : '',
+      phone: phoneCol ? (row[phoneCol] || '') : ''
+    }));
+
+    let validCount = 0;
+    csvData.forEach((row, index) => {
+      const name = row.name.trim();
+      const email = row.email.trim();
+      const phone = row.phone.trim();
+
+      // Auto-generate name from email if no name provided
+      const displayName = name || (email ? email.split('@')[0] : 'Unknown');
+
+      // Validate row
+      let status = 'Valid';
+      let statusClass = 'bg-green-100 text-green-800';
+
+      if (!email && !phone) {
+        status = 'Missing contact';
+        statusClass = 'bg-red-100 text-red-800';
+      } else if (email && !validateEmail(email)) {
+        status = 'Invalid email';
+        statusClass = 'bg-red-100 text-red-800';
+      } else if (phone && !validatePhone(phone)) {
+        status = 'Invalid phone';
+        statusClass = 'bg-red-100 text-red-800';
+      } else {
+        // Check if exists in database
+        const existingCheck = checkExistingCustomer(email, phone);
+        if (existingCheck.exists) {
+          status = 'Exists in database';
+          statusClass = 'bg-red-100 text-red-800';
+        } else if (customersToAdd.some(customer =>
+          (email && customer.email === email) ||
+          (phone && customer.phone === phone)
+        )) {
+          status = 'Duplicate in list';
+          statusClass = 'bg-yellow-100 text-yellow-800';
+        } else {
+          validCount++;
+        }
+      }
+
+      const tr = document.createElement('tr');
+      tr.className = 'hover:bg-gray-50 transition-colors duration-200';
+      tr.innerHTML = `
+        <td class="px-6 py-4">
+          <input type="checkbox" class="csv-row-checkbox rounded border-gray-300" data-index="${index}" ${status === 'Valid' ? 'checked' : ''}>
+        </td>
+        <td class="px-6 py-4 text-sm text-gray-900">${displayName}</td>
+        <td class="px-6 py-4 text-sm text-gray-900">${email}</td>
+        <td class="px-6 py-4 text-sm text-gray-900">${phone}</td>
+        <td class="px-6 py-4">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClass}">
+            ${status}
+          </span>
+        </td>
+      `;
+      previewBody.appendChild(tr);
+    });
+
+    showCustomModal('success', 'Preview Generated', `Found ${validCount} valid rows ready for import.`);
+  }
+
+  // Select all rows functionality
+  document.getElementById('selectAllRows').addEventListener('change', function() {
+    const checkboxes = document.querySelectorAll('.csv-row-checkbox');
+    checkboxes.forEach(checkbox => {
+      checkbox.checked = this.checked;
+    });
+  });
+
+  // Add CSV data to list
+  document.getElementById('addCsvToList').addEventListener('click', function () {
+    const checkboxes = document.querySelectorAll('.csv-row-checkbox:checked');
+    let addedCount = 0;
+    let skippedCount = 0;
+
+    checkboxes.forEach(checkbox => {
+      const index = parseInt(checkbox.dataset.index);
+      const row = csvData[index];
+
+      const name = row.name.trim();
+      const email = row.email.trim();
+      const phone = row.phone.trim();
+
+      // Use email prefix as name if no name provided
+      const finalName = name || (email ? email.split('@')[0] : 'Unknown');
+
+      // Check if exists in database
+      const existingCheck = checkExistingCustomer(email, phone);
+      if (existingCheck.exists) {
+        skippedCount++;
+        return; // Skip this customer
+      }
+
+      // Double check for duplicates in current list
+      const isDuplicateInList = customersToAdd.some(customer =>
+        (email && customer.email === email) ||
+        (phone && customer.phone === phone)
+      );
+
+      if (!isDuplicateInList && (email || phone)) {
+        customersToAdd.push({
+          name: finalName,
+          email: email || null,
+          phone: phone || null
+        });
+        addedCount++;
+      } else if (isDuplicateInList) {
+        skippedCount++;
+      }
+    });
+
+    let message = `Added ${addedCount} customers to your list.`;
+    if (skippedCount > 0) {
+      message += ` Skipped ${skippedCount} duplicates.`;
+    }
+    
+    showCustomModal('success', 'Customers Added', message);
+    updateCustomerList();
+
+    // Clear CSV preview and column mapping
+    document.getElementById('csvPreviewSection').classList.add('hidden');
+    document.getElementById('columnMappingSection').classList.add('hidden');
+    document.getElementById('csvFileInput').value = '';
+    csvData = [];
+    rawCsvData = [];
+    csvHeaders = [];
+  });
+
+  // Update customer list display
+  function updateCustomerList() {
+    const customerCount = document.getElementById('customerCount');
+    const emptyMessage = document.getElementById('emptyListMessage');
+    const customerTable = document.getElementById('customerListTable');
+    const customerListBody = document.getElementById('customerListBody');
+    const clearAllBtn = document.getElementById('clearAllBtn');
+    const saveAllBtn = document.getElementById('saveAllBtn');
+
+    customerCount.textContent = customersToAdd.length;
+
+    if (customersToAdd.length === 0) {
+      emptyMessage.classList.remove('hidden');
+      customerTable.classList.add('hidden');
+      clearAllBtn.disabled = true;
+      saveAllBtn.disabled = true;
+      clearAllBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      saveAllBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    } else {
+      emptyMessage.classList.add('hidden');
+      customerTable.classList.remove('hidden');
+      clearAllBtn.disabled = false;
+      saveAllBtn.disabled = false;
+      clearAllBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      saveAllBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
+
+    // Update table body
+    customerListBody.innerHTML = '';
+    customersToAdd.forEach((customer, index) => {
+      const tr = document.createElement('tr');
+      tr.className = 'hover:bg-gray-50 transition-colors duration-200';
+      tr.innerHTML = `
+        <td class="px-6 py-4 font-medium text-gray-900">${customer.name}</td>
+        <td class="px-6 py-4 text-sm text-gray-600">${customer.email || '-'}</td>
+        <td class="px-6 py-4 text-sm text-gray-600">${customer.phone || '-'}</td>
+        <td class="px-6 py-4">
+          <button onclick="removeCustomer(${index})" class="text-red-600 hover:text-red-800 transform transition-all duration-200 hover:scale-110">
+            <i class="fas fa-trash"></i>
+          </button>
+        </td>
+      `;
+      customerListBody.appendChild(tr);
+    });
+  }
+
+  // Remove customer from list
+  function removeCustomer(index) {
+    const customer = customersToAdd[index];
+    customersToAdd.splice(index, 1);
+    updateCustomerList();
+    showCustomModal('info', 'Customer Removed', `${customer.name} has been removed from the list.`);
+  }
+
+  // Clear all customers
+  document.getElementById('clearAllBtn').addEventListener('click', function () {
+    if (customersToAdd.length === 0) return;
+    
+    showCustomModal('warning', 'Clear All Customers?', `Are you sure you want to remove all ${customersToAdd.length} customers from the list?`);
+    
+    // Add confirm functionality to modal
+    const modal = document.getElementById('customModal');
+    const okButton = modal.querySelector('button');
+    okButton.textContent = 'Yes, Clear All';
+    okButton.onclick = function() {
+      customersToAdd = [];
+      updateCustomerList();
+      closeCustomModal();
+      showCustomModal('info', 'List Cleared', 'All customers have been removed from the list.');
+      
+      // Reset button
+      setTimeout(() => {
+        okButton.textContent = 'OK';
+        okButton.onclick = closeCustomModal;
+      }, 100);
+    };
+  });
+
+
+
+
+
+
+
+
+
+
+
+
+function highlightDuplicateEmails(customersToAdd) {
+    let duplicatesFound = false;
+
+    // 1. Reset any previous highlights
+    document.querySelectorAll(".customer-row").forEach(row => {
+        row.classList.remove("bg-red-100");
+    });
+
+    // 2. Collect all emails from table rows
+    const emailMap = {}; // { email: [rowElements] }
+
+    document.querySelectorAll(".customer-row").forEach(row => {
+        const emailEl = row.querySelector(".fa-envelope");
+        if (emailEl) {
+            const email = emailEl.parentElement.textContent.trim().toLowerCase();
+            if (email) {
+                if (!emailMap[email]) emailMap[email] = [];
+                emailMap[email].push(row);
+            }
+        }
+    });
+
+    // 3. Add emails from customersToAdd (marking them as 'virtual rows')
+    customersToAdd.forEach(customer => {
+        const email = (customer.email || "").trim().toLowerCase();
+        if (email) {
+            if (!emailMap[email]) emailMap[email] = [];
+            // No actual row for these yet, so just store null
+            emailMap[email].push(null);
+        }
+    });
+
+    // 4. Find duplicates and highlight rows
+    for (const email in emailMap) {
+        if (emailMap[email].length > 1) {
+            duplicatesFound = true;
+            emailMap[email].forEach(row => {
+                if (row) row.classList.add("bg-red-100"); // highlight in red
+            });
+        }
+    }
+
+    return duplicatesFound;
+}
+
+// Example usage:
+function validateBeforeAdd() {
+    if (highlightDuplicateEmails(customersToAdd)) {
+        alert("Duplicate emails found. Highlighted in red.");
+        return false;
+    }
+    return true;
+}
+
+
+
+
+
+
+  // Save all customers
+  document.getElementById('saveAllBtn').addEventListener('click', function () {
+    if (customersToAdd.length === 0) return;
+
+    const duplicates = highlightDuplicateEmails(customersToAdd);
+    console.log(duplicates);
+    if (duplicates == true) {
+     showCustomModal('error', 'Duplicate found', 'Rows containing conflicting email or phone addresses will be highlighted.');
+      return;
+    }
+
+    showLoadingSpinner('Saving customers...');
+
+    
+
+    fetch('/customers/bulk', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(customersToAdd)
+    })
+      .then(response => response.json())
+      .then(data => {
+        hideLoadingSpinner();
+        if (data.success) {
+          showCustomModal('success', 'Customers Saved', `Successfully added ${data.added} customers to your database!`);
+          customersToAdd = [];
+          updateCustomerList();
+          setTimeout(() => {
+            location.reload(); // Reload to show new customers in existing table
+          }, 2000);
+        } else {
+          showCustomModal('error', 'Save Failed', data.error);
+        }
+      })
+      .catch(error => {
+        hideLoadingSpinner();
+        showCustomModal('error', 'Network Error', 'Error saving customers: ' + error.message);
+      });
+  });
+
+  // Existing customer management functions
+
+  function sendFeedbackModal() {
+    const selected = document.querySelectorAll('.customer-checkbox:checked').length;
+    document.getElementById('selectedCount').textContent = selected;
+    document.getElementById('sendFeedbackModal').classList.remove('hidden');
+  }
+
+  function hideSendFeedbackModal() {
+    document.getElementById('sendFeedbackModal').classList.add('hidden');
+    document.getElementById('sendFeedbackForm').reset();
+  }
+
+  function toggleSelectAll() {
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    const customerCheckboxes = document.querySelectorAll('.customer-checkbox');
+
+    customerCheckboxes.forEach(checkbox => {
+      checkbox.checked = selectAllCheckbox.checked;
+    });
+
+    updateSelectionButtons();
+  }
+
+  function selectAllCustomers() {
+    document.getElementById('selectAllCheckbox').checked = true;
+    toggleSelectAll();
+  }
+
+  function clearSelection() {
+    document.getElementById('selectAllCheckbox').checked = false;
+    toggleSelectAll();
+  }
+
+  function updateSelectionButtons() {
+    const selectedCount = document.querySelectorAll('.customer-checkbox:checked').length;
+    const sendBtn = document.getElementById('sendFeedbackBtn');
+    const deleteBtn = document.getElementById('deleteBtn');
+
+    // Only update buttons if they exist (when there are customers)
+    if (sendBtn && deleteBtn) {
+      if (selectedCount > 0) {
+        sendBtn.disabled = false;
+        sendBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        deleteBtn.disabled = false;
+        deleteBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      } else {
+        sendBtn.disabled = true;
+        sendBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        deleteBtn.disabled = true;
+        deleteBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      }
+    }
+  }
+
+  // Send feedback form submission
+  document.getElementById('sendFeedbackForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    showLoadingSpinner('Sending feedback requests...');
+
+    const formData = new FormData(this);
+    const selectedCustomers = document.querySelectorAll('.customer-checkbox:checked');
+
+    // Automatically set method to 'both' to use all available contact methods
+    formData.append('method', 'both');
+
+    selectedCustomers.forEach(checkbox => {
+      formData.append('customer_ids', checkbox.value);
+    });
+
+    fetch('/send-feedback-requests', {
+      method: 'POST',
+      body: formData
+    })
+      .then(response => response.json())
+      .then(data => {
+        hideLoadingSpinner();
+        if (data.success) {
+          hideSendFeedbackModal();
+          showCustomModal('success', 'Requests Sent', `Feedback requests sent successfully!\nSent: ${data.sent}\nFailed: ${data.failed}`);
+          setTimeout(() => {
+            location.reload();
+          }, 2000);
+        } else {
+          showCustomModal('error', 'Send Failed', data.error);
+        }
+      })
+      .catch(error => {
+        hideLoadingSpinner();
+        showCustomModal('error', 'Network Error', 'Error sending requests: ' + error.message);
+      });
+  });
+
+  // Delete selected customers
+  function deleteSelected() {
+    const selected = document.querySelectorAll('.customer-checkbox:checked').length;
+
+    if (selected === 0) return;
+
+    showCustomModal('warning', 'Delete Customers?', `Are you sure you want to delete ${selected} selected customers? This action cannot be undone.`);
+    
+    // Add confirm functionality to modal
+    const modal = document.getElementById('customModal');
+    const okButton = modal.querySelector('button');
+    okButton.textContent = 'Yes, Delete';
+    okButton.onclick = function() {
+      closeCustomModal();
+      performDelete();
+      
+      // Reset button
+      setTimeout(() => {
+        okButton.textContent = 'OK';
+        okButton.onclick = closeCustomModal;
+      }, 100);
+    };
+  }
+
+  function performDelete() {
+    showLoadingSpinner('Deleting customers...');
+
+    const formData = new FormData();
+    const selectedCustomers = document.querySelectorAll('.customer-checkbox:checked');
+
+    selectedCustomers.forEach(checkbox => {
+      formData.append('customer_ids', checkbox.value);
+    });
+
+    fetch('/delete-customers', {
+      method: 'POST',
+      body: formData
+    })
+      .then(response => response.json())
+      .then(data => {
+        hideLoadingSpinner();
+        if (data.success) {
+          showCustomModal('success', 'Customers Deleted', `Successfully deleted ${data.deleted} customers.`);
+          setTimeout(() => {
+            location.reload();
+          }, 2000);
+        } else {
+          showCustomModal('error', 'Delete Failed', data.error);
+        }
+      })
+      .catch(error => {
+        hideLoadingSpinner();
+        showCustomModal('error', 'Network Error', 'Error deleting customers: ' + error.message);
+      });
+  }
+
+  // Initialize selection buttons state
+  updateSelectionButtons();
+</script>
+
+<style>
+  .fade-in {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  }
+
+  .border-3 {
+    border-width: 3px;
+  }
+
+  .tab-content {
+    opacity: 1;
+    transform: translateY(0);
+    transition: all 0.3s ease;
+  }
+
+  .tab-content.hidden {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  .animate-slide-down {
+    animation: slideDown 0.3s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .btn-primary:hover,
+  .btn-secondary:hover {
+    transform: translateY(-1px);
+  }
+
+  .btn-primary:disabled,
+  .btn-secondary:disabled {
+    transform: none;
+    opacity: 0.5;
+  }
+
+  #customModal .bg-white {
+    animation: modalSlideIn 0.3s ease-out;
+  }
+
+  @keyframes modalSlideIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9) translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+</style>
+{% endblock %}

@@ -1,0 +1,1091 @@
+
+{% extends "base.html" %}
+{% block title %}Form Customization - Quantum{% endblock %}
+
+{% block content %}
+<div class="bg-gray-50 px-4 py-16 min-h-screen text-gray-900">
+  <div class="max-w-7xl mx-auto space-y-12">
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div>
+        <h1 class="text-4xl font-bold mb-2">Advanced Form Customization</h1>
+        <p class="text-gray-600 text-lg">Create stunning, on-brand review forms with advanced styling options</p>
+      </div>
+      <a href="{{ url_for('dashboard') }}" class="btn-gradient">
+        <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+      </a>
+    </div>
+
+    <div class="grid lg:grid-cols-5 gap-8">
+      <!-- Customization Form -->
+      <div class="lg:col-span-2 bg-white rounded-2xl shadow-xl p-8">
+        <h2 class="text-2xl font-semibold mb-8">
+          <i class="fas fa-palette mr-2 text-indigo-600"></i>Design Studio
+        </h2>
+
+        <form method="POST" class="space-y-8">
+          <!-- Background Style -->
+          <div class="space-y-4">
+            <label class="label-lg">
+              <i class="fas fa-image mr-2 text-indigo-600"></i>Background Style
+            </label>
+            <div class="grid grid-cols-2 gap-3">
+              {% for style in background_styles %}
+              <label class="style-option">
+                <input type="radio" name="background_style" value="{{ style.value }}" 
+                  {% if settings and settings.form_background_style == style.value %}checked{% endif %}
+                  onchange="updatePreview()">
+                <div class="style-card">
+                  <div class="style-preview style-{{ style.value }}"></div>
+                  <span class="style-name">{{ style.name }}</span>
+                </div>
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Primary Color -->
+          <div class="space-y-4">
+            <label for="primary_color" class="label-lg">
+              <i class="fas fa-paint-brush mr-2 text-indigo-600"></i>Primary Color
+            </label>
+            <div class="color-picker-container">
+              <input 
+                type="color" 
+                name="primary_color" 
+                id="primary_color"
+                value="{{ settings.form_primary_color if settings and settings.form_primary_color else '#3B82F6' }}"
+                class="color-input">
+              <select class="color-preset-dropdown" onchange="applyColorPreset('primary_color', this.value);">
+                <option value="">Quick Colors</option>
+                {% for color in colors %}
+                <option value="{{ color.value }}" 
+                  {% if settings and settings.form_primary_color == color.value %}selected{% endif %}>
+                  {{ color.name }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="color-suggestions">
+              {% for color in colors[:11] %}
+              <button type="button" class="color-swatch" 
+                style="background: {{ color.value }}" 
+                onclick="setColor('primary_color', '{{ color.value }}')"
+                title="{{ color.name }}"></button>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Secondary Color -->
+          <div class="space-y-4">
+            <label for="secondary_color" class="label-lg">
+              <i class="fas fa-palette mr-2 text-indigo-600"></i>Secondary Color
+            </label>
+            <div class="color-picker-container">
+              <input 
+                type="color" 
+                name="secondary_color" 
+                id="secondary_color"
+                value="{{ settings.form_secondary_color if settings and settings.form_secondary_color else '#8B5CF6' }}"
+                class="color-input">
+              <select class="color-preset-dropdown" onchange="applyColorPreset('secondary_color', this.value);">
+                <option value="">Quick Colors</option>
+                {% for color in colors %}
+                <option value="{{ color.value }}"
+                  {% if settings and settings.form_secondary_color == color.value %}selected{% endif %}>
+                  {{ color.name }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="color-suggestions">
+              {% for color in colors[:11] %}
+              <button type="button" class="color-swatch" 
+                style="background: {{ color.value }}" 
+                onclick="setColor('secondary_color', '{{ color.value }}')"
+                title="{{ color.name }}"></button>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Gradient Controls -->
+          <div id="gradient-controls" class="space-y-6 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border-2 border-blue-200">
+            <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+              <i class="fas fa-magic mr-2 text-purple-600"></i>Gradient Controls
+            </h3>
+            
+            <!-- Gradient Start Color -->
+            <div class="space-y-4">
+              <label for="gradient_start_color" class="label-lg">
+                <i class="fas fa-play mr-2 text-indigo-600"></i>Gradient Start Color
+              </label>
+              <div class="color-picker-container">
+                <input 
+                  type="color" 
+                  name="gradient_start_color" 
+                  id="gradient_start_color"
+                  value="{{ settings.form_gradient_start_color if settings and settings.form_gradient_start_color else '#667eea' }}"
+                  class="color-input">
+                <select class="color-preset-dropdown" onchange="applyColorPreset('gradient_start_color', this.value);">
+                  <option value="">Quick Colors</option>
+                  {% for color in colors %}
+                  <option value="{{ color.value }}">{{ color.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="color-suggestions">
+                {% for color in colors[:6] %}
+                <button type="button" class="color-swatch" 
+                  style="background: {{ color.value }}" 
+                  onclick="setColor('gradient_start_color', '{{ color.value }}')"
+                  title="{{ color.name }}"></button>
+                {% endfor %}
+              </div>
+            </div>
+
+            <!-- Gradient End Color -->
+            <div class="space-y-4">
+              <label for="gradient_end_color" class="label-lg">
+                <i class="fas fa-stop mr-2 text-indigo-600"></i>Gradient End Color
+              </label>
+              <div class="color-picker-container">
+                <input 
+                  type="color" 
+                  name="gradient_end_color" 
+                  id="gradient_end_color"
+                  value="{{ settings.form_gradient_end_color if settings and settings.form_gradient_end_color else '#764ba2' }}"
+                  class="color-input">
+                <select class="color-preset-dropdown" onchange="applyColorPreset('gradient_end_color', this.value);">
+                  <option value="">Quick Colors</option>
+                  {% for color in colors %}
+                  <option value="{{ color.value }}">{{ color.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="color-suggestions">
+                {% for color in colors[:6] %}
+                <button type="button" class="color-swatch" 
+                  style="background: {{ color.value }}" 
+                  onclick="setColor('gradient_end_color', '{{ color.value }}')"
+                  title="{{ color.name }}"></button>
+                {% endfor %}
+              </div>
+            </div>
+            
+            <!-- Gradient Direction -->
+            <div class="space-y-3">
+              <label class="label-md">Gradient Direction</label>
+              <div class="gradient-direction-grid">
+                <button type="button" class="gradient-btn" data-direction="to top" onclick="setGradientDirection('to top')">
+                  <i class="fas fa-arrow-up"></i>
+                </button>
+                <button type="button" class="gradient-btn" data-direction="to top right" onclick="setGradientDirection('to top right')">
+                  <i class="fas fa-arrow-up" style="transform: rotate(45deg);"></i>
+                </button>
+                <button type="button" class="gradient-btn" data-direction="to right" onclick="setGradientDirection('to right')">
+                  <i class="fas fa-arrow-right"></i>
+                </button>
+                <button type="button" class="gradient-btn" data-direction="to bottom right" onclick="setGradientDirection('to bottom right')">
+                  <i class="fas fa-arrow-down" style="transform: rotate(45deg);"></i>
+                </button>
+                <button type="button" class="gradient-btn" data-direction="to bottom" onclick="setGradientDirection('to bottom')">
+                  <i class="fas fa-arrow-down"></i>
+                </button>
+                <button type="button" class="gradient-btn" data-direction="to bottom left" onclick="setGradientDirection('to bottom left')">
+                  <i class="fas fa-arrow-down" style="transform: rotate(-45deg);"></i>
+                </button>
+                <button type="button" class="gradient-btn" data-direction="to left" onclick="setGradientDirection('to left')">
+                  <i class="fas fa-arrow-left"></i>
+                </button>
+                <button type="button" class="gradient-btn" data-direction="to top left" onclick="setGradientDirection('to top left')">
+                  <i class="fas fa-arrow-up" style="transform: rotate(-45deg);"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Custom Angle -->
+            <div class="space-y-3">
+              <label for="gradient_angle" class="label-md">Custom Angle</label>
+              <div class="flex items-center space-x-4">
+                <input 
+                  type="range" 
+                  id="gradient_angle" 
+                  name="gradient_angle"
+                  min="0" 
+                  max="360" 
+                  value="135" 
+                  class="gradient-slider"
+                  oninput="updateGradientAngle(this.value)">
+                <span id="angle_display" class="angle-display">135°</span>
+              </div>
+            </div>
+
+            <!-- Gradient Presets -->
+            <div class="space-y-3">
+              <label class="label-md">Gradient Presets</label>
+              <div class="gradient-presets">
+                <button type="button" class="gradient-preset" onclick="applyGradientPreset('#FF6B6B', '#4ECDC4', '45deg')" style="background: linear-gradient(45deg, #FF6B6B, #4ECDC4);"></button>
+                <button type="button" class="gradient-preset" onclick="applyGradientPreset('#667eea', '#764ba2', '135deg')" style="background: linear-gradient(135deg, #667eea, #764ba2);"></button>
+                <button type="button" class="gradient-preset" onclick="applyGradientPreset('#f093fb', '#f5576c', '90deg')" style="background: linear-gradient(90deg, #f093fb, #f5576c);"></button>
+                <button type="button" class="gradient-preset" onclick="applyGradientPreset('#4facfe', '#00f2fe', '180deg')" style="background: linear-gradient(180deg, #4facfe, #00f2fe);"></button>
+                <button type="button" class="gradient-preset" onclick="applyGradientPreset('#43e97b', '#38f9d7', '0deg')" style="background: linear-gradient(0deg, #43e97b, #38f9d7);"></button>
+                <button type="button" class="gradient-preset" onclick="applyGradientPreset('#fa709a', '#fee140', '270deg')" style="background: linear-gradient(270deg, #fa709a, #fee140);"></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Logo Upload -->
+          <div class="space-y-4">
+            <label for="logo_upload" class="label-lg">
+              <i class="fas fa-image mr-2 text-indigo-600"></i>Business Logo
+            </label>
+            <div class="file-upload-container">
+              <input type="file" id="logo_upload" accept="image/*" class="file-upload-input">
+              <label for="logo_upload" class="file-upload-label">
+                <div class="text-center">
+                  <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-3"></i>
+                  <div class="text-base text-gray-600">
+                    <span class="font-medium">Click to upload</span> or drag and drop
+                  </div>
+                  <div class="text-sm text-gray-500 mt-2">PNG, JPG up to 2MB</div>
+                </div>
+              </label>
+            </div>
+            <div id="logo_preview" class="hidden">
+              <div class="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg p-4">
+                <div class="flex items-center">
+                  <img id="logo_thumbnail" class="w-12 h-12 object-cover rounded-lg mr-3">
+                  <div>
+                    <div class="text-sm font-medium text-green-900" id="logo_file_name"></div>
+                    <div class="text-xs text-green-600">Logo uploaded successfully</div>
+                  </div>
+                </div>
+                <button type="button" onclick="removeLogo()" class="text-red-500 hover:text-red-700 transition-colors">
+                  <i class="fas fa-times text-lg"></i>
+                </button>
+              </div>
+            </div>
+            <input type="hidden" name="logo_url" id="logo_url" value="{{ settings.form_logo_url if settings and settings.form_logo_url else '' }}">
+          </div>
+
+          <!-- Welcome Message -->
+          <div class="space-y-4">
+            <label for="welcome_message" class="label-lg">
+              <i class="fas fa-comment mr-2 text-indigo-600"></i>Custom Welcome Message
+            </label>
+            <textarea 
+              name="welcome_message" 
+              id="welcome_message"
+              rows="4" 
+              class="input-field resize-none"
+              placeholder="We value your feedback and would love to hear about your experience with us">{{ settings.form_welcome_message if settings and settings.form_welcome_message else '' }}</textarea>
+            <div class="flex items-center justify-between text-sm text-gray-500">
+              <span>Personal message shown to customers</span>
+              <span id="message_count">0/500</span>
+            </div>
+          </div>
+
+          <!-- Hidden fields for gradient data -->
+          <input type="hidden" name="gradient_direction" id="gradient_direction" value="135deg">
+          <input type="hidden" name="gradient_angle" id="gradient_angle_hidden" value="135">
+
+          <!-- Submit Button -->
+          <div class="flex gap-4 pt-8 border-t border-gray-200">
+            <button type="submit" class="btn-gradient flex-1 text-lg py-4">
+              <i class="fas fa-save mr-2"></i>Save Customization
+            </button>
+            <button type="button" onclick="resetToDefaults()" class="btn-secondary px-6">
+              <i class="fas fa-undo mr-2"></i>Reset
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Live Preview -->
+      <div class="lg:col-span-3 bg-white rounded-2xl shadow-xl p-8">
+        <div class="flex items-center justify-between mb-8">
+          <h2 class="text-2xl font-semibold">
+            <i class="fas fa-eye mr-2 text-indigo-600"></i>Live Preview
+          </h2>
+          <div class="flex items-center space-x-3">
+            <button onclick="toggleDevicePreview('mobile')" class="device-btn" id="mobile-btn">
+              <i class="fas fa-mobile-alt"></i>
+            </button>
+
+            <button onclick="toggleDevicePreview('desktop')" class="device-btn active" id="desktop-btn">
+              <i class="fas fa-desktop"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="preview-container">
+          <div id="form-preview" class="preview-form transition-all duration-500" style="background: linear-gradient(135deg, #3B82F6, #8B5CF6);">
+            <!-- Preview Logo -->
+            <div class="text-center mb-8">
+              <div id="preview-logo" class="w-20 h-20 bg-white bg-opacity-20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-star text-white text-3xl"></i>
+              </div>
+              <h1 id="preview-title" class="text-3xl font-bold mb-4 text-white">Share Your Experience</h1>
+              {% if settings %}
+              <h2 id="preview-business-name" class="text-xl font-semibold mb-4 text-purple-200">{{ settings.business_name }}</h2>
+              {% endif %}
+              <p id="preview-message" class="text-lg opacity-90 text-white break-words whitespace-normal">
+                We value your feedback and would love to hear about your experience with us
+              </p>
+            </div>
+
+            <!-- Preview Form Elements -->
+            <div class="space-y-6">
+              <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label id="preview-label-1" class="block font-semibold mb-2 text-sm uppercase tracking-wide text-white">
+                    <i class="fas fa-user mr-2 text-purple-300"></i>Full Name
+                  </label>
+                  <input type="text" id="preview-input-1" class="w-full px-4 py-3 border rounded-lg transition-all bg-white bg-opacity-10 border-white border-opacity-30 text-white placeholder-white placeholder-opacity-70" placeholder="Enter your full name">
+                </div>
+                <div>
+                  <label id="preview-label-2" class="block font-semibold mb-2 text-sm uppercase tracking-wide text-white">
+                    <i class="fas fa-envelope mr-2 text-purple-300"></i>Email Address
+                  </label>
+                  <input type="email" id="preview-input-2" class="w-full px-4 py-3 border rounded-lg transition-all bg-white bg-opacity-10 border-white border-opacity-30 text-white placeholder-white placeholder-opacity-70" placeholder="your@email.com">
+                </div>
+              </div>
+
+              <!-- Stars -->
+              <div class="text-center">
+                <label id="preview-rating-label" class="block font-semibold mb-4 text-lg text-white">
+                  <i class="fas fa-star mr-2 text-purple-300"></i>How would you rate your experience?
+                </label>
+                <div class="flex justify-center space-x-2 mb-4">
+                  <span class="text-3xl text-yellow-400">★★★★★</span>
+                </div>
+              </div>
+
+              <!-- Text Area -->
+              <div>
+                <label id="preview-label-3" class="block font-semibold mb-2 text-sm uppercase tracking-wide text-white">
+                  <i class="fas fa-comment mr-2 text-purple-300"></i>Tell us about your experience
+                </label>
+                <textarea id="preview-textarea" rows="4" class="w-full px-4 py-3 border rounded-lg transition-all resize-none bg-white bg-opacity-10 border-white border-opacity-30 text-white placeholder-white placeholder-opacity-70" placeholder="Share your thoughts..."></textarea>
+              </div>
+
+              <!-- Submit Button -->
+              <div class="text-center">
+                <button id="preview-button" class="px-8 py-4 font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all bg-white text-gray-800">
+                  <i class="fas fa-paper-plane mr-2"></i>Submit Review
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {% if settings %}
+        <div class="mt-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-200">
+          <h3 class="font-semibold text-gray-900 mb-3 flex items-center">
+            <i class="fas fa-link mr-2 text-blue-600"></i>Your Live Form URL
+          </h3>
+          <div class="flex items-center space-x-3">
+            <input type="text" value="{{ request.url_root }}review-form/{{ settings.id }}" class="flex-1 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm" readonly>
+            <button onclick="copyFormUrl()" class="btn-secondary px-4 py-2">
+              <i class="fas fa-copy"></i>
+            </button>
+            <a href="{{ url_for('review_form', business_id=settings.id) }}" target="_blank" class="btn-gradient px-4 py-2">
+              <i class="fas fa-external-link-alt"></i>
+            </a>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Enhanced styling for the improved form customization */
+.style-option {
+  cursor: pointer;
+}
+
+.style-option input[type="radio"] {
+  display: none;
+}
+
+.style-card {
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.style-option input[type="radio"]:checked + .style-card {
+  border-color: #3b82f6;
+  background: #eff6ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.style-preview {
+  width: 100%;
+  height: 60px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.style-gradient {
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+}
+
+.style-solid {
+  background: #3b82f6;
+}
+
+.style-minimal {
+  background: #ffffff;
+  border: 2px solid #e5e7eb;
+}
+
+.style-dark {
+  background: #1f2937;
+}
+
+.style-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.color-picker-container {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.color-input {
+  width: 60px;
+  height: 60px;
+  border: 3px solid #e5e7eb;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.color-input:hover {
+  border-color: #3b82f6;
+  transform: scale(1.05);
+}
+
+.color-preset-dropdown {
+  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.color-suggestions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.color-swatch {
+  width: 40px;
+  height: 40px;
+  border: 2px solid #ffffff;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.color-swatch:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.gradient-direction-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  max-width: 200px;
+}
+
+.gradient-btn {
+  width: 50px;
+  height: 50px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.gradient-btn:hover {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.gradient-btn.active {
+  border-color: #3b82f6;
+  background: #3b82f6;
+  color: white;
+}
+
+.gradient-slider {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+  outline: none;
+  cursor: pointer;
+}
+
+.angle-display {
+  background: #f3f4f6;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  min-width: 50px;
+  text-align: center;
+}
+
+.gradient-presets {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+
+.gradient-preset {
+  width: 50px;
+  height: 50px;
+  border: 2px solid #ffffff;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.gradient-preset:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.file-upload-container {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  width: 100%;
+}
+
+.file-upload-input {
+  position: absolute;
+  left: -9999px;
+}
+
+.file-upload-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  border: 3px dashed #d1d5db;
+  border-radius: 16px;
+  background: #f9fafb;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  min-height: 120px;
+}
+
+.file-upload-label:hover {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.file-upload-label.has-file {
+  border-color: #10b981;
+  background: #f0fdf4;
+  border-style: solid;
+}
+
+.device-btn {
+  padding: 8px 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.device-btn:hover {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.device-btn.active {
+  border-color: #3b82f6;
+  background: #3b82f6;
+  color: white;
+}
+
+.preview-container {
+  border: 3px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 4px;
+  background: #f9fafb;
+  transition: all 0.3s ease;
+}
+
+.preview-form {
+  border-radius: 12px;
+  padding: 2rem;
+  min-height: 600px;
+}
+
+.preview-container.mobile .preview-form {
+  max-width: 375px;
+  margin: 0 auto;
+}
+
+.preview-container.tablet .preview-form {
+  max-width: 768px;
+  margin: 0 auto;
+}
+
+.input-field {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.label-lg {
+  display: block;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+
+.label-md {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+
+.btn-gradient {
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-gradient:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+}
+
+.btn-secondary {
+  background: #6b7280;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-secondary:hover {
+  background: #4b5563;
+  transform: translateY(-2px);
+}
+</style>
+
+<script>
+let uploadedLogoUrl = null;
+let currentGradientDirection = '135deg';
+
+// Character counter for welcome message
+document.getElementById('welcome_message').addEventListener('input', function() {
+  const count = this.value.length;
+  document.getElementById('message_count').textContent = `${count}/500`;
+  if (count > 500) {
+    this.value = this.value.substring(0, 500);
+    document.getElementById('message_count').textContent = '500/500';
+  }
+  updatePreview();
+});
+
+// Logo upload handler
+document.getElementById('logo_upload').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (file) {
+    if (file.size > 2 * 1024 * 1024) {
+      alert('File size must be less than 2MB');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      uploadedLogoUrl = event.target.result;
+      showLogoPreview(file.name, event.target.result);
+      updatePreview();
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
+function showLogoPreview(fileName, imageSrc) {
+  const preview = document.getElementById('logo_preview');
+  const thumbnail = document.getElementById('logo_thumbnail');
+  const fileNameSpan = document.getElementById('logo_file_name');
+  const label = document.querySelector('.file-upload-label');
+
+  preview.classList.remove('hidden');
+  thumbnail.src = imageSrc;
+  fileNameSpan.textContent = fileName;
+  label.classList.add('has-file');
+
+  document.getElementById('logo_url').value = imageSrc;
+}
+
+function removeLogo() {
+  uploadedLogoUrl = null;
+  document.getElementById('logo_upload').value = '';
+  document.getElementById('logo_url').value = '';
+  document.getElementById('logo_preview').classList.add('hidden');
+  const label = document.querySelector('.file-upload-label');
+  label.classList.remove('has-file');
+  updatePreview();
+}
+
+function setColor(inputId, color) {
+  // Update the color picker
+  document.getElementById(inputId).value = color;
+
+  // Find the dropdown in the same container
+  const container = document.getElementById(inputId).closest('.color-picker-container');
+  const dropdown = container.querySelector('.color-preset-dropdown');
+
+  // Update dropdown if it has this color as an option, otherwise reset
+  if (dropdown) {
+    const optionExists = Array.from(dropdown.options).some(opt => opt.value === color);
+    dropdown.value = optionExists ? color : "";
+  }
+
+  updatePreview();
+}
+
+
+function applyColorPreset(inputId, color) {
+  if (color) {
+    document.getElementById(inputId).value = color;
+    updatePreview();
+  }
+}
+
+function setGradientDirection(direction) {
+  currentGradientDirection = direction;
+  document.getElementById('gradient_direction').value = direction;
+  
+  // Update active button
+  document.querySelectorAll('.gradient-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  document.querySelector(`[data-direction="${direction}"]`).classList.add('active');
+  
+  updatePreview();
+}
+
+function updateGradientAngle(angle) {
+  currentGradientDirection = `${angle}deg`;
+  document.getElementById('gradient_direction').value = `${angle}deg`;
+  document.getElementById('gradient_angle_hidden').value = angle;
+  document.getElementById('angle_display').textContent = `${angle}°`;
+  
+  // Clear direction button selection when using custom angle
+  document.querySelectorAll('.gradient-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  
+  updatePreview();
+}
+
+function applyGradientPreset(color1, color2, angle) {
+  document.getElementById('gradient_start_color').value = color1;
+  document.getElementById('gradient_end_color').value = color2;
+  document.getElementById('gradient_angle').value = angle.replace('deg', '');
+  updateGradientAngle(angle.replace('deg', ''));
+  updatePreview();
+}
+
+function toggleDevicePreview(device) {
+  const container = document.querySelector('.preview-container');
+  const buttons = document.querySelectorAll('.device-btn');
+  
+  buttons.forEach(btn => btn.classList.remove('active'));
+  document.getElementById(`${device}-btn`).classList.add('active');
+  
+  container.className = `preview-container ${device}`;
+}
+
+function copyFormUrl() {
+  const input = document.querySelector('input[readonly]');
+  input.select();
+  document.execCommand('copy');
+  
+  // Show feedback
+  const btn = event.target.closest('button');
+  const originalContent = btn.innerHTML;
+  btn.innerHTML = '<i class="fas fa-check"></i>';
+  setTimeout(() => {
+    btn.innerHTML = originalContent;
+  }, 2000);
+}
+
+function resetToDefaults() {
+  if (confirm('Reset all customizations to default values?')) {
+    document.getElementById('primary_color').value = '#3B82F6';
+    document.getElementById('secondary_color').value = '#8B5CF6';
+    document.getElementById('gradient_start_color').value = '#667eea';
+    document.getElementById('gradient_end_color').value = '#764ba2';
+    document.getElementById('welcome_message').value = '';
+    document.querySelector('input[name="background_style"][value="gradient"]').checked = true;
+    removeLogo();
+    setGradientDirection('135deg');
+    updatePreview();
+  }
+}
+
+// Helper function to determine if a color is light
+function isLightColor(color) {
+  const hex = color.replace('#', '');
+  const r = parseInt(hex.substr(0, 2), 16);
+  const g = parseInt(hex.substr(2, 2), 16);
+  const b = parseInt(hex.substr(4, 2), 16);
+  const brightness = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+  return brightness > 155;
+}
+
+function isWhitishColor(color) {
+  const whitishColors = ['#ffffff', '#f8f9fa', '#e9ecef'];
+  return whitishColors.includes(color.toLowerCase());
+}
+
+function updatePreview() {
+  const primaryColor = document.getElementById('primary_color').value;
+  const secondaryColor = document.getElementById('secondary_color').value;
+  const gradientStartColor = document.getElementById('gradient_start_color').value;
+  const gradientEndColor = document.getElementById('gradient_end_color').value;
+  const backgroundStyle = document.querySelector('input[name="background_style"]:checked').value;
+  const welcomeMessage = document.getElementById('welcome_message').value;
+
+  const preview = document.getElementById('form-preview');
+  const previewLogo = document.getElementById('preview-logo');
+  const previewMessage = document.getElementById('preview-message');
+  const previewButton = document.getElementById('preview-button');
+
+  // Get all text elements for styling
+  const textElements = [
+    document.getElementById('preview-title'),
+    document.getElementById('preview-business-name'),
+    document.getElementById('preview-message'),
+    document.getElementById('preview-label-1'),
+    document.getElementById('preview-label-2'),
+    document.getElementById('preview-label-3'),
+    document.getElementById('preview-rating-label')
+  ];
+
+  const inputElements = [
+    document.getElementById('preview-input-1'),
+    document.getElementById('preview-input-2'),
+    document.getElementById('preview-textarea')
+  ];
+
+  // Apply styles based on background type
+  let textColor, inputBgColor, inputBorderColor, inputTextColor, logoIconColor, buttonBg, buttonColor;
+
+  switch(backgroundStyle) {
+    case 'gradient':
+      preview.style.background = `linear-gradient(${currentGradientDirection}, ${gradientStartColor}, ${gradientEndColor})`;
+      textColor = '#ffffff';
+      inputBgColor = 'rgba(255, 255, 255, 0.1)';
+      inputBorderColor = 'rgba(255, 255, 255, 0.3)';
+      inputTextColor = '#ffffff';
+      logoIconColor = primaryColor;
+      buttonBg = '#ffffff';
+      buttonColor = '#1f2937';
+      break;
+
+    case 'solid':
+      preview.style.background = primaryColor;
+      if (isWhitishColor(primaryColor)) {
+        textColor = '#1f2937';
+        inputBgColor = 'rgba(0, 0, 0, 0.05)';
+        inputBorderColor = 'rgba(0, 0, 0, 0.2)';
+        inputTextColor = '#1f2937';
+        logoIconColor = primaryColor;
+        buttonBg = secondaryColor;
+        buttonColor = '#ffffff';
+      } else {
+        textColor = '#ffffff';
+        inputBgColor = 'rgba(255, 255, 255, 0.1)';
+        inputBorderColor = 'rgba(255, 255, 255, 0.3)';
+        inputTextColor = '#ffffff';
+        logoIconColor = '#ffffff';
+        buttonBg = secondaryColor;
+        buttonColor = '#ffffff';
+      }
+      break;
+
+    case 'minimal':
+      preview.style.background = '#ffffff';
+      textColor = '#1f2937';
+      inputBgColor = '#ffffff';
+      inputBorderColor = '#d1d5db';
+      inputTextColor = '#1f2937';
+      logoIconColor = primaryColor;
+      buttonBg = primaryColor;
+      buttonColor = isWhitishColor(primaryColor) ? '#1f2937' : '#ffffff';
+      break;
+
+    case 'dark':
+      preview.style.background = '#1f2937';
+      textColor = '#ffffff';
+      inputBgColor = 'rgba(255, 255, 255, 0.1)';
+      inputBorderColor = 'rgba(255, 255, 255, 0.3)';
+      inputTextColor = '#ffffff';
+      logoIconColor = '#ffffff';
+      buttonBg = primaryColor;
+      buttonColor = '#ffffff';
+      break;
+  }
+
+  // Apply text colors
+  textElements.forEach(el => {
+    if (el) {
+      el.style.color = textColor;
+    }
+  });
+
+  // Apply input styles
+  inputElements.forEach(el => {
+    if (el) {
+      el.style.backgroundColor = inputBgColor;
+      el.style.borderColor = inputBorderColor;
+      el.style.color = inputTextColor;
+    }
+  });
+
+  // Update logo
+  if (uploadedLogoUrl) {
+    previewLogo.innerHTML = `<img src="${uploadedLogoUrl}" alt="Logo" class="w-full h-full object-contain rounded-2xl">`;
+  } else {
+    previewLogo.innerHTML = `<i class="fas fa-star text-3xl" style="color: ${logoIconColor};"></i>`;
+  }
+
+  // Update message
+  if (welcomeMessage) {
+    previewMessage.textContent = welcomeMessage;
+  } else {
+    previewMessage.textContent = 'We value your feedback and would love to hear about your experience with us';
+  }
+
+  // Update button
+  previewButton.style.background = buttonBg;
+  previewButton.style.color = buttonColor;
+
+  // Update secondary color elements
+  const secondaryElements = [
+    document.getElementById('preview-label-1'),
+    document.getElementById('preview-label-2'), 
+    document.getElementById('preview-label-3'),
+    document.getElementById('preview-rating-label')
+  ];
+
+  secondaryElements.forEach(el => {
+    if (el) {
+      const icon = el.querySelector('i');
+      if (icon) {
+        icon.style.color = secondaryColor;
+      }
+    }
+  });
+
+  const businessName = document.getElementById('preview-business-name');
+  if (businessName) {
+    businessName.style.color = secondaryColor;
+  }
+
+  // Show/hide gradient controls
+  const gradientControls = document.getElementById('gradient-controls');
+  if (backgroundStyle === 'gradient') {
+    gradientControls.style.display = 'block';
+  } else {
+    gradientControls.style.display = 'none';
+  }
+}
+
+// Auto-update preview when any input changes
+document.getElementById('primary_color').addEventListener('input', updatePreview);
+document.getElementById('secondary_color').addEventListener('input', updatePreview);
+document.getElementById('gradient_start_color').addEventListener('input', updatePreview);
+document.getElementById('gradient_end_color').addEventListener('input', updatePreview);
+document.querySelectorAll('input[name="background_style"]').forEach(input => {
+  input.addEventListener('change', updatePreview);
+});
+
+// Initialize preview
+document.addEventListener('DOMContentLoaded', function() {
+  
+
+  // Set initial logo if exists
+  const existingLogoUrl = document.getElementById('logo_url').value;
+  if (existingLogoUrl && existingLogoUrl.startsWith('data:')) {
+    uploadedLogoUrl = existingLogoUrl;
+    showLogoPreview('Existing Logo', existingLogoUrl);
+  }
+
+  updatePreview();
+
+  // Set initial gradient direction from database or default
+  {% if settings and settings.form_gradient_settings %}
+    {% set gradient_data = settings.form_gradient_settings|safe %}
+    {% if '"direction"' in gradient_data %}
+      {% set saved_direction = gradient_data.split('"direction": "')[1].split('"')[0] %}
+      setGradientDirection('{{ saved_direction }}');
+    {% else %}
+      setGradientDirection('135deg');
+    {% endif %}
+  {% else %}
+    setGradientDirection('135deg');
+  {% endif %}
+});
+</script>
+{% endblock %}

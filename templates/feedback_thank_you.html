@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Thank You for Your Feedback{% endblock %}
+
+{% block content %}
+<div class="bg-white -mx-4 -my-8 px-4 py-16 text-gray-900 min-h-screen">
+  <div class="max-w-2xl mx-auto text-center space-y-8 fade-in">
+    <!-- Success Icon -->
+    <div class="w-24 h-24 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-8">
+      <i class="fas fa-heart text-white text-4xl"></i>
+    </div>
+
+    <!-- Thank You Message -->
+    <div class="space-y-6">
+      <h1 class="text-4xl font-bold text-gray-900">Thank You for Your Feedback!</h1>
+      <p class="text-xl text-gray-700 leading-relaxed">
+        Your honest feedback is incredibly valuable to us and will help us improve our service for you and future customers.
+      </p>
+    </div>
+
+    <!-- Message Card -->
+    <div class="card p-8">
+      <div class="space-y-4">
+        <div class="w-16 h-16 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center mx-auto">
+          <i class="fas fa-lightbulb text-white text-2xl"></i>
+        </div>
+
+        <h2 class="text-2xl font-semibold text-gray-900">Your Voice Matters</h2>
+        <p class="text-gray-600">
+          We take all feedback seriously and use it to continuously improve our products and services. 
+          Our team will review your comments and work on addressing any concerns you've shared.
+        </p>
+      </div>
+    </div>
+
+    <!-- Follow-up Information -->
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-3">What happens next?</h3>
+      <ul class="text-gray-700 space-y-2 text-left max-w-md mx-auto">
+        <li class="flex items-center">
+          <i class="fas fa-check-circle text-blue-600 mr-3"></i>
+          Your feedback has been securely recorded
+        </li>
+        <li class="flex items-center">
+          <i class="fas fa-users text-blue-600 mr-3"></i>
+          Our team will review your comments
+        </li>
+        <li class="flex items-center">
+          <i class="fas fa-cog text-blue-600 mr-3"></i>
+          We'll use your input to improve our service
+        </li>
+        <li class="flex items-center">
+          <i class="fas fa-phone text-blue-600 mr-3"></i>
+          We may reach out if you requested follow-up
+        </li>
+      </ul>
+    </div>
+
+    <!-- Closing Message -->
+    <div class="space-y-4">
+      <p class="text-gray-600">
+        Thank you for taking the time to help us serve you better.
+      </p>
+      <p class="text-sm text-gray-500">
+        You can now safely close this page.
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

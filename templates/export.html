@@ -1,0 +1,275 @@
+
+{% extends "base.html" %}
+{% block title %}Export Data - Quantum{% endblock %}
+
+{% block content %}
+<div class="space-y-6 fade-in">
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row items-start md:items-center justify-between">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">Export Data</h1>
+      <p class="text-gray-600">Download your business data for backup, analysis, or integration with other tools</p>
+    </div>
+    <div class="mt-4 md:mt-0">
+      <div class="flex items-center space-x-2 px-4 py-2 bg-blue-50 rounded-lg">
+        <i class="fas fa-shield-alt text-blue-600"></i>
+        <span class="text-sm text-blue-800 font-medium">Secure Export</span>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Export Options -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Reviews Export -->
+    <div class="card">
+      <div class="p-6 border-b border-gray-200">
+        <div class="flex items-center space-x-4 mb-4">
+          <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-lg flex items-center justify-center">
+            <i class="fas fa-star text-white text-lg"></i>
+          </div>
+          <div>
+            <h2 class="text-xl font-semibold text-gray-900">Customer Reviews</h2>
+            <p class="text-gray-600 text-sm">Export all review data and feedback</p>
+          </div>
+        </div>
+        
+        <div class="space-y-4">
+          <div class="bg-gray-50 rounded-lg p-4">
+            <h4 class="font-medium text-gray-900 mb-2">What's included:</h4>
+            <ul class="text-sm text-gray-600 space-y-1">
+              <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2 w-3"></i>Customer names and ratings</li>
+              <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2 w-3"></i>Review text and feedback</li>
+              <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2 w-3"></i>Submission timestamps</li>
+              <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2 w-3"></i>Contact information</li>
+              <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2 w-3"></i>Review status and visibility</li>
+            </ul>
+          </div>
+
+          <form method="POST" class="export-form space-y-3">
+            <input type="hidden" name="data_type" value="reviews">
+            <input type="hidden" name="format" value="csv">
+            
+            <button type="submit" class="w-full btn-primary py-3 text-center">
+              <i class="fas fa-download mr-2"></i>
+              <span>Download Reviews CSV</span>
+            </button>
+          </form>
+
+          <div class="text-center">
+            <span class="text-xs text-gray-500">
+              <i class="fas fa-clock mr-1"></i>
+              Real-time data • No server storage
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Customers Export -->
+    <div class="card">
+      <div class="p-6 border-b border-gray-200">
+        <div class="flex items-center space-x-4 mb-4">
+          <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center">
+            <i class="fas fa-address-book text-white text-lg"></i>
+          </div>
+          <div>
+            <h2 class="text-xl font-semibold text-gray-900">Customer List</h2>
+            <p class="text-gray-600 text-sm">Export contact information and details</p>
+          </div>
+        </div>
+        
+        <div class="space-y-4">
+          <div class="bg-gray-50 rounded-lg p-4">
+            <h4 class="font-medium text-gray-900 mb-2">What's included:</h4>
+            <ul class="text-sm text-gray-600 space-y-1">
+              <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2 w-3"></i>Customer names</li>
+              <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2 w-3"></i>Email addresses</li>
+              <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2 w-3"></i>Phone numbers</li>
+              <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2 w-3"></i>Date added to system</li>
+              <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2 w-3"></i>Contact preferences</li>
+            </ul>
+          </div>
+
+          <form method="POST" class="export-form space-y-3">
+            <input type="hidden" name="data_type" value="customers">
+            <input type="hidden" name="format" value="csv">
+            
+            <button type="submit" class="w-full btn-primary py-3 text-center">
+              <i class="fas fa-download mr-2"></i>
+              <span>Download Customers CSV</span>
+            </button>
+          </form>
+
+          <div class="text-center">
+            <span class="text-xs text-gray-500">
+              <i class="fas fa-clock mr-1"></i>
+              Real-time data • No server storage
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Usage Guide -->
+  <div class="card">
+    <div class="p-6 border-b border-gray-200">
+      <div class="flex items-center space-x-3 mb-4">
+        <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center">
+          <i class="fas fa-lightbulb text-white"></i>
+        </div>
+        <h2 class="text-xl font-semibold text-gray-900">Export Guide & Best Practices</h2>
+      </div>
+    </div>
+    
+    <div class="p-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div>
+          <h4 class="font-semibold text-gray-900 mb-3 flex items-center">
+            <i class="fas fa-file-csv text-emerald-500 mr-2"></i>
+            CSV Format
+          </h4>
+          <ul class="space-y-2 text-sm text-gray-600">
+            <li class="flex items-start space-x-2">
+              <i class="fas fa-check text-emerald-500 mt-1"></i>
+              <span>Compatible with Excel, Google Sheets</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <i class="fas fa-check text-emerald-500 mt-1"></i>
+              <span>UTF-8 encoded for international characters</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <i class="fas fa-check text-emerald-500 mt-1"></i>
+              <span>Standard comma-separated format</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <i class="fas fa-check text-emerald-500 mt-1"></i>
+              <span>Headers included for easy identification</span>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="font-semibold text-gray-900 mb-3 flex items-center">
+            <i class="fas fa-cog text-blue-500 mr-2"></i>
+            Integration
+          </h4>
+          <ul class="space-y-2 text-sm text-gray-600">
+            <li class="flex items-start space-x-2">
+              <i class="fas fa-arrow-right text-blue-500 mt-1"></i>
+              <span>Import into CRM systems</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <i class="fas fa-arrow-right text-blue-500 mt-1"></i>
+              <span>Email marketing platforms</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <i class="fas fa-arrow-right text-blue-500 mt-1"></i>
+              <span>Business intelligence tools</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <i class="fas fa-arrow-right text-blue-500 mt-1"></i>
+              <span>Analytics and reporting software</span>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="font-semibold text-gray-900 mb-3 flex items-center">
+            <i class="fas fa-shield-alt text-purple-500 mr-2"></i>
+            Security & Privacy
+          </h4>
+          <ul class="space-y-2 text-sm text-gray-600">
+            <li class="flex items-start space-x-2">
+              <i class="fas fa-lock text-purple-500 mt-1"></i>
+              <span>Direct download to your device</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <i class="fas fa-lock text-purple-500 mt-1"></i>
+              <span>No data stored on external servers</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <i class="fas fa-lock text-purple-500 mt-1"></i>
+              <span>Export activity is logged</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <i class="fas fa-lock text-purple-500 mt-1"></i>
+              <span>GDPR and privacy compliant</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Success Toast -->
+<div id="successToast" class=" hidden fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300 z-50">
+  <div class="flex items-center space-x-2">
+    <i class="fas fa-check-circle"></i>
+    <span>Export completed successfully!</span>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Add loading states to export forms
+  document.querySelectorAll('.export-form').forEach(form => {
+    form.addEventListener('submit', function(e) {
+      const button = this.querySelector('button');
+      const originalContent = button.innerHTML;
+      
+      button.disabled = true;
+      button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i><span>Preparing Export...</span>';
+      
+      // Show success message and reset button after delay
+      setTimeout(() => {
+        button.innerHTML = '<i class="fas fa-check mr-2"></i><span>Export Complete</span>';
+        showSuccessToast();
+        
+        // Reset button after another delay
+        setTimeout(() => {
+          button.disabled = false;
+          button.innerHTML = originalContent;
+        }, 2000);
+      }, 1500);
+    });
+  });
+});
+
+function showSuccessToast() {
+  const toast = document.getElementById('successToast');
+  toast.classList.remove('hidden translate-x-full');
+  toast.classList.add('translate-x-0');
+  
+  setTimeout(() => {
+    toast.classList.remove('translate-x-0');
+    toast.classList.add('hidden translate-x-full');
+  }, 3000);
+}
+</script>
+
+<style>
+.fade-in {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.export-form button:hover {
+  transform: translateY(-1px);
+}
+
+.export-form button:disabled {
+  transform: none;
+  opacity: 0.8;
+}
+</style>
+{% endblock %}

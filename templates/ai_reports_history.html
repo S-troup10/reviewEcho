@@ -1,0 +1,126 @@
+
+{% extends "base.html" %}
+{% block title %}AI Reports History - Quantum Platform{% endblock %}
+
+{% block content %}
+<div class="space-y-6 fade-in">
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">
+        <i class="fas fa-history text-purple-600 mr-3"></i>AI Reports History
+      </h1>
+      <p class="text-gray-600">View and compare your past AI business intelligence reports</p>
+    </div>
+
+    <div class="flex gap-3">
+      <a onclick="showLoadingSpinner('Generating comprehensive AI analysis...')" href="{{ url_for('ai_review_summary') }}" 
+         class="btn-primary">
+        <i class="fas fa-plus mr-2"></i>Generate New Report
+      </a>
+      <a href="{{ url_for('dashboard') }}" 
+         class="btn-secondary">
+        <i class="fas fa-arrow-left mr-2"></i>Dashboard
+      </a>
+    </div>
+  </div>
+
+  {% if reports %}
+  <!-- Reports Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+    {% for report in reports %}
+    <div class="card hover:shadow-lg transition-all duration-300 cursor-pointer group" 
+    onclick="window.location.href='{{ url_for('view_ai_report', report_id=report.id) }}'">
+      <div class="p-6">
+        <!-- Report Header -->
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center space-x-3">
+            <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+              <i class="fas fa-chart-line text-white text-xl"></i>
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-900">AI Business Analysis</h3>
+              <p class="text-sm text-gray-500">{{ report.generated_at[:10] }}</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium 
+              {% if report.report_data.analysis.overall_sentiment == 'positive' %}bg-emerald-100 text-emerald-800{% elif report.report_data.analysis.overall_sentiment == 'negative' %}bg-red-100 text-red-800{% else %}bg-amber-100 text-amber-800{% endif %}">
+              {% if report.report_data.analysis.overall_sentiment == 'positive' %}
+              <i class="fas fa-smile mr-1"></i>Positive
+              {% elif report.report_data.analysis.overall_sentiment == 'negative' %}
+              <i class="fas fa-frown mr-1"></i>Negative
+              {% else %}
+              <i class="fas fa-meh mr-1"></i>Mixed
+              {% endif %}
+            </span>
+          </div>
+        </div>
+
+        <!-- Report Preview -->
+        <div class="space-y-3">
+          {% if report.report_data.analysis.executive_summary %}
+          <div class="bg-gray-50 rounded-lg p-3">
+            <p class="text-sm text-gray-700 font-medium mb-1">Executive Summary</p>
+            <p class="text-sm text-gray-600">{{ report.report_data.analysis.executive_summary[:120] }}{% if report.report_data.analysis.executive_summary|length > 120 %}...{% endif %}</p>
+          </div>
+          {% endif %}
+
+          <!-- Key Metrics Preview -->
+          <div class="flex items-center justify-between bg-blue-50 rounded-lg p-3">
+            <div class="flex items-center space-x-4">
+              {% if report.report_data.analysis.key_strengths %}
+              <span class="text-xs bg-emerald-100 text-emerald-800 px-2 py-1 rounded-full font-semibold">
+                {{ report.report_data.analysis.key_strengths|length }} Strengths
+              </span>
+              {% endif %}
+              {% if report.report_data.analysis.areas_for_improvement %}
+              <span class="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded-full font-semibold">
+                {{ report.report_data.analysis.areas_for_improvement|length }} Improvements
+              </span>
+              {% endif %}
+              {% if report.report_data.analysis.actionable_recommendations %}
+              <span class="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full font-semibold">
+                {{ report.report_data.analysis.actionable_recommendations|length }} Actions
+              </span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Report Stats -->
+        <div class="flex items-center justify-between pt-4 mt-4 border-t border-gray-200">
+          <span class="text-sm text-gray-600">{{ report.report_data.review_count }} reviews analyzed</span>
+          <span class="text-sm text-purple-600 font-medium group-hover:text-purple-800">View Full Report →</span>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Load More Button (if needed) -->
+  {% if reports|length >= 10 %}
+  <div class="text-center">
+    <button class="btn-secondary">
+      <i class="fas fa-refresh mr-2"></i>Load More Reports
+    </button>
+  </div>
+  {% endif %}
+
+  {% else %}
+  <!-- No Reports State -->
+  <div class="card text-center p-12">
+    <div class="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+      <i class="fas fa-chart-line text-purple-600 text-3xl"></i>
+    </div>
+    <h3 class="text-xl font-semibold text-gray-900 mb-3">No AI Reports Yet</h3>
+    <p class="text-gray-600 mb-6 max-w-md mx-auto">Generate your first comprehensive AI business intelligence report to start tracking detailed customer feedback insights, identify opportunities, and receive actionable recommendations over time.</p>
+    <a href="{{ url_for('ai_review_summary') }}" 
+       onclick="showLoadingSpinner('Generating comprehensive AI analysis...')"
+       class="btn-primary text-lg px-8 py-3">
+      <i class="fas fa-brain mr-2"></i>Generate Detailed AI Report
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

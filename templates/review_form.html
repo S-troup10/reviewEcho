@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leave a Review - {{ business.business_name }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: {{ business.form_primary_color or '#3B82F6' }};
+            --secondary-color: {{ business.form_secondary_color or '#8B5CF6' }};
+        }
+
+        {% set background_style = business.form_background_style or 'gradient' %}
+        {% if background_style == 'gradient' %}
+        .form-container {
+            {% set gradient_direction = '135deg' %}
+            {% if business.form_gradient_settings %}
+                {% set gradient_data = business.form_gradient_settings|safe %}
+                {% if '"direction"' in gradient_data %}
+                    {% set gradient_direction = gradient_data.split('"direction": "')[1].split('"')[0] %}
+                {% endif %}
+            {% endif %}
+            background: linear-gradient({{ gradient_direction }}, {{ business.form_gradient_start_color or '#667eea' }}, {{ business.form_gradient_end_color or '#764ba2' }});
+            color: white;
+        }
+        .form-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .form-logo-bg {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .form-button {
+            background: white;
+            color: #1f2937;
+        }
+        {% elif background_style == 'solid' %}
+        .form-container {
+            background: var(--primary-color);
+            {% if business.form_primary_color and business.form_primary_color in ['#ffffff', '#f8f9fa', '#e9ecef'] %}
+            color: #1f2937;
+            {% else %}
+            color: white;
+            {% endif %}
+        }
+        .form-input {
+            {% if business.form_primary_color and business.form_primary_color in ['#ffffff', '#f8f9fa', '#e9ecef'] %}
+            background: rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            color: #1f2937;
+            {% else %}
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            {% endif %}
+        }
+        .form-input::placeholder {
+            {% if business.form_primary_color and business.form_primary_color in ['#ffffff', '#f8f9fa', '#e9ecef'] %}
+            color: rgba(0, 0, 0, 0.5);
+            {% else %}
+            color: rgba(255, 255, 255, 0.7);
+            {% endif %}
+        }
+        .form-logo-bg {
+            {% if business.form_primary_color and business.form_primary_color in ['#ffffff', '#f8f9fa', '#e9ecef'] %}
+            background: rgba(0, 0, 0, 0.1);
+            {% else %}
+            background: rgba(255, 255, 255, 0.2);
+            {% endif %}
+        }
+        .form-button {
+            background: var(--secondary-color);
+            color: white;
+        }
+        {% elif background_style == 'minimal' %}
+        .form-container {
+            background: white;
+            color: #1f2937;
+        }
+        .form-input {
+            background: white;
+            border: 1px solid #d1d5db;
+            color: #1f2937;
+        }
+        .form-input::placeholder {
+            color: #6b7280;
+        }
+        .form-logo-bg {
+            background: var(--primary-color);
+        }
+        .form-button {
+            background: var(--primary-color);
+            {% if business.form_primary_color and business.form_primary_color in ['#ffffff', '#f8f9fa', '#e9ecef'] %}
+            color: #1f2937;
+            {% else %}
+            color: white;
+            {% endif %}
+        }
+        {% elif background_style == 'dark' %}
+        .form-container {
+            background: #1f2937;
+            color: white;
+        }
+        .form-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .form-logo-bg {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .form-button {
+            background: var(--primary-color);
+            color: white;
+        }
+        {% endif %}
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container min-h-screen p-8 fade-in">
+        <div class="max-w-2xl mx-auto space-y-8">
+            <!-- Header -->
+            <div class="text-center mb-12">
+                {% if business.form_logo_url %}
+                    <img src="{{ business.form_logo_url }}" alt="{{ business.business_name }} Logo" class="w-20 h-20 mx-auto mb-6 rounded-2xl object-cover">
+                {% else %}
+                    <div class="w-20 h-20 form-logo-bg rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-star text-3xl" style="color: var(--primary-color);"></i>
+                    </div>
+                {% endif %}
+                <h1 class="text-4xl font-bold mb-4">Share Your Experience</h1>
+                <h2 class="text-2xl font-semibold mb-4" style="color: var(--secondary-color);">{{ business.business_name }}</h2>
+                <p class="text-lg opacity-75 break-words whitespace-normal">
+                    {% if business.form_welcome_message %}
+                        {{ business.form_welcome_message }}
+                    {% else %}
+                        We value your feedback and would love to hear about your experience with us
+                    {% endif %}
+                </p>
+            </div>
+
+            <!-- Review Form -->
+            <div class="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-8 border border-white border-opacity-20">
+                <form method="POST" action="{{ url_for('submit_review', business_id=business.id) }}" class="space-y-8">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="customer_name" class="block font-semibold mb-3 text-sm uppercase tracking-wide">
+                                <i class="fas fa-user mr-2" style="color: var(--secondary-color);"></i>Full Name
+                            </label>
+                            <input 
+                                type="text" 
+                                name="customer_name" 
+                                id="customer_name"
+                                required 
+                                class="w-full px-4 py-3 rounded-lg form-input focus:outline-none focus:ring-2 transition-all"
+                                style="focus:ring-color: var(--primary-color);"
+                                placeholder="Enter your full name">
+                        </div>
+
+                        <div>
+                            <label for="customer_email" class="block font-semibold mb-3 text-sm uppercase tracking-wide">
+                                <i class="fas fa-envelope mr-2" style="color: var(--secondary-color);"></i>Email Address
+                            </label>
+                            <input 
+                                type="email" 
+                                name="customer_email" 
+                                id="customer_email"
+                                required 
+                                class="w-full px-4 py-3 rounded-lg form-input focus:outline-none focus:ring-2 transition-all"
+                                style="focus:ring-color: var(--primary-color);"
+                                placeholder="your@email.com">
+                        </div>
+                    </div>
+
+                    <!-- Star Rating -->
+                    <div class="text-center">
+                        <label class="block font-semibold mb-6 text-lg">
+                            <i class="fas fa-star mr-2" style="color: var(--secondary-color);"></i>How would you rate your experience?
+                        </label>
+                        <div class="star-rating flex justify-center space-x-2 mb-4">
+                            <input type="radio" name="rating" value="1" id="star1" class="hidden">
+                            <label for="star1" class="star cursor-pointer text-4xl text-gray-300 hover:text-yellow-400 transition-colors">★</label>
+
+                            <input type="radio" name="rating" value="2" id="star2" class="hidden">
+                            <label for="star2" class="star cursor-pointer text-4xl text-gray-300 hover:text-yellow-400 transition-colors">★</label>
+
+                            <input type="radio" name="rating" value="3" id="star3" class="hidden">
+                            <label for="star3" class="star cursor-pointer text-4xl text-gray-300 hover:text-yellow-400 transition-colors">★</label>
+
+                            <input type="radio" name="rating" value="4" id="star4" class="hidden">
+                            <label for="star4" class="star cursor-pointer text-4xl text-gray-300 hover:text-yellow-400 transition-colors">★</label>
+
+                            <input type="radio" name="rating" value="5" id="star5" class="hidden">
+                            <label for="star5" class="star cursor-pointer text-4xl text-gray-300 hover:text-yellow-400 transition-colors">★</label>
+                        </div>
+                        <p class="opacity-75 text-sm">Click on the stars to rate your experience</p>
+                    </div>
+
+                    <!-- Review Text -->
+                    <div>
+                        <label for="review_text" class="block font-semibold mb-3 text-sm uppercase tracking-wide">
+                            <i class="fas fa-comment mr-2" style="color: var(--secondary-color);"></i>Tell us about your experience
+                        </label>
+                        <textarea 
+                            name="review_text" 
+                            id="review_text"
+                            
+                            rows="6" 
+                            class="w-full px-4 py-3 rounded-lg form-input focus:outline-none focus:ring-2 transition-all resize-none"
+                            style="focus:ring-color: var(--primary-color);"
+                            placeholder="Share your thoughts about our service, product quality, staff, or anything else you'd like us to know..."></textarea>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="text-center pt-6">
+                        <button type="submit" 
+                                class="form-button text-lg px-12 py-4 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                id="submitBtn" disabled>
+                            <i class="fas fa-paper-plane mr-3"></i>Submit Review
+                        </button>
+                        <p class="opacity-75 text-sm mt-4">Your feedback helps us improve our service</p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const stars = document.querySelectorAll('.star');
+        const ratingInputs = document.querySelectorAll('input[name="rating"]');
+        const submitBtn = document.getElementById('submitBtn');
+        const reviewText = document.getElementById('review_text');
+
+        // Star rating functionality
+        stars.forEach((star, index) => {
+            star.addEventListener('click', function() {
+                const rating = index + 1;
+
+                // Update radio buttons
+                ratingInputs[index].checked = true;
+
+                // Update star colors
+                stars.forEach((s, i) => {
+                    if (i <= index) {
+                        s.classList.remove('text-gray-300');
+                        s.style.color = 'var(--secondary-color)';
+                    } else {
+                        s.classList.add('text-gray-300');
+                        s.style.color = '';
+                    }
+                });
+
+                checkFormValid();
+            });
+        });
+
+        // Check form validity
+        function checkFormValid() {
+            const rating = document.querySelector('input[name="rating"]:checked');
+            const reviewTextValue = reviewText.value.trim();
+            const name = document.getElementById('customer_name').value.trim();
+            const email = document.getElementById('customer_email').value.trim();
+
+            submitBtn.disabled = !(rating && name && email);
+        }
+
+        // Add event listeners to other inputs
+        reviewText.addEventListener('input', checkFormValid);
+        document.getElementById('customer_name').addEventListener('input', checkFormValid);
+        document.getElementById('customer_email').addEventListener('input', checkFormValid);
+
+        // Initial check on page load
+        checkFormValid();
+    });
+    </script>
+</body>
+</html>

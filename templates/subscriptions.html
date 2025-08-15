@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+
+{% block title %}Subscriptions - Modern App{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold text-white mb-4">Choose Your Plan</h1>
+        <p class="text-xl text-white/70 max-w-2xl mx-auto">
+            Select the perfect plan for your needs. Upgrade or downgrade anytime.
+        </p>
+    </div>
+
+    <!-- Current Plan Status -->
+    {% if current_user.subscription_tier != 'free' %}
+    <div class="glass-card backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-6 mb-8">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 bg-gradient-to-br from-purple-400 to-blue-400 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-crown text-white"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-white">Current Plan: {{ current_user.subscription_tier.title() }}</h3>
+                    <p class="text-white/70">
+                        Status: 
+                        {% if current_user.subscription_status == 'active' %}
+                            <span class="text-green-400">Active</span>
+                        {% else %}
+                            <span class="text-yellow-400">{{ current_user.subscription_status.title() }}</span>
+                        {% endif %}
+                        {% if current_user.subscription_end_date %}
+                            • Expires {{ current_user.subscription_end_date.strftime('%B %d, %Y') }}
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            {% if current_user.subscription_status == 'active' %}
+            <a href="{{ url_for('cancel_subscription') }}" 
+               class="mt-4 md:mt-0 px-4 py-2 border border-red-400/50 text-red-400 hover:bg-red-400/10 rounded-lg transition-all duration-200">
+                Cancel Subscription
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Pricing Plans -->
+    <div class="grid md:grid-cols-3 gap-8 mb-12">
+        <!-- Free Plan -->
+        <div class="glass-card backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-6 
+                    {% if current_user.subscription_tier == 'free' %}ring-2 ring-purple-400/50{% endif %} 
+                    hover:bg-white/10 transition-all duration-300">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-gradient-to-br from-gray-400 to-gray-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-rocket text-white text-xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-white mb-2">Free</h3>
+                <div class="text-3xl font-bold text-white mb-1">$0</div>
+                <p class="text-white/60">per month</p>
+            </div>
+
+            <ul class="space-y-3 mb-8">
+                <li class="flex items-center space-x-3">
+                    <i class="fas fa-check text-green-400"></i>
+                    <span class="text-white/80">Basic features</span>
+                </li>
+                <li class="flex items-center space-x-3">
+                    <i class="fas fa-check text-green-400"></i>
+                    <span class="text-white/80">Limited usage</span>
+                </li>
+                <li class="flex items-center space-x-3">
+                    <i class="fas fa-check text-green-400"></i>
+                    <span class="text-white/80">Community support</span>
+                </li>
+                <li class="flex items-center space-x-3 opacity-50">
+                    <i class="fas fa-times text-red-400"></i>
+                    <span class="text-white/60">Advanced features</span>
+                </li>
+                <li class="flex items-center space-x-3 opacity-50">
+                    <i class="fas fa-times text-red-400"></i>
+                    <span class="text-white/60">Priority support</span>
+                </li>
+            </ul>
+
+            {% if current_user.subscription_tier == 'free' %}
+                <button class="w-full py-3 bg-white/10 border border-white/20 rounded-lg font-medium text-white/60 cursor-not-allowed">
+                    Current Plan
+                </button>
+            {% else %}
+                <a href="{{ url_for('subscribe', tier='free') }}" 
+                   class="block w-full py-3 border border-white/30 rounded-lg font-medium text-white hover:bg-white/10 transition-all duration-200 text-center">
+                    Downgrade
+                </a>
+            {% endif %}
+        </div>
+
+        <!-- Basic Plan -->
+        <div class="glass-card backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-6 
+                    {% if current_user.subscription_tier == 'basic' %}ring-2 ring-purple-400/50{% endif %} 
+                    hover:bg-white/10 transition-all duration-300 relative">
+            {% if current_user.subscription_tier != 'basic' %}
+            <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                <span class="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-4 py-1 rounded-full text-sm font-medium">
+                    Popular
+                </span>
+            </div>
+            {% endif %}
+
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-gradient-to-br from-purple-400 to-blue-400 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-star text-white text-xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-white mb-2">Basic</h3>
+                <div class="text-3xl font-bold text-white mb-1">$9</div>
+                <p class="text-white/60">per month</p>
+            </div>
+
+            <ul class="space-y-3 mb-8">
+                <li class="flex items-center space-x-3">
+                    <i class="fas fa-check text-green-400"></i>
+                    <span class="text-white/80">All free features</span>
+                </li>
+                <li class="flex items-center space-x-3">
+                    <i class="fas fa-check text-green-400"></i>
+                    <span class="text-white/80">Enhanced usage limits</span>
+                </li>
+                <li class="flex items-center space-x-3">
+                    <i class="fas fa-check text-green-400"></i>
+                    <span class="text-white/80">Email support</span>
+                </li>
+                <li class="flex items-center space-x-3">
+                    <i class="fas fa-check text-green-400"></i>
+                    <span class="text-white/80">Advanced features</span>
+                </li>
+                <li class="flex items-center space-x-3 opacity-50">
+                    <i class="fas fa-times text-red-400"></i>
+                    <span class="text-white/60">Premium features</span>
+                </li>
+            </ul>
+
+            {% if current_user.subscription_tier == 'basic' %}
+                <button class="w-full py-3 bg-white/10 border border-white/20 rounded-lg font-medium text-white/60 cursor-not-allowed">
+                    Current Plan
+                </button>
+            {% else %}
+                <a href="{{ url_for('subscribe', tier='basic') }}" 
+                   class="block w-full py-3 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg font-medium text-white hover:from-purple-600 hover:to-blue-600 transform hover:-translate-y-0.5 transition-all duration-200 shadow-lg hover:shadow-xl text-center">
+                    {% if current_user.subscription_tier == 'free' %}Upgrade{% else %}Switch to Basic{% endif %}
+                </a>
+            {% endif %}
+        </div>
+
+        <!-- Premium Plan -->
+        <div class="glass-card backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-6 
+                    {% if current_user.subscription_tier == 'premium' %}ring-2 ring-purple-400/50{% endif %} 
+                    hover:bg-white/10 transition-all duration-300">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-400 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-crown text-white text-xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-white mb-2">Premium</h3>
+                <div class="text-3xl font-bold text-white mb-1">$19</div>
+                <p class="text-white/60">per month</p>
+            </div>
+
+            <ul class="space-y-3 mb-8">
+                <li class="flex items-center space-x-3">
+                    <i class="fas fa-check text-green-400"></i>
+                    <span class="text-white/80">All basic features</span>
+                </li>
+                <li class="flex items-center space-x-3">
+                    <i class="fas fa-check text-green-400"></i>
+                    <span class="text-white/80">Unlimited usage</span>
+                </li>
+                <li class="flex items-center space-x-3">
+                    <i class="fas fa-check text-green-400"></i>
+                    <span class="text-white/80">Priority support</span>
+                </li>
+                <li class="flex items-center space-x-3">
+                    <i class="fas fa-check text-green-400"></i>
+                    <span class="text-white/80">Premium features</span>
+                </li>
+                <li class="flex items-center space-x-3">
+                    <i class="fas fa-check text-green-400"></i>
+                    <span class="text-white/80">Advanced analytics</span>
+                </li>
+            </ul>
+
+            {% if current_user.subscription_tier == 'premium' %}
+                <button class="w-full py-3 bg-white/10 border border-white/20 rounded-lg font-medium text-white/60 cursor-not-allowed">
+                    Current Plan
+                </button>
+            {% else %}
+                <a href="{{ url_for('subscribe', tier='premium') }}" 
+                   class="block w-full py-3 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg font-medium text-white hover:from-yellow-600 hover:to-orange-600 transform hover:-translate-y-0.5 transition-all duration-200 shadow-lg hover:shadow-xl text-center">
+                    {% if current_user.subscription_tier == 'free' %}Upgrade{% else %}Upgrade to Premium{% endif %}
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Features Comparison -->
+    <div class="glass-card backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-8">
+        <h2 class="text-2xl font-bold text-white text-center mb-8">Feature Comparison</h2>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-white/10">
+                        <th class="text-left p-4 text-white/80">Features</th>
+                        <th class="text-center p-4 text-white/80">Free</th>
+                        <th class="text-center p-4 text-white/80">Basic</th>
+                        <th class="text-center p-4 text-white/80">Premium</th>
+                    </tr>
+                </thead>
+                <tbody class="space-y-2">
+                    <tr class="border-b border-white/5">
+                        <td class="p-4 text-white/90">Basic Dashboard</td>
+                        <td class="text-center p-4"><i class="fas fa-check text-green-400"></i></td>
+                        <td class="text-center p-4"><i class="fas fa-check text-green-400"></i></td>
+                        <td class="text-center p-4"><i class="fas fa-check text-green-400"></i></td>
+                    </tr>
+                    <tr class="border-b border-white/5">
+                        <td class="p-4 text-white/90">Usage Limits</td>
+                        <td class="text-center p-4 text-white/60">Limited</td>
+                        <td class="text-center p-4 text-white/90">Enhanced</td>
+                        <td class="text-center p-4 text-green-400">Unlimited</td>
+                    </tr>
+                    <tr class="border-b border-white/5">
+                        <td class="p-4 text-white/90">Support</td>
+                        <td class="text-center p-4 text-white/60">Community</td>
+                        <td class="text-center p-4 text-white/90">Email</td>
+                        <td class="text-center p-4 text-green-400">Priority</td>
+                    </tr>
+                    <tr class="border-b border-white/5">
+                        <td class="p-4 text-white/90">Advanced Features</td>
+                        <td class="text-center p-4"><i class="fas fa-times text-red-400"></i></td>
+                        <td class="text-center p-4"><i class="fas fa-check text-green-400"></i></td>
+                        <td class="text-center p-4"><i class="fas fa-check text-green-400"></i></td>
+                    </tr>
+                    <tr class="border-b border-white/5">
+                        <td class="p-4 text-white/90">Analytics & Reports</td>
+                        <td class="text-center p-4"><i class="fas fa-times text-red-400"></i></td>
+                        <td class="text-center p-4 text-white/60">Basic</td>
+                        <td class="text-center p-4 text-green-400">Advanced</td>
+                    </tr>
+                    <tr>
+                        <td class="p-4 text-white/90">API Access</td>
+                        <td class="text-center p-4"><i class="fas fa-times text-red-400"></i></td>
+                        <td class="text-center p-4"><i class="fas fa-times text-red-400"></i></td>
+                        <td class="text-center p-4"><i class="fas fa-check text-green-400"></i></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="glass-card backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-8 mt-8">
+        <h2 class="text-2xl font-bold text-white text-center mb-8">Frequently Asked Questions</h2>
+        
+        <div class="space-y-6">
+            <div class="p-4 rounded-lg bg-white/5 border border-white/5">
+                <h3 class="text-white font-semibold mb-2">Can I change my plan anytime?</h3>
+                <p class="text-white/70">Yes, you can upgrade or downgrade your plan at any time. Changes will take effect immediately.</p>
+            </div>
+            
+            <div class="p-4 rounded-lg bg-white/5 border border-white/5">
+                <h3 class="text-white font-semibold mb-2">What happens if I cancel my subscription?</h3>
+                <p class="text-white/70">You'll continue to have access to premium features until the end of your current billing period, then your account will be downgraded to the free plan.</p>
+            </div>
+            
+            <div class="p-4 rounded-lg bg-white/5 border border-white/5">
+                <h3 class="text-white font-semibold mb-2">Is there a free trial?</h3>
+                <p class="text-white/70">Our free plan gives you access to basic features indefinitely. You can upgrade to paid plans anytime to unlock additional functionality.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,154 @@
+
+{% extends "base.html" %}
+
+{% block title %}Account Settings - Quantum{% endblock %}
+
+{% block content %}
+<div class="bg-gray-50 px-4 py-16 min-h-screen text-gray-900">
+  <div class="max-w-4xl mx-auto space-y-12">
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div>
+        <h1 class="text-4xl font-bold mb-2">Account Settings</h1>
+        <p class="text-gray-600 text-lg">Manage your account preferences and settings</p>
+      </div>
+      <a href="{{ url_for('dashboard') }}" class="btn-gradient">
+        <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+      </a>
+    </div>
+
+    <form method="POST" class="space-y-8">
+      
+      <!-- Profile Information -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+        <h2 class="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
+          <i class="fas fa-user-circle mr-3 text-indigo-600"></i>
+          Profile Information
+        </h2>
+        
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-gray-700 text-sm font-medium mb-2">Name</label>
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+              <span class="text-gray-900">{{ current_user.first_name }} {{ current_user.last_name }}</span>
+            </div>
+            <p class="text-gray-500 text-xs mt-1">Contact support to change your name</p>
+          </div>
+          
+          <div>
+            <label class="block text-gray-700 text-sm font-medium mb-2">Email Address</label>
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+              <span class="text-gray-900">{{ current_user.email or 'Not provided' }}</span>
+            </div>
+            <p class="text-gray-500 text-xs mt-1">Email is managed through your authentication provider</p>
+          </div>
+        </div>
+
+        <div class="mt-6">
+          <label class="block text-gray-700 text-sm font-medium mb-2">Account ID</label>
+          <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+            <span class="text-gray-600 font-mono text-sm">{{ current_user.id }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notification Preferences -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+        <h2 class="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
+          <i class="fas fa-bell mr-3 text-blue-600"></i>
+          Notification Preferences
+        </h2>
+        
+        <div class="space-y-6">
+          <div class="flex items-center justify-between p-4 rounded-lg bg-gray-50 border border-gray-100">
+            <div>
+              <h3 class="text-gray-900 font-medium">Email Notifications</h3>
+              <p class="text-gray-600 text-sm">Receive important updates via email</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" name="email_notifications" class="sr-only peer" 
+                     {% if settings.email_notifications %}checked{% endif %}>
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
+          </div>
+          
+          <div class="flex items-center justify-between p-4 rounded-lg bg-gray-50 border border-gray-100">
+            <div>
+              <h3 class="text-gray-900 font-medium">Push Notifications</h3>
+              <p class="text-gray-600 text-sm">Get real-time notifications in your browser</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" name="push_notifications" class="sr-only peer" 
+                     {% if settings.push_notifications %}checked{% endif %}>
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
+          </div>
+          
+          <div class="flex items-center justify-between p-4 rounded-lg bg-gray-50 border border-gray-100">
+            <div>
+              <h3 class="text-gray-900 font-medium">Marketing Emails</h3>
+              <p class="text-gray-600 text-sm">Receive product updates and promotional content</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" name="marketing_emails" class="sr-only peer" 
+                     {% if settings.marketing_emails %}checked{% endif %}>
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      
+
+      <!-- Account Security -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+        <h2 class="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
+          <i class="fas fa-shield-alt mr-3 text-green-600"></i>
+          Account Security
+        </h2>
+        
+        <div class="space-y-4">
+          <div class="p-4 rounded-lg bg-gray-50 border border-gray-100">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-gray-900 font-medium">Authentication</h3>
+                <p class="text-gray-600 text-sm">Your account is secured with OAuth authentication</p>
+              </div>
+              <div class="flex items-center space-x-2 text-green-600">
+                <i class="fas fa-check-circle"></i>
+                <span class="text-sm">Secured</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="p-4 rounded-lg bg-gray-50 border border-gray-100">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-gray-900 font-medium">Session Security</h3>
+                <p class="text-gray-600 text-sm">Your session is encrypted and automatically expires</p>
+              </div>
+              <div class="flex items-center space-x-2 text-green-600">
+                <i class="fas fa-check-circle"></i>
+                <span class="text-sm">Active</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-4 justify-end">
+        <a href="{{ url_for('dashboard') }}" 
+           class="px-6 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-all duration-200 text-center">
+          Cancel
+        </a>
+        <button type="submit" 
+                class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 rounded-lg font-medium text-white hover:from-indigo-700 hover:to-blue-700 transform hover:-translate-y-0.5 transition-all duration-200 shadow-lg hover:shadow-xl">
+          Save Changes
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

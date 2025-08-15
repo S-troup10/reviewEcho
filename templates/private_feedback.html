@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Private Feedback - {{ business.business_name }}{% endblock %}
+
+{% block content %}
+<div class="bg-white -mx-4 -my-8 px-4 py-16 text-gray-900 min-h-screen">
+  <div class="max-w-2xl mx-auto space-y-8 fade-in">
+    <!-- Header -->
+    <div class="text-center mb-12">
+      <div class="w-20 h-20 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+        <i class="fas fa-comment text-white text-3xl"></i>
+      </div>
+      <h1 class="text-4xl font-bold text-gray-900 mb-4">Help Us Improve</h1>
+      <h2 class="text-2xl font-semibold text-orange-600 mb-4">{{ business.business_name }}</h2>
+      <p class="text-lg text-gray-600">Thank you for your honest feedback. This will help us serve you better in the future.</p>
+    </div>
+
+    <!-- Feedback Form -->
+    <div class="card p-8">
+      <form method="POST" action="{{ url_for('submit_private_feedback', business_id=business.id) }}" class="space-y-8">
+        <!-- Hidden fields to carry over data -->
+        <input type="hidden" name="customer_name" value="{{ customer_name }}">
+        <input type="hidden" name="customer_email" value="{{ customer_email }}">
+        <input type="hidden" name="rating" value="{{ rating }}">
+        <input type="hidden" name="review_text" value="{{ review_text }}">
+
+        <!-- Review Summary -->
+        <div class="bg-orange-50 border border-orange-200 rounded-lg p-6">
+          <h3 class="font-semibold text-gray-900 mb-4">Your Original Review:</h3>
+          <div class="flex items-center mb-2">
+            {% for i in range(1, 6) %}
+              {% if i <= rating|int %}
+                <i class="fas fa-star text-yellow-400"></i>
+              {% else %}
+                <i class="fas fa-star text-gray-300"></i>
+              {% endif %}
+            {% endfor %}
+            <span class="ml-2 text-gray-700">({{ rating }} stars)</span>
+          </div>
+          <p class="text-gray-700 italic">"{{ review_text }}"</p>
+        </div>
+
+        <!-- Additional Feedback -->
+        <div>
+          <label for="private_feedback" class="block text-gray-900 font-semibold mb-3 text-lg">
+            <i class="fas fa-lightbulb mr-2 text-orange-600"></i>What could we do better?
+          </label>
+          <p class="text-gray-600 mb-4">Your feedback is completely private and will only be used internally to improve our service. Please be specific about areas where we can enhance your experience.</p>
+          <textarea 
+            name="private_feedback" 
+            id="private_feedback"
+            rows="6" 
+            class="input-field text-gray-900 resize-none"
+            placeholder="Please share specific suggestions for improvement, what went wrong, or how we could have better met your expectations..."></textarea>
+        </div>
+
+        <!-- Contact Preference -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+          <h3 class="font-semibold text-gray-900 mb-3">
+            <i class="fas fa-handshake mr-2 text-blue-600"></i>Would you like us to follow up with you?
+          </h3>
+          <div class="space-y-3">
+            <label class="flex items-center text-gray-700">
+              <input type="radio" name="follow_up" value="yes" class="mr-3 text-blue-600">
+              Yes, please contact me to discuss how we can make this right
+            </label>
+            <label class="flex items-center text-gray-700">
+              <input type="radio" name="follow_up" value="no" class="mr-3 text-blue-600" checked>
+              No, I just want to provide feedback for improvement
+            </label>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="text-center pt-6">
+          <button type="submit" 
+                  class="btn-primary text-lg px-12 py-4">
+            <i class="fas fa-paper-plane mr-3"></i>Submit Feedback
+          </button>
+          <p class="text-gray-500 text-sm mt-4">This feedback will remain completely private</p>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

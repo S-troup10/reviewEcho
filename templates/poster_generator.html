@@ -1,0 +1,1071 @@
+
+{% extends "base.html" %}
+
+{% block title %}Poster Generator - {{ business.business_name }}{% endblock %}
+
+{% block content %}
+<style>
+    .file-upload-container {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+        width: 100%;
+    }
+    
+    .file-upload-input {
+        position: absolute;
+        left: -9999px;
+    }
+    
+    .file-upload-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        border: 2px dashed #d1d5db;
+        border-radius: 0.75rem;
+        background: #f9fafb;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        min-height: 80px;
+    }
+    
+    .file-upload-label:hover {
+        border-color: #3b82f6;
+        background: #eff6ff;
+    }
+    
+    .file-upload-label.has-file {
+        border-color: #10b981;
+        background: #f0fdf4;
+        border-style: solid;
+    }
+    
+    .poster-canvas {
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        transform: scale(0.5);
+        transform-origin: top center;
+        margin: 0 auto;
+    }
+    
+    .template-option.selected {
+        border-color: #3b82f6 !important;
+        background: #eff6ff !important;
+        transform: scale(1.05);
+    }
+    
+    .color-option.selected {
+        ring: 3px solid #3b82f6;
+        ring-opacity: 50%;
+    }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<div class="min-h-screen">
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold text-gray-900 mb-2">Professional Poster Generator</h1>
+        <p class="text-gray-600 text-lg">Create stunning custom posters for {{ business.business_name }}</p>
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-8">
+        <!-- Template Selection -->
+        <div class="bg-white rounded-2xl shadow-lg p-6">
+            <h2 class="text-2xl font-semibold mb-6 text-gray-900">Choose Your Template</h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                {% for template in templates %}
+                <div class="template-option border-2 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-blue-500 transition-all duration-300"
+                    data-template="{{ template.id }}" data-color="{{ template.preview_color }}">
+                    <div class="w-full h-32 rounded-lg mb-3 flex items-center justify-center text-white font-bold text-xs relative overflow-hidden"
+                        style="background: {{ template.preview_color }};">
+                        {% if template.id == 'modern' %}
+                        <div class="text-center">
+                            <div class="w-10 h-10 bg-white bg-opacity-30 rounded-lg mb-2 mx-auto"></div>
+                            <div class="text-sm font-bold">BUSINESS</div>
+                            <div class="w-8 h-8 bg-white bg-opacity-50 rounded-lg mt-2 mx-auto"></div>
+                        </div>
+                        {% elif template.id == 'gradient' %}
+                        <div class="absolute inset-0 bg-gradient-to-br from-purple-400 to-pink-500 opacity-80"></div>
+                        <div class="relative text-center">
+                            <div class="w-8 h-8 bg-white bg-opacity-60 rounded-full mx-auto mb-2"></div>
+                            <div class="h-1 bg-white bg-opacity-40 w-20 mx-auto mb-1"></div>
+                            <div class="h-1 bg-white bg-opacity-60 w-12 mx-auto"></div>
+                        </div>
+                        {% elif template.id == 'classic' %}
+                        <div class="text-center">
+                            <div class="border-2 border-white rounded p-2">
+                                <div class="w-8 h-8 bg-white bg-opacity-40 rounded-full mx-auto mb-1"></div>
+                                <div class="text-xs font-bold">CLASSIC</div>
+                            </div>
+                        </div>
+                        {% elif template.id == 'vibrant' %}
+                        <div class="absolute inset-0 bg-gradient-to-r from-red-500 to-orange-500"></div>
+                        <div class="relative text-center">
+                            <div class="flex justify-center gap-1 mb-2">
+                                <div class="w-3 h-3 bg-white rounded-full animate-pulse"></div>
+                                <div class="w-3 h-3 bg-white bg-opacity-60 rounded-full"></div>
+                                <div class="w-3 h-3 bg-white bg-opacity-30 rounded-full"></div>
+                            </div>
+                            <div class="w-10 h-10 bg-white bg-opacity-50 rounded-lg mx-auto transform rotate-12"></div>
+                        </div>
+                        {% elif template.id == 'elegant' %}
+                        <div class="text-center">
+                            <div class="w-full h-1 bg-white bg-opacity-30 mb-3"></div>
+                            <div class="w-8 h-8 bg-white bg-opacity-20 mx-auto mb-2 border border-white border-opacity-40"></div>
+                            <div class="w-16 h-1 bg-white bg-opacity-50 mx-auto"></div>
+                        </div>
+                        {% elif template.id == 'warm' %}
+                        <div class="absolute inset-0 bg-gradient-to-br from-orange-400 to-yellow-300"></div>
+                        <div class="relative text-center text-orange-900">
+                            <div class="w-10 h-10 bg-orange-900 bg-opacity-20 rounded-full mx-auto mb-2 border-2 border-orange-900 border-opacity-30"></div>
+                            <div class="flex justify-center gap-1">
+                                <div class="w-1 h-1 bg-orange-900 rounded-full"></div>
+                                <div class="w-1 h-1 bg-orange-900 rounded-full"></div>
+                                <div class="w-1 h-1 bg-orange-900 rounded-full"></div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <h3 class="font-semibold text-gray-900">{{ template.name }}</h3>
+                    <p class="text-sm text-gray-600">{{ template.description }}</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Customization Options -->
+            <div class="border-t pt-6">
+                <h3 class="text-lg font-semibold mb-4 text-gray-900">Customize Your Poster</h3>
+
+                <!-- Business Name -->
+<!-- Business Name -->
+<div class="mb-6">
+    <label class="block text-sm font-medium text-gray-700 mb-2">Business Name</label>
+    <input type="text" id="businessName" value="{{ business.business_name }}"
+        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 transition-colors"
+        data-max-chars="30">
+    <p id="businessNameCounter" class="text-xs text-gray-500 mt-1">0 / 30 characters</p>
+</div>
+
+<!-- Company Slogan -->
+<div class="mb-6">
+    <label class="block text-sm font-medium text-gray-700 mb-2">Company Slogan</label>
+    <input type="text" id="companySlogan" placeholder="e.g., 'Quality Service Since 1990'"
+        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 transition-colors"
+        data-max-chars="50">
+    <p id="companySloganCounter" class="text-xs text-gray-500 mt-1">0 / 50 characters</p>
+</div>
+
+<script>
+  function setupCharLimit(inputId, counterId) {
+    const input = document.getElementById(inputId);
+    const counter = document.getElementById(counterId);
+    const maxChars = parseInt(input.dataset.maxChars);
+
+    input.addEventListener('input', () => {
+      let value = input.value;
+      if (value.length > maxChars) {
+        input.value = value.slice(0, maxChars);
+        value = input.value;
+      }
+
+      counter.textContent = `${value.length} / ${maxChars} characters`;
+    });
+
+    // Initialize counter
+    counter.textContent = `${input.value.length} / ${maxChars} characters`;
+  }
+
+  setupCharLimit('businessName', 'businessNameCounter');
+  setupCharLimit('companySlogan', 'companySloganCounter');
+</script>
+
+
+                <!-- Logo Upload -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Company Logo</label>
+                    <div class="file-upload-container">
+                        <input type="file" id="logoUpload" accept="image/*" class="file-upload-input">
+                        <label for="logoUpload" class="file-upload-label">
+                            <div class="text-center">
+                                <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                                <div class="text-sm text-gray-600">
+                                    <span class="font-medium">Click to upload</span> or drag and drop
+                                </div>
+                                <div class="text-xs text-gray-500 mt-1">PNG, JPG up to 2MB</div>
+                            </div>
+                        </label>
+                    </div>
+                    <div id="logoPreview" class="hidden mt-3">
+                        <div class="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg p-3">
+                            <div class="flex items-center">
+                                <img id="logoThumbnail" class="w-10 h-10 object-cover rounded mr-3">
+                                <div>
+                                    <div class="text-sm font-medium text-green-900" id="logoFileName"></div>
+                                    <div class="text-xs text-green-600">Logo uploaded successfully</div>
+                                </div>
+                            </div>
+                            <button onclick="removeLogo()" class="text-red-500 hover:text-red-700">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Color Selection -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Primary Color</label>
+                    <div class="grid grid-cols-4 gap-3">
+                        {% for color in colors %}
+                        <div class="color-option w-12 h-12 rounded-lg cursor-pointer border-3 border-gray-300 hover:border-gray-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                            data-color="{{ color.value }}" style="background-color: {{ color.value }};"
+                            title="{{ color.name }}">
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Call to Action -->
+                <div class="mb-8">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Call to Action</label>
+                    <input type="text" id="callToAction" value="Scan to leave a review!"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 transition-colors">
+                </div>
+
+                <!-- Download Button -->
+                <button onclick="downloadPoster()" id="downloadBtn"
+                    class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-4 px-6 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                    <i class="fas fa-download mr-2"></i>Download High-Quality Poster
+                </button>
+            </div>
+        </div>
+
+        <!-- Preview -->
+        <div class="bg-white rounded-2xl shadow-lg p-6">
+            <h2 class="text-2xl font-semibold mb-6 text-gray-900">Live Preview</h2>
+
+            <div class="flex justify-center mb-4">
+                <div class="text-center">
+                    <div id="posterPreview" class="poster-canvas bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-lg shadow-xl relative overflow-hidden"
+                        style="width: 794px; height: 1123px;">
+                        <!-- Content will be dynamically generated -->
+                    </div>
+                    <p class="text-sm text-gray-500 mt-4">Preview shown at 50% scale</p>
+                </div>
+            </div>
+
+            <!-- Hidden full-size poster for download -->
+            <div id="downloadPoster" style="position: absolute; left: -9999px; top: 0; width: 794px; height: 1123px;">
+                <!-- Full-size poster content will be generated here -->
+            </div>
+
+            <!-- Hidden elements for processing -->
+            <img id="logoImage" style="display: none;" />
+            <canvas id="qrCanvas" style="display: none;" width="400" height="400"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Download Success Modal -->
+<div id="downloadModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-2xl p-8 max-w-md mx-4 text-center shadow-2xl transform transition-all duration-300 scale-95" id="modalContent">
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-check text-green-600 text-2xl"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-900 mb-2">Download Complete!</h3>
+        <p class="text-gray-600 mb-6">Your poster has been successfully downloaded and is ready to use.</p>
+        <div class="flex gap-3">
+            <button onclick="closeModal()" class="flex-1 bg-gray-100 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-200 transition-colors font-medium">
+                Close
+            </button>
+            <button onclick="downloadAnother()" class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                Download Another
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let selectedTemplate = 'modern';
+    let selectedColor = '#3B82F6';
+    let logoImage = null;
+    const reviewUrl = "{{ request.url_root }}review-form/{{ business.id }}";
+
+    // Initialize QR code
+    const qrGenerator = new QRious({
+        element: document.getElementById('qrCanvas'),
+        value: reviewUrl,
+        size: 400,
+        background: 'white',
+        foreground: 'black'
+    });
+
+    // Logo upload handler
+    document.getElementById('logoUpload').addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (file) {
+            if (file.size > 2 * 1024 * 1024) {
+                alert('File size must be less than 2MB');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                const img = document.getElementById('logoImage');
+                img.onload = function () {
+                    logoImage = img;
+                    showLogoPreview(file.name, event.target.result);
+                    updatePreview();
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    function showLogoPreview(fileName, imageSrc) {
+        const preview = document.getElementById('logoPreview');
+        const thumbnail = document.getElementById('logoThumbnail');
+        const fileNameSpan = document.getElementById('logoFileName');
+        const label = document.querySelector('.file-upload-label');
+        
+        thumbnail.src = imageSrc;
+        fileNameSpan.textContent = fileName;
+        preview.classList.remove('hidden');
+        label.classList.add('has-file');
+        label.innerHTML = `
+            <div class="text-center">
+                <i class="fas fa-check-circle text-3xl text-green-500 mb-2"></i>
+                <div class="text-sm text-green-600 font-medium">Logo uploaded successfully</div>
+            </div>
+        `;
+    }
+
+    function removeLogo() {
+        logoImage = null;
+        document.getElementById('logoUpload').value = '';
+        document.getElementById('logoPreview').classList.add('hidden');
+        const label = document.querySelector('.file-upload-label');
+        label.classList.remove('has-file');
+        label.innerHTML = `
+            <div class="text-center">
+                <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                <div class="text-sm text-gray-600">
+                    <span class="font-medium">Click to upload</span> or drag and drop
+                </div>
+                <div class="text-xs text-gray-500 mt-1">PNG, JPG up to 2MB</div>
+            </div>
+        `;
+        updatePreview();
+    }
+
+    
+
+    // Template selection
+    document.querySelectorAll('.template-option').forEach(option => {
+        option.addEventListener('click', function () {
+            document.querySelectorAll('.template-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            this.classList.add('selected');
+
+            selectedTemplate = this.dataset.template;
+            selectedColor = this.dataset.color;
+            updatePreview();
+        });
+    });
+
+    // Color selection
+    document.querySelectorAll('.color-option').forEach(option => {
+        option.addEventListener('click', function () {
+            document.querySelectorAll('.color-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            this.classList.add('selected');
+
+            selectedColor = this.dataset.color;
+            updatePreview();
+        });
+    });
+
+    // Text input listeners
+    document.getElementById('businessName').addEventListener('input', updatePreview);
+    document.getElementById('companySlogan').addEventListener('input', updatePreview);
+    document.getElementById('callToAction').addEventListener('input', updatePreview);
+
+    function updatePreview() {
+        const businessName = document.getElementById('businessName').value;
+        const slogan = document.getElementById('companySlogan').value;
+        const callToAction = document.getElementById('callToAction').value;
+
+        applyTemplate(selectedTemplate, selectedColor, businessName, slogan, callToAction);
+        
+        // Also update the hidden download poster
+        setTimeout(() => {
+            const downloadPoster = document.getElementById('downloadPoster');
+            const previewPoster = document.getElementById('posterPreview');
+            downloadPoster.innerHTML = previewPoster.innerHTML;
+            downloadPoster.className = previewPoster.className;
+            downloadPoster.style.cssText = previewPoster.style.cssText;
+            downloadPoster.style.position = 'absolute';
+            downloadPoster.style.left = '-9999px';
+            downloadPoster.style.transform = 'scale(1)';
+            downloadPoster.style.transformOrigin = 'top left';
+        }, 50);
+    }
+
+    function applyTemplate(template, color, businessName, slogan, callToAction) {
+        const poster = document.getElementById('posterPreview');
+        poster.innerHTML = '';
+        poster.className = 'poster-canvas rounded-lg shadow-xl relative overflow-hidden';
+        poster.style.width = '794px';
+        poster.style.height = '1123px';
+
+        switch (template) {
+            case 'modern':
+                createModernLayout(poster, color, businessName, slogan, callToAction);
+                break;
+            case 'gradient':
+                createGradientLayout(poster, color, businessName, slogan, callToAction);
+                break;
+            case 'classic':
+                createClassicLayout(poster, color, businessName, slogan, callToAction);
+                break;
+            case 'vibrant':
+                createVibrantLayout(poster, color, businessName, slogan, callToAction);
+                break;
+            case 'elegant':
+                createElegantLayout(poster, color, businessName, slogan, callToAction);
+                break;
+            case 'warm':
+                createWarmLayout(poster, color, businessName, slogan, callToAction);
+                break;
+        }
+    }
+
+    function createModernLayout(poster, color, businessName, slogan, callToAction) {
+        const adjusted = adjustColor(color, -15);
+        poster.style.background = `linear-gradient(135deg, ${color}, ${adjusted})`;
+        poster.style.padding = '50px';
+        poster.style.boxSizing = 'border-box';
+        poster.style.color = 'white';
+        poster.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        poster.innerHTML = `
+            <div style="display: flex; flex-direction: column; height: 100%; position: relative;">
+                <!-- Header Section -->
+                <div style="text-align: center; margin-bottom: 40px;">
+                    ${logoImage ? `
+                        <div style="width: 120px; height: 120px; background: rgba(255,255,255,0.15); border-radius: 20px; padding: 15px; backdrop-filter: blur(10px); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 25px;">
+                            <img src="${logoImage.src}" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+                        </div>
+                    ` : ''}
+                    <h1 style="font-size: 3.5rem; font-weight: 700; margin: 0; letter-spacing: -1px; line-height: 1.1; margin-bottom: 15px;">${businessName}</h1>
+                    ${slogan ? `<p style="font-size: 1.4rem; font-weight: 400; opacity: 0.95; margin: 0; max-width: 600px; margin: 0 auto; line-height: 1.3;">${slogan}</p>` : ''}
+                </div>
+
+                <!-- Main Content -->
+                <div style="flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 50px;">
+                    <!-- Left Side - Information -->
+                    <div style="flex: 1; max-width: 350px;">
+                        <h2 style="font-size: 2.2rem; font-weight: 600; margin-bottom: 25px; line-height: 1.2;">Share Your Experience</h2>
+                        
+                        <div style="space-y: 20px;">
+                            <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                                <div style="width: 50px; height: 50px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                                    <i class="fas fa-mobile-alt" style="font-size: 20px;"></i>
+                                </div>
+                                <div>
+                                    <h3 style="font-size: 1.1rem; font-weight: 600; margin: 0; margin-bottom: 5px;">Scan QR Code</h3>
+                                    <p style="font-size: 0.95rem; opacity: 0.8; margin: 0; line-height: 1.3;">Use your smartphone camera</p>
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                                <div style="width: 50px; height: 50px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                                    <i class="fas fa-star" style="font-size: 20px;"></i>
+                                </div>
+                                <div>
+                                    <h3 style="font-size: 1.1rem; font-weight: 600; margin: 0; margin-bottom: 5px;">Rate Our Service</h3>
+                                    <p style="font-size: 0.95rem; opacity: 0.8; margin: 0; line-height: 1.3;">Takes less than 2 minutes</p>
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; align-items: center; margin-bottom: 30px;">
+                                <div style="width: 50px; height: 50px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                                    <i class="fas fa-heart" style="font-size: 20px;"></i>
+                                </div>
+                                <div>
+                                    <h3 style="font-size: 1.1rem; font-weight: 600; margin: 0; margin-bottom: 5px;">Help Others Decide</h3>
+                                    <p style="font-size: 0.95rem; opacity: 0.8; margin: 0; line-height: 1.3;">Your review matters</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 15px; backdrop-filter: blur(10px);">
+                            <p style="font-size: 1.1rem; font-weight: 500; margin: 0; text-align: center;">${callToAction}</p>
+                        </div>
+                    </div>
+
+                    <!-- Right Side - QR Code -->
+                    <div style="display: flex; flex-direction: column; align-items: center;">
+                        <div style="background: white; padding: 30px; border-radius: 25px; box-shadow: 0 25px 50px rgba(0,0,0,0.15); margin-bottom: 25px;">
+                            <canvas class="qr-code" width="280" height="280"></canvas>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="display: flex; justify-content: center; margin-bottom: 10px;">
+                                <span style="font-size: 1.8rem; color: #fbbf24; margin: 0 2px;">★</span>
+                                <span style="font-size: 1.8rem; color: #fbbf24; margin: 0 2px;">★</span>
+                                <span style="font-size: 1.8rem; color: #fbbf24; margin: 0 2px;">★</span>
+                                <span style="font-size: 1.8rem; color: #fbbf24; margin: 0 2px;">★</span>
+                                <span style="font-size: 1.8rem; color: #fbbf24; margin: 0 2px;">★</span>
+                            </div>
+                            <p style="font-size: 1rem; opacity: 0.9; margin: 0;">Scan to Leave a Review</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div style="text-align: center; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 25px; margin-top: 30px;">
+                    <p style="font-size: 1rem; opacity: 0.8; margin: 0;">Thank you for choosing ${businessName} • Your feedback drives our excellence</p>
+                </div>
+            </div>
+        `;
+        renderQRInCanvas(poster.querySelector('.qr-code'));
+    }
+
+    function createGradientLayout(poster, color, businessName, slogan, callToAction) {
+        poster.style.background = `linear-gradient(45deg, ${color}, ${adjustColor(color, 40)}, ${adjustColor(color, -20)})`;
+        poster.style.padding = '50px';
+        poster.style.color = 'white';
+        poster.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        poster.innerHTML = `
+            <div style="height: 100%; display: flex; flex-direction: column;">
+                <!-- Header -->
+                <div style="text-align: center; margin-bottom: 40px;">
+                    ${logoImage ? `
+                        <div style="width: 100px; height: 100px; background: rgba(255,255,255,0.2); border-radius: 20px; padding: 12px; margin: 0 auto 20px; backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center;">
+                            <img src="${logoImage.src}" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+                        </div>
+                    ` : ''}
+                    <h1 style="font-size: 3.2rem; font-weight: 700; margin-bottom: 15px; line-height: 1.1; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">${businessName}</h1>
+                    ${slogan ? `<p style="font-size: 1.3rem; opacity: 0.95; margin: 0; line-height: 1.4;">${slogan}</p>` : ''}
+                </div>
+
+                <!-- Main Content Area -->
+                <div style="flex: 1; display: flex; gap: 40px; align-items: center;">
+                    <!-- Left Content -->
+                    <div style="flex: 1;">
+                        <div style="background: rgba(255,255,255,0.15); border-radius: 20px; padding: 30px; backdrop-filter: blur(10px); margin-bottom: 30px;">
+                            <h2 style="font-size: 1.8rem; font-weight: 600; margin-bottom: 20px; text-align: center;">Why Your Review Matters</h2>
+                            
+                            <div style="margin-bottom: 20px;">
+                                <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                                    <span style="font-size: 1.5rem; margin-right: 12px;">🎯</span>
+                                    <p style="margin: 0; font-size: 1rem; line-height: 1.4;">Helps us improve our services</p>
+                                </div>
+                                <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                                    <span style="font-size: 1.5rem; margin-right: 12px;">👥</span>
+                                    <p style="margin: 0; font-size: 1rem; line-height: 1.4;">Guides future customers</p>
+                                </div>
+                                <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                                    <span style="font-size: 1.5rem; margin-right: 12px;">⭐</span>
+                                    <p style="margin: 0; font-size: 1rem; line-height: 1.4;">Builds our community trust</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="background: rgba(255,255,255,0.1); border-radius: 15px; padding: 25px; text-align: center;">
+                            <h3 style="font-size: 1.4rem; font-weight: 600; margin-bottom: 15px;">Quick & Easy Process</h3>
+                            <div style="display: flex; justify-content: space-around; align-items: center;">
+                                <div style="text-align: center;">
+                                    <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 18px;">1</div>
+                                    <p style="margin: 0; font-size: 0.85rem;">Scan</p>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 18px;">2</div>
+                                    <p style="margin: 0; font-size: 0.85rem;">Rate</p>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 18px;">3</div>
+                                    <p style="margin: 0; font-size: 0.85rem;">Done!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right QR Code -->
+                    <div style="display: flex; flex-direction: column; align-items: center;">
+                        <div style="background: white; border-radius: 25px; padding: 35px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); margin-bottom: 25px; transform: rotate(-2deg);">
+                            <canvas class="qr-code" width="260" height="260"></canvas>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.15); border-radius: 15px; padding: 20px; backdrop-filter: blur(8px); text-align: center;">
+                            <p style="font-size: 1.2rem; font-weight: 600; margin: 0;">${callToAction}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div style="text-align: center; margin-top: 30px; padding-top: 25px; border-top: 1px solid rgba(255,255,255,0.2);">
+                    <p style="font-size: 1rem; opacity: 0.9; margin: 0;">🌟 Join hundreds of satisfied customers who have shared their experience 🌟</p>
+                </div>
+            </div>
+        `;
+        renderQRInCanvas(poster.querySelector('.qr-code'));
+    }
+
+    function createClassicLayout(poster, color, businessName, slogan, callToAction) {
+        poster.style.background = `linear-gradient(135deg, ${color}, ${adjustColor(color, -20)})`;
+        poster.style.padding = '50px';
+        poster.style.color = 'white';
+        poster.style.fontFamily = 'Georgia, "Times New Roman", serif';
+        poster.style.border = '8px solid rgba(255,255,255,0.3)';
+        poster.style.borderRadius = '8px';
+        poster.innerHTML = `
+            <div style="height: 100%; display: flex; flex-direction: column; position: relative;">
+                <!-- Decorative corners -->
+                <div style="position: absolute; top: -2px; left: -2px; width: 60px; height: 60px; border-left: 4px solid rgba(255,255,255,0.4); border-top: 4px solid rgba(255,255,255,0.4);"></div>
+                <div style="position: absolute; top: -2px; right: -2px; width: 60px; height: 60px; border-right: 4px solid rgba(255,255,255,0.4); border-top: 4px solid rgba(255,255,255,0.4);"></div>
+                <div style="position: absolute; bottom: -2px; left: -2px; width: 60px; height: 60px; border-left: 4px solid rgba(255,255,255,0.4); border-bottom: 4px solid rgba(255,255,255,0.4);"></div>
+                <div style="position: absolute; bottom: -2px; right: -2px; width: 60px; height: 60px; border-right: 4px solid rgba(255,255,255,0.4); border-bottom: 4px solid rgba(255,255,255,0.4);"></div>
+
+                <!-- Header Section -->
+                <div style="text-align: center; border-bottom: 3px solid rgba(255,255,255,0.3); padding-bottom: 35px; margin-bottom: 40px;">
+                    ${logoImage ? `
+                        <div style="width: 110px; height: 110px; background: rgba(255,255,255,0.15); border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; margin: 0 auto 25px; padding: 15px; display: flex; align-items: center; justify-content: center;">
+                            <img src="${logoImage.src}" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+                        </div>
+                    ` : ''}
+                    <h1 style="font-size: 3.2rem; font-weight: bold; margin-bottom: 15px; letter-spacing: 2px; text-shadow: 2px 2px 4px rgba(0,0,0,0.2);">${businessName}</h1>
+                    ${slogan ? `<p style="font-size: 1.3rem; font-style: italic; opacity: 0.9; letter-spacing: 1px;">${slogan}</p>` : ''}
+                    <div style="width: 150px; height: 2px; background: rgba(255,255,255,0.5); margin: 20px auto;"></div>
+                </div>
+
+                <!-- Main Content -->
+                <div style="flex: 1; display: flex; gap: 40px; align-items: center;">
+                    <!-- Left Side Info -->
+                    <div style="flex: 1;">
+                        <h2 style="font-size: 2rem; font-weight: bold; margin-bottom: 25px; text-align: center; letter-spacing: 1px;">Share Your Experience</h2>
+                        
+                        <div style="background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 15px; padding: 25px; margin-bottom: 25px;">
+                            <h3 style="font-size: 1.3rem; font-weight: 600; margin-bottom: 15px; text-align: center;">Your Review Helps Us</h3>
+                            <div style="text-align: left;">
+                                <p style="margin: 10px 0; font-size: 1rem; display: flex; align-items: center;"><span style="margin-right: 10px; font-size: 1.2rem;">✓</span> Maintain our high standards</p>
+                                <p style="margin: 10px 0; font-size: 1rem; display: flex; align-items: center;"><span style="margin-right: 10px; font-size: 1.2rem;">✓</span> Improve our services</p>
+                                <p style="margin: 10px 0; font-size: 1rem; display: flex; align-items: center;"><span style="margin-right: 10px; font-size: 1.2rem;">✓</span> Build community trust</p>
+                                <p style="margin: 10px 0; font-size: 1rem; display: flex; align-items: center;"><span style="margin-right: 10px; font-size: 1.2rem;">✓</span> Guide future customers</p>
+                            </div>
+                        </div>
+
+                        <div style="background: rgba(255,255,255,0.15); border-radius: 12px; padding: 20px; text-align: center;">
+                            <h4 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 10px;">Est. Quality Service</h4>
+                            <div style="display: flex; justify-content: center; gap: 3px; margin-bottom: 10px;">
+                                <span style="color: #fbbf24; font-size: 1.3rem;">★</span>
+                                <span style="color: #fbbf24; font-size: 1.3rem;">★</span>
+                                <span style="color: #fbbf24; font-size: 1.3rem;">★</span>
+                                <span style="color: #fbbf24; font-size: 1.3rem;">★</span>
+                                <span style="color: #fbbf24; font-size: 1.3rem;">★</span>
+                            </div>
+                            <p style="margin: 0; font-size: 0.9rem; opacity: 0.8;">Trusted by our community</p>
+                        </div>
+                    </div>
+
+                    <!-- Right Side QR -->
+                    <div style="display: flex; flex-direction: column; align-items: center;">
+                        <div style="background: white; border: 4px solid rgba(255,255,255,0.8); border-radius: 20px; padding: 30px; margin-bottom: 25px; box-shadow: 0 15px 30px rgba(0,0,0,0.2);">
+                            <canvas class="qr-code" width="280" height="280"></canvas>
+                        </div>
+                        <div style="text-align: center; background: rgba(255,255,255,0.15); border-radius: 12px; padding: 20px;">
+                            <p style="font-size: 1.3rem; font-weight: 600; margin: 0; letter-spacing: 1px;">${callToAction}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div style="text-align: center; border-top: 2px solid rgba(255,255,255,0.3); padding-top: 25px; margin-top: 30px;">
+                    <p style="font-size: 1rem; opacity: 0.9; margin: 0; font-style: italic; letter-spacing: 1px;">
+                        Thank you for choosing ${businessName}
+                    </p>
+                </div>
+            </div>
+        `;
+        renderQRInCanvas(poster.querySelector('.qr-code'));
+    }
+
+    function createVibrantLayout(poster, color, businessName, slogan, callToAction) {
+        poster.style.background = `radial-gradient(circle at 30% 20%, ${color}, ${adjustColor(color, -30)}, ${adjustColor(color, 20)})`;
+        poster.style.padding = '50px';
+        poster.style.color = 'white';
+        poster.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        poster.innerHTML = `
+            <div style="height: 100%; position: relative;">
+                <!-- Decorative elements -->
+                <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.08); border-radius: 50%; opacity: 0.6;"></div>
+                <div style="position: absolute; bottom: -30px; left: -30px; width: 150px; height: 150px; background: rgba(255,255,255,0.06); border-radius: 50%; opacity: 0.4;"></div>
+                <div style="position: absolute; top: 30%; right: 10%; width: 80px; height: 80px; background: rgba(255,255,255,0.1); border-radius: 20px; transform: rotate(45deg);"></div>
+                
+                <div style="position: relative; z-index: 10; height: 100%; display: flex; flex-direction: column;">
+                    <!-- Header -->
+                    <div style="text-align: center; margin-bottom: 35px;">
+                        ${logoImage ? `
+                            <div style="width: 100px; height: 100px; background: rgba(255,255,255,0.2); border-radius: 20px; margin: 0 auto 20px; padding: 15px; backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; transform: rotate(3deg); box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
+                                <img src="${logoImage.src}" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+                            </div>
+                        ` : ''}
+                        <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 12px; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); letter-spacing: -1px;">${businessName}</h1>
+                        ${slogan ? `<p style="font-size: 1.2rem; font-weight: 500; opacity: 0.95; line-height: 1.3;">${slogan}</p>` : ''}
+                    </div>
+                    
+                    <!-- Main Content -->
+                    <div style="flex: 1; display: flex; gap: 40px; align-items: center;">
+                        <!-- Left Info Panel -->
+                        <div style="flex: 1;">
+                            <div style="background: rgba(255,255,255,0.15); border-radius: 25px; padding: 30px; backdrop-filter: blur(15px); margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.2);">
+                                <h2 style="font-size: 1.8rem; font-weight: 700; margin-bottom: 20px; text-align: center;">🎉 We Value Your Opinion!</h2>
+                                
+                                <div style="margin-bottom: 20px;">
+                                    <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 15px; color: #FFE4E1;">How It Works:</h3>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                        <div style="text-align: center; flex: 1;">
+                                            <div style="width: 50px; height: 50px; background: rgba(255,255,255,0.25); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 20px; font-weight: bold;">📱</div>
+                                            <p style="margin: 0; font-size: 0.9rem; font-weight: 500;">Scan QR Code</p>
+                                        </div>
+                                        <div style="font-size: 1.5rem; color: rgba(255,255,255,0.6);">→</div>
+                                        <div style="text-align: center; flex: 1;">
+                                            <div style="width: 50px; height: 50px; background: rgba(255,255,255,0.25); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 20px; font-weight: bold;">⭐</div>
+                                            <p style="margin: 0; font-size: 0.9rem; font-weight: 500;">Rate & Review</p>
+                                        </div>
+                                        <div style="font-size: 1.5rem; color: rgba(255,255,255,0.6);">→</div>
+                                        <div style="text-align: center; flex: 1;">
+                                            <div style="width: 50px; height: 50px; background: rgba(255,255,255,0.25); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 20px; font-weight: bold;">🎊</div>
+                                            <p style="margin: 0; font-size: 0.9rem; font-weight: 500;">Help Others!</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style="background: rgba(255,255,255,0.1); border-radius: 15px; padding: 20px; text-align: center;">
+                                    <h4 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px;">⏱️ Takes Less Than 2 Minutes</h4>
+                                    <p style="margin: 0; font-size: 0.95rem; opacity: 0.9; line-height: 1.3;">Your feedback makes a real difference in our service quality</p>
+                                </div>
+                            </div>
+
+                            <div style="background: rgba(255,255,255,0.1); border-radius: 20px; padding: 25px; text-align: center; border: 1px solid rgba(255,255,255,0.15);">
+                                <h3 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 15px; color: #FFD700;">🏆 Join Our Community</h3>
+                                <p style="margin: 0; font-size: 1rem; line-height: 1.4;">Be part of hundreds of satisfied customers who've shared their experience with ${businessName}</p>
+                            </div>
+                        </div>
+
+                        <!-- Right QR Code -->
+                        <div style="display: flex; flex-direction: column; align-items: center;">
+                            <div style="background: linear-gradient(145deg, rgba(255,255,255,0.95), rgba(255,255,255,0.9)); border-radius: 30px; padding: 35px; box-shadow: 0 25px 50px rgba(0,0,0,0.2); margin-bottom: 20px;">
+                                <canvas class="qr-code" width="240" height="240"></canvas>
+                            </div>
+                            <div style="background: rgba(255,255,255,0.2); border-radius: 20px; padding: 20px; backdrop-filter: blur(10px); text-align: center; border: 1px solid rgba(255,255,255,0.2); transform: rotate(1deg);">
+                                <p style="font-size: 1.3rem; font-weight: 700; margin: 0; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">${callToAction}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div style="text-align: center; margin-top: 25px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.2);">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            <span style="font-size: 1.2rem;">🌟</span>
+                            <p style="margin: 0; font-size: 1rem; font-weight: 500;">Your voice matters • Help us serve you better</p>
+                            <span style="font-size: 1.2rem;">🌟</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        renderQRInCanvas(poster.querySelector('.qr-code'));
+    }
+
+    function createElegantLayout(poster, color, businessName, slogan, callToAction) {
+        poster.style.background = `linear-gradient(135deg, #1F2937, ${color}, #374151)`;
+        poster.style.padding = '40px';
+        poster.style.color = 'white';
+        poster.style.fontFamily = 'Georgia, "Times New Roman", serif';
+        poster.innerHTML = `
+            <div style="height: 100%; border: 2px solid rgba(255,255,255,0.2); border-radius: 15px; padding: 35px; display: flex; flex-direction: column; position: relative; overflow: hidden;">
+                <!-- Elegant decorative elements -->
+                <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, rgba(255,215,0,0.6), rgba(255,255,255,0.4), rgba(255,215,0,0.6), transparent);"></div>
+                <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, rgba(255,215,0,0.6), rgba(255,255,255,0.4), rgba(255,215,0,0.6), transparent);"></div>
+                
+                <!-- Header Section -->
+                <div style="text-align: center; margin-bottom: 35px; border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 25px;">
+                    ${logoImage ? `
+                        <div style="width: 80px; height: 80px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 12px; margin: 0 auto 20px; padding: 10px; display: flex; align-items: center; justify-content: center;">
+                            <img src="${logoImage.src}" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+                        </div>
+                    ` : ''}
+                    <h1 style="font-size: 2.4rem; font-weight: 400; margin-bottom: 12px; letter-spacing: 3px; text-transform: uppercase; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">${businessName}</h1>
+                    ${slogan ? `<p style="font-size: 1rem; font-style: italic; opacity: 0.85; letter-spacing: 1px; color: #D1D5DB;">${slogan}</p>` : ''}
+                    <div style="width: 100px; height: 2px; background: linear-gradient(90deg, transparent, #FFD700, transparent); margin: 15px auto;"></div>
+                </div>
+                
+                <!-- Main Content -->
+                <div style="flex: 1; display: flex; gap: 35px; align-items: center;">
+                    <!-- Left Content -->
+                    <div style="flex: 1;">
+                        <h2 style="font-size: 1.6rem; font-weight: 400; margin-bottom: 20px; letter-spacing: 2px; text-align: center; color: #F3F4F6;">Your Distinguished Opinion</h2>
+                        
+                        <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 20px; margin-bottom: 20px; backdrop-filter: blur(10px);">
+                            <div style="text-align: center; margin-bottom: 15px;">
+                                <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                                    <div style="width: 6px; height: 6px; background: #FFD700; border-radius: 50%; margin: 0 8px;"></div>
+                                    <p style="margin: 0; font-size: 0.9rem; color: #D1D5DB; letter-spacing: 0.5px;">Elevates our excellence</p>
+                                </div>
+                                <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                                    <div style="width: 6px; height: 6px; background: #FFD700; border-radius: 50%; margin: 0 8px;"></div>
+                                    <p style="margin: 0; font-size: 0.9rem; color: #D1D5DB; letter-spacing: 0.5px;">Guides our refinement</p>
+                                </div>
+                                <div style="display: flex; align-items: center; justify-content: center;">
+                                    <div style="width: 6px; height: 6px; background: #FFD700; border-radius: 50%; margin: 0 8px;"></div>
+                                    <p style="margin: 0; font-size: 0.9rem; color: #D1D5DB; letter-spacing: 0.5px;">Inspires distinction</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.2); border-radius: 10px; padding: 18px; text-align: center;">
+                            <h4 style="font-size: 1rem; font-weight: 500; margin-bottom: 8px; letter-spacing: 1px; color: #FDE68A;">PREMIUM EXPERIENCE</h4>
+                            <p style="margin: 0; font-size: 0.85rem; opacity: 0.9; font-style: italic; letter-spacing: 0.5px;">Every detail perfected</p>
+                        </div>
+                    </div>
+
+                    <!-- Right QR Code -->
+                    <div style="display: flex; flex-direction: column; align-items: center;">
+                        <div style="border: 2px solid rgba(255,255,255,0.2); border-radius: 15px; padding: 30px; margin-bottom: 20px; background: rgba(255,255,255,0.05); backdrop-filter: blur(8px); box-shadow: 0 12px 24px rgba(0,0,0,0.2);">
+                            <canvas class="qr-code" width="240" height="240"></canvas>
+                        </div>
+                        <div style="text-align: center; border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 15px; background: rgba(255,255,255,0.03);">
+                            <p style="font-size: 1.1rem; font-weight: 400; margin: 0; letter-spacing: 1px;">${callToAction}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Footer -->
+                <div style="text-align: center; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 20px; margin-top: 25px;">
+                    <div style="margin-bottom: 8px;">
+                        <span style="color: #FFD700; font-size: 1rem; margin: 0 2px;">◆</span>
+                        <span style="color: #FFD700; font-size: 0.8rem; margin: 0 2px;">◆</span>
+                        <span style="color: #FFD700; font-size: 1rem; margin: 0 2px;">◆</span>
+                    </div>
+                    <p style="font-size: 0.85rem; opacity: 0.7; letter-spacing: 1px; text-transform: uppercase; margin: 0;">Crafting Excellence</p>
+                </div>
+            </div>
+        `;
+        renderQRInCanvas(poster.querySelector('.qr-code'));
+    }
+
+    function createWarmLayout(poster, color, businessName, slogan, callToAction) {
+        poster.style.background = `linear-gradient(135deg, ${color}, ${adjustColor(color, 30)}, #FED7AA)`;
+        poster.style.padding = '40px';
+        poster.style.fontFamily = 'Georgia, "Times New Roman", serif';
+        poster.innerHTML = `
+            <div style="height: 100%; background: linear-gradient(145deg, rgba(255,255,255,0.95), rgba(255,255,255,0.9)); border-radius: 20px; padding: 35px; box-shadow: inset 0 0 30px rgba(0,0,0,0.05), 0 20px 40px rgba(0,0,0,0.1); display: flex; flex-direction: column; color: #374151; position: relative; overflow: hidden;">
+                
+                <!-- Decorative corner elements -->
+                <div style="position: absolute; top: 0; left: 0; width: 60px; height: 60px; background: linear-gradient(135deg, ${color}30, transparent); border-radius: 0 0 40px 0;"></div>
+                <div style="position: absolute; top: 0; right: 0; width: 60px; height: 60px; background: linear-gradient(225deg, ${color}30, transparent); border-radius: 0 0 0 40px;"></div>
+                <div style="position: absolute; bottom: 0; left: 0; width: 60px; height: 60px; background: linear-gradient(45deg, ${color}30, transparent); border-radius: 0 40px 0 0;"></div>
+                <div style="position: absolute; bottom: 0; right: 0; width: 60px; height: 60px; background: linear-gradient(315deg, ${color}30, transparent); border-radius: 40px 0 0 0;"></div>
+
+                <!-- Header Section -->
+                <div style="text-align: center; margin-bottom: 30px; position: relative; z-index: 10;">
+                    ${logoImage ? `
+                        <div style="width: 80px; height: 80px; margin: 0 auto 15px; border-radius: 50%; overflow: hidden; box-shadow: 0 8px 16px rgba(0,0,0,0.15); border: 3px solid ${color}40;">
+                            <img src="${logoImage.src}" style="width: 100%; height: 100%; object-fit: cover;" />
+                        </div>
+                    ` : ''}
+                    <h1 style="font-size: 2.4rem; font-weight: 700; margin-bottom: 10px; color: ${color}; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); letter-spacing: -1px;">${businessName}</h1>
+                    ${slogan ? `<p style="font-size: 1.1rem; color: #6B7280; font-style: italic; line-height: 1.4; margin: 0;">${slogan}</p>` : ''}
+                    <div style="width: 80px; height: 3px; background: linear-gradient(90deg, transparent, ${color}, transparent); margin: 12px auto;"></div>
+                </div>
+                
+                <!-- Main Content -->
+                <div style="flex: 1; display: flex; gap: 35px; align-items: center; position: relative; z-index: 10;">
+                    <!-- Left Information Panel -->
+                    <div style="flex: 1;">
+                        <div style="background: linear-gradient(135deg, ${color}15, ${color}10); border-radius: 15px; padding: 25px; margin-bottom: 20px; border: 2px solid ${color}20; box-shadow: 0 6px 12px rgba(0,0,0,0.1);">
+                            <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 18px; color: ${color}; text-align: center;">Share Your Experience</h2>
+                            
+                            <div style="text-align: center;">
+                                <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                                    <span style="color: ${color}; font-size: 1.2rem; margin-right: 10px;">🌟</span>
+                                    <p style="margin: 0; font-size: 0.9rem; color: #6B7280; line-height: 1.4;">Helps us grow</p>
+                                </div>
+                                <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                                    <span style="color: ${color}; font-size: 1.2rem; margin-right: 10px;">💝</span>
+                                    <p style="margin: 0; font-size: 0.9rem; color: #6B7280; line-height: 1.4;">Shows us care</p>
+                                </div>
+                                <div style="display: flex; align-items: center; justify-content: center;">
+                                    <span style="color: ${color}; font-size: 1.2rem; margin-right: 10px;">🤝</span>
+                                    <p style="margin: 0; font-size: 0.9rem; color: #6B7280; line-height: 1.4;">Builds community</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="background: linear-gradient(135deg, #FEF3C7, #FDE68A); border-radius: 12px; padding: 20px; text-align: center; border: 2px solid #F59E0B40; box-shadow: 0 4px 8px rgba(0,0,0,0.08);">
+                            <h4 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 6px; color: #92400E;">⏰ Quick & Easy</h4>
+                            <p style="margin: 0; font-size: 0.9rem; color: #A16207; font-style: italic; line-height: 1.3;">Just 90 seconds of your time</p>
+                        </div>
+                    </div>
+
+                    <!-- Right QR Code -->
+                    <div style="display: flex; flex-direction: column; align-items: center;">
+                        <div style="background: white; border-radius: 20px; box-shadow: 0 15px 30px rgba(0,0,0,0.15); padding: 30px; margin-bottom: 20px; transform: rotate(2deg); border: 3px solid ${color}20;">
+                            <canvas class="qr-code" width="220" height="220"></canvas>
+                        </div>
+                        <div style="background: linear-gradient(135deg, ${color}20, ${color}10); border-radius: 12px; padding: 15px; text-align: center; border: 2px solid ${color}30; transform: rotate(-1deg);">
+                            <p style="font-size: 1.1rem; font-weight: 600; color: ${color}; margin: 0;">${callToAction}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Footer -->
+                <div style="text-align: center; border-top: 2px solid ${color}30; padding-top: 18px; margin-top: 25px; position: relative; z-index: 10;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <span style="color: ${color}; font-size: 1.2rem;">🏠</span>
+                        <p style="margin: 0; font-size: 0.9rem; color: #4B5563; font-weight: 500;">Family-Owned • Community-Focused</p>
+                        <span style="color: ${color}; font-size: 1.2rem;">🏠</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        renderQRInCanvas(poster.querySelector('.qr-code'));
+    }
+
+    function renderQRInCanvas(canvas) {
+        if (canvas) {
+            const qr = new QRious({
+                element: canvas,
+                value: reviewUrl,
+                size: canvas.width,
+                background: 'white',
+                foreground: 'black'
+            });
+        }
+    }
+
+    function adjustColor(color, percent) {
+        const num = parseInt(color.replace('#', ''), 16);
+        const amt = Math.round(2.55 * percent);
+        const R = Math.max(0, Math.min(255, (num >> 16) + amt));
+        const G = Math.max(0, Math.min(255, (num >> 8 & 0x00FF) + amt));
+        const B = Math.max(0, Math.min(255, (num & 0x0000FF) + amt));
+        return `#${(0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1)}`;
+    }
+
+    function downloadPoster() {
+        const businessName = document.getElementById('businessName').value || '{{ business.business_name }}';
+        const downloadBtn = document.getElementById('downloadBtn');
+        
+        // Show loading state
+        downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating Poster...';
+        downloadBtn.disabled = true;
+        
+        // Create the download poster with exact same styling as preview
+        const downloadPoster = document.getElementById('downloadPoster');
+        const previewPoster = document.getElementById('posterPreview');
+        
+        // Copy exact content and styling from preview to download element
+        downloadPoster.innerHTML = previewPoster.innerHTML;
+        downloadPoster.className = previewPoster.className;
+        downloadPoster.style.cssText = previewPoster.style.cssText;
+        downloadPoster.style.position = 'absolute';
+        downloadPoster.style.left = '-9999px';
+        downloadPoster.style.transform = 'scale(1)'; // Full size for download
+        downloadPoster.style.transformOrigin = 'top left';
+        
+        // Wait a moment for styles to apply
+        setTimeout(() => {
+            html2canvas(downloadPoster, {
+                width: 794,
+                height: 1123,
+                scale: 2, // Higher resolution
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: null,
+                logging: false,
+                onclone: function(clonedDoc) {
+                    // Ensure QR codes are rendered in the clone
+                    const qrCodes = clonedDoc.querySelectorAll('.qr-code');
+                    qrCodes.forEach(qr => {
+                        if (qr.tagName === 'CANVAS') {
+                            const originalQr = document.querySelector('.qr-code');
+                            if (originalQr) {
+                                qr.getContext('2d').drawImage(originalQr, 0, 0);
+                            }
+                        }
+                    });
+                }
+            }).then(canvas => {
+                // Convert to blob and download
+                canvas.toBlob(function(blob) {
+                    const link = document.createElement('a');
+                    link.download = `${businessName.replace(/\s+/g, '_')}_poster_${selectedTemplate}.png`;
+                    link.href = URL.createObjectURL(blob);
+                    link.click();
+                    URL.revokeObjectURL(link.href);
+                    
+                    // Reset button and show success modal
+                    downloadBtn.innerHTML = '<i class="fas fa-download mr-2"></i>Download High-Quality Poster';
+                    downloadBtn.disabled = false;
+                    showDownloadSuccess();
+                }, 'image/png');
+            }).catch(error => {
+                console.error('Error generating poster:', error);
+                downloadBtn.innerHTML = '<i class="fas fa-download mr-2"></i>Download High-Quality Poster';
+                downloadBtn.disabled = false;
+                alert('Error generating poster. Please try again.');
+            });
+        }, 100);
+    }
+
+    function showDownloadSuccess() {
+        const modal = document.getElementById('downloadModal');
+        const modalContent = document.getElementById('modalContent');
+        
+        modal.classList.remove('hidden');
+        // Trigger animation
+        setTimeout(() => {
+            modalContent.classList.remove('scale-95');
+            modalContent.classList.add('scale-100');
+        }, 10);
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('downloadModal');
+        const modalContent = document.getElementById('modalContent');
+        
+        modalContent.classList.remove('scale-100');
+        modalContent.classList.add('scale-95');
+        
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 200);
+    }
+
+    function downloadAnother() {
+        closeModal();
+        // Scroll to top to see template options
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('downloadModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModal();
+        }
+    });
+
+
+    // Initialize with first template selected
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelector('.template-option').click();
+        document.querySelector('.color-option').click();
+        updatePreview();
+    });
+</script>
+{% endblock %}

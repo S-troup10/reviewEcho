@@ -1,0 +1,329 @@
+{% extends "base.html" %}
+{% block title %}Reviews Dashboard - Quantum Platform{% endblock %}
+
+{% block content %}
+<div class="bg-white -mx-4 -my-8 px-4 py-16 text-gray-900 min-h-screen">
+  <div class="max-w-6xl mx-auto space-y-8 fade-in">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div>
+        <h1 class="text-4xl font-bold text-gray-900 mb-2">Reviews Dashboard</h1>
+        <p class="text-gray-600 text-lg">Monitor and manage your customer feedback professionally</p>
+      </div>
+
+      <div class="flex gap-4">
+        {% if reviews|length >= 2 %}
+        <a href="{{ url_for('ai_reports_history') }}" 
+           onclick="showLoading('Loading AI analysis...')"
+           class="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl font-semibold text-white hover:from-purple-600 hover:to-pink-600 transition-all scale-hover ">
+          <i class="fas fa-chart-line mr-2"></i>AI Analysis
+        </a>
+        {% endif %}
+        <a href="{{ url_for('business_settings') }}" 
+           class="px-6 py-3 border border-gray-300 rounded-xl font-semibold text-gray-700 hover:bg-gray-100 transition-all scale-hover">
+          <i class="fas fa-cog mr-2"></i>Settings
+        </a>
+        <a href="{{ url_for('dashboard') }}" 
+           class="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl font-semibold text-white hover:from-indigo-600 hover:to-purple-600 transition-all scale-hover">
+          <i class="fas fa-arrow-left mr-2"></i>Dashboard
+        </a>
+      </div>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div class="card p-6 bg-blue-50 border border-blue-200">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
+            <i class="fas fa-star text-white text-xl"></i>
+          </div>
+          
+        </div>
+        <h3 class="text-3xl font-bold text-gray-900 mb-1">{{ reviews|length }}</h3>
+        <p class="text-gray-600">Total Reviews</p>
+      </div>
+
+      <div class="card p-6 bg-green-50 border border-green-200">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
+            <i class="fas fa-thumbs-up text-white text-xl"></i>
+          </div>
+          <span class="text-sm font-medium text-green-600">Perfect</span>
+        </div>
+        <h3 class="text-3xl font-bold text-gray-900 mb-1">
+          {% set public_reviews = reviews|selectattr("review_type", "equalto", "public")|list %}
+          {{ public_reviews|length }}
+        </h3>
+        <p class="text-gray-600">Public Reviews</p>
+      </div>
+
+      <div class="card p-6 bg-orange-50 border border-orange-200">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center">
+            <i class="fas fa-comment text-white text-xl"></i>
+          </div>
+          <span class="text-sm font-medium text-blue-600">Improving</span>
+        </div>
+        <h3 class="text-3xl font-bold text-gray-900 mb-1">
+          {% set private_reviews = reviews|selectattr("review_type", "equalto", "private")|list %}
+          {{ private_reviews|length }}
+        </h3>
+        <p class="text-gray-600">Private Feedback</p>
+      </div>
+
+      <div class="card p-6 bg-purple-50 border border-purple-200">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center">
+            <i class="fas fa-chart-line text-white text-xl"></i>
+          </div>
+          
+        </div>
+        <h3 class="text-3xl font-bold text-gray-900 mb-1">
+          {% if reviews %}
+            {% set total_rating = reviews|sum(attribute='rating') %}
+            {{ "%.1f"|format(total_rating / reviews|length) }}
+          {% else %}
+            0.0
+          {% endif %}
+        </h3>
+        <p class="text-gray-600">Avg. Rating</p>
+      </div>
+    </div>
+
+    <!-- Reviews Table -->
+    <div class="card">
+      <div class="p-6 border-b border-gray-200">
+        <h2 class="text-xl font-semibold text-gray-900">Recent Reviews & Feedback</h2>
+      </div>
+
+      {% if reviews %}
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th class="px-6 py-4 text-left text-sm font-medium text-gray-900 uppercase tracking-wider">Customer</th>
+              <th class="px-6 py-4 text-left text-sm font-medium text-gray-900 uppercase tracking-wider">Rating</th>
+              <th class="px-6 py-4 text-left text-sm font-medium text-gray-900 uppercase tracking-wider">Review</th>
+              <th class="px-6 py-4 text-left text-sm font-medium text-gray-900 uppercase tracking-wider">Type</th>
+              <th class="px-6 py-4 text-left text-sm font-medium text-gray-900 uppercase tracking-wider">Date</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            {% for review in reviews %}
+            <tr onclick="openViewReview(this)" 
+    class="hover:bg-gray-50 transition-colors cursor-pointer"
+    data-customer="{{ review.customer_name }}"
+    data-email="{{ review.customer_email }}"
+    data-rating="{{ review.rating }}"
+    data-review="{{ review.review_text | e }}"
+    data-type="{{ review.review_type }}"
+    data-date="{{ review.created_at }}">
+
+              <td class="px-6 py-4">
+                <div>
+                  <div class="font-medium text-gray-900">{{ review.customer_name }}</div>
+                  <div class="text-sm text-gray-500">{{ review.customer_email }}</div>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex items-center">
+                  {% for i in range(1, 6) %}
+                    {% if i <= review.rating %}
+                      <i class="fas fa-star text-yellow-400"></i>
+                    {% else %}
+                      <i class="fas fa-star text-gray-300"></i>
+                    {% endif %}
+                  {% endfor %}
+                  <span class="ml-2 text-sm text-gray-600">({{ review.rating }})</span>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <p class="text-gray-900 max-w-xs truncate">{{ review.review_text }}</p>
+              </td>
+              <td class="px-6 py-4">
+                {% if review.review_type == 'public' %}
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                    <i class="fas fa-globe mr-1"></i>Public
+                  </span>
+                {% else %}
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
+                    <i class="fas fa-lock mr-1"></i>Private
+                  </span>
+                {% endif %}
+              </td>
+              <td class="format-date px-6 py-4 text-sm text-gray-500">
+                {{ review.created_at }}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="p-12 text-center">
+        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-star text-gray-400 text-xl"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">No Reviews Yet</h3>
+        <p class="text-gray-600 mb-6">Start collecting reviews by sharing your custom review link with customers</p>
+        <a href="{{ url_for('business_settings') }}" 
+           class="btn-primary">
+          <i class="fas fa-cog mr-2"></i>Configure Settings
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal -->
+<!-- Modal -->
+<div id="reviewModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm hidden transition-opacity duration-300">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-8 relative animate-fadeIn">
+    
+    <!-- Close button -->
+    <button onclick="closeViewReview()" 
+            class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition">
+      <i class="fas fa-times text-lg"></i>
+    </button>
+
+    <!-- Header -->
+    <div class="mb-6 border-b pb-4">
+      <h2 class="text-2xl font-semibold text-gray-800" id="modalCustomerName"></h2>
+      <p class="text-sm text-gray-500 mt-1" id="modalCustomerEmail"></p>
+    </div>
+
+    <!-- Rating + Type + Date -->
+    <div class="flex flex-wrap gap-4 items-center text-sm text-gray-600 mb-4">
+      <div class="flex items-center gap-1" id="modalRating"></div>
+      <span id="modalType" class="inline-flex items-center rounded-full px-3 py-1 font-medium"></span>
+      <span class="text-gray-400" id="modalDate"></span>
+    </div>
+
+    <!-- Review text -->
+    <div class="bg-gray-50 rounded-lg p-4 text-gray-800 leading-relaxed max-h-60 overflow-y-auto border border-gray-200">
+      <p id="modalReviewText"></p>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  function openViewReview(row) {
+    const modal = document.getElementById('reviewModal');
+
+    // Populate modal
+    document.getElementById('modalCustomerName').textContent = row.dataset.customer;
+    document.getElementById('modalCustomerEmail').textContent = row.dataset.email;
+    document.getElementById('modalDate').textContent = new Date(row.dataset.date).toLocaleDateString('en-AU', {
+      year: 'numeric', month: 'short', day: 'numeric'
+    });
+    document.getElementById('modalReviewText').textContent = row.dataset.review;
+
+    // Rating stars
+    const rating = parseInt(row.dataset.rating);
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+      stars.push(`<i class="fas fa-star ${i <= rating ? 'text-yellow-400' : 'text-gray-300'} mr-1"></i>`);
+    }
+    stars.push(`<span class="ml-2 text-sm text-gray-600">(${rating})</span>`);
+    document.getElementById('modalRating').innerHTML = stars.join('');
+
+    // Type badge
+    const type = row.dataset.type;
+    const typeEl = document.getElementById('modalType');
+    if (type === 'public') {
+      typeEl.className = 'inline-block mb-2 text-sm font-medium px-3 py-1 rounded-full bg-green-100 text-green-800';
+      typeEl.innerHTML = '<i class="fas fa-globe mr-1"></i>Public';
+    } else {
+      typeEl.className = 'inline-block mb-2 text-sm font-medium px-3 py-1 rounded-full bg-orange-100 text-orange-800';
+      typeEl.innerHTML = '<i class="fas fa-lock mr-1"></i>Private';
+    }
+
+    // Show modal
+    modal.classList.remove('hidden');
+  }
+
+  function closeViewReview() {
+    document.getElementById('reviewModal').classList.add('hidden');
+  }
+</script>
+
+
+<script>
+  // Function to show loading spinner and message
+  function showLoading(message) {
+    const loadingOverlay = document.createElement('div');
+    loadingOverlay.id = 'loading-overlay';
+    loadingOverlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+    loadingOverlay.innerHTML = `
+      <div class="flex flex-col items-center">
+        <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-16 w-16"></div>
+        <p class="mt-4 text-white font-semibold">${message}</p>
+      </div>
+    `;
+    document.body.appendChild(loadingOverlay);
+  }
+
+  // Function to hide loading spinner
+  function hideLoading() {
+    const loadingOverlay = document.getElementById('loading-overlay');
+    if (loadingOverlay) {
+      loadingOverlay.remove();
+    }
+  }
+
+  // Automatically hide loading spinner after a delay or when navigation completes
+  window.addEventListener('load', hideLoading);
+  // Add event listeners for links that trigger loading
+  document.querySelectorAll('a[onclick*="showLoading"]').forEach(link => {
+    link.addEventListener('click', () => {
+      // If the link navigates to a new page, the loading spinner will be shown.
+      // We don't need to explicitly call showLoading here again if it's already in the onclick.
+      // However, if the link is supposed to do something *before* navigation and then show loading,
+      // you might need more complex handling.
+    });
+  });
+
+  // Basic fade-in effect for the main content
+  document.addEventListener('DOMContentLoaded', (event) => {
+    const fadeElements = document.querySelectorAll('.fade-in');
+    fadeElements.forEach(el => {
+      el.style.opacity = 0;
+      let opacity = 0;
+      const interval = setInterval(() => {
+        if (opacity < 1) {
+          opacity += 0.1;
+          el.style.opacity = opacity;
+        } else {
+          clearInterval(interval);
+        }
+      }, 50); // Adjust speed as needed
+    });
+  });
+
+</script>
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const dateElements = document.querySelectorAll(".format-date");
+
+    dateElements.forEach((el) => {
+      const rawDate = el.textContent.trim();
+
+      if (rawDate) {
+        const date = new Date(rawDate);
+        const formatted = date.toLocaleDateString("en-AU", {
+          year: "numeric",
+          month: "short",
+          day: "numeric"
+        });
+        el.textContent = formatted; // e.g., "8 Aug 2025"
+      }
+    });
+  });
+</script>
+
+{% endblock %}

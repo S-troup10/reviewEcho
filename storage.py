@@ -5,13 +5,13 @@ import openai
 
 
 # Replace with your real values
-SUPABASE_URL = "https://gmpxcungtwhjrhygqvdk.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtcHhjdW5ndHdoanJoeWdxdmRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyODQ1NjIsImV4cCI6MjA2OTg2MDU2Mn0.T6FLVh783wgB0Sq6uAY1JHTjpYpkx0Wy7zVapxwA-zE"
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # Initialize OpenAI client
-openai.api_key = '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'
+openai.api_key = os.environ.get("OPEN_AI_KEY")
 
 
 def add(table, data):

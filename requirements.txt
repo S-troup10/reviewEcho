@@ -1,8 +1,11 @@
 Flask==3.0.3
 flask-cors==5.0.1
 Flask-Login==0.6.3
+Flask-Dance==7.1.0
 supabase==2.10.0
 stripe==12.3.0
 pandas==2.2.3
 openai==1.52.0
 gunicorn==23.0.0
+python-dotenv==1.0.1
+

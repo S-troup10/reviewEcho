@@ -819,6 +819,50 @@ def pricing():
                            subscription_status=subscription_status)
 
 
+
+
+
+
+
+
+import os
+import stripe
+from flask import (
+    Flask, request, jsonify, render_template, redirect,
+    url_for, flash, session
+)
+from functools import wraps
+
+# --- App + Stripe setup ---
+app = Flask(__name__)
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "dev-secret")  # set in prod
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
+
+# Your storage abstraction — assumed available in your project
+# Methods referenced below should be implemented on your side.
+from storage import storage
+
+# --- Helpers ---
+def require_login(f):
+    @wraps(f)
+    def wrapped(*args, **kwargs):
+        if not session.get("user_id"):
+            flash("Please log in first.", "error")
+            return redirect(url_for("login"))
+        return f(*args, **kwargs)
+    return wrapped
+
+# Centralized price config (keep in code or load from env/DB)
+PRICES = {
+    "base": {"amount": 3400, "name": "Base Plan"},   # $34.00
+    "pro":  {"amount": 4800, "name": "Pro Plan"},    # $48.00
+}
+CURRENCY = "usd"
+BILLING_INTERVAL = "month"
+
+# --- Routes ---
+
 @app.route("/create-checkout-session", methods=["POST"])
 @require_login
 def create_checkout_session():
@@ -832,121 +876,89 @@ def create_checkout_session():
 @app.route("/subscribe/<tier>")
 @require_login
 def subscribe(tier):
-
+    """Create a Checkout Session and mark a pending subscription in DB."""
     if not stripe.api_key:
-        flash("Payment system not configured. Please contact support.",
-              "error")
+        flash("Payment system not configured. Please contact support.", "error")
         return redirect(url_for("pricing"))
 
     user_id = session.get("user_id")
     user_data = storage.fetch("users", {"id": user_id})
-
     if not user_data:
         flash("User not found.", "error")
         return redirect(url_for("pricing"))
-
     user = user_data[0]
 
-    # Define pricing
-    prices = {
-        "base": {
-            "amount": 3400,
-            "name": "Base Plan"
-        },  # $34.00
-        "pro": {
-            "amount": 4800,
-            "name": "Pro Plan"
-        }  # $48.00
-    }
-
-    if tier not in prices:
+    if tier not in PRICES:
         flash("Invalid plan selected.", "error")
         return redirect(url_for("pricing"))
 
     try:
-        # Create Stripe checkout session
+        # Create a Stripe Checkout Session for a MONTHLY subscription
         checkout_session = stripe.checkout.Session.create(
             customer_email=user["email"],
-            payment_method_types=['card'],
+            payment_method_types=["card"],
+            mode="subscription",
             line_items=[{
-                'price_data': {
-                    'currency': 'usd',
-                    'product_data': {
-                        'name': prices[tier]["name"],
-                        'description': f'{prices[tier]["name"]} - Monthly Subscription'
+                "price_data": {
+                    "currency": CURRENCY,
+                    "product_data": {
+                        "name": PRICES[tier]["name"],
+                        "description": f"{PRICES[tier]['name']} - Monthly Subscription",
                     },
-                    'unit_amount': prices[tier]["amount"],
-                    'recurring': {
-                        'interval': 'month',
-                    },
+                    "unit_amount": PRICES[tier]["amount"],
+                    "recurring": {"interval": BILLING_INTERVAL},
                 },
-                'quantity': 1,
+                "quantity": 1,
             }],
-            mode='subscription',
-            success_url=request.host_url +
-            'subscription-success?session_id={CHECKOUT_SESSION_ID}',
-            cancel_url=request.host_url + 'pricing',
+            success_url=request.host_url + "subscription-success?session_id={CHECKOUT_SESSION_ID}",
+            cancel_url=request.host_url + "pricing",
             metadata={
-                'user_id': str(user_id),
-                'tier': tier,
-                'business_name': user.get('business', 'N/A')
+                "user_id": str(user_id),
+                "tier": tier,
+                "business_name": user.get("business", "N/A"),
             },
             subscription_data={
-                'metadata': {
-                    'user_id': str(user_id),
-                    'tier': tier
+                "metadata": {
+                    "user_id": str(user_id),
+                    "tier": tier,
                 }
-            })
+            },
+        )
+
+        # Mark "pending" so the dashboard can reflect immediate state
+        try:
+            storage.mark_pending_subscription(int(user_id), tier)
+        except Exception as db_e:
+            # Non-fatal; webhook is still the source of truth
+            print(f"⚠️ Could not mark pending subscription for user {user_id}: {db_e}")
 
         print(f"📝 Created checkout session for user {user_id} with tier {tier}")
         return redirect(checkout_session.url)
 
     except Exception as e:
-        print(f"❌ Stripe checkout error: {str(e)}")
-        flash(f"Error creating checkout session: {str(e)}", "error")
+        print(f"❌ Stripe checkout error: {e}")
+        flash("Error creating checkout session. Please try again.", "error")
         return redirect(url_for("pricing"))
 
 
 @app.route("/subscription-success")
 @require_login
 def subscription_success():
-
-    session_id = request.args.get('session_id')
+    """Show confirmation after Stripe checkout — NO DB writes here."""
+    session_id = request.args.get("session_id")
     if not session_id:
         flash("Invalid session.", "error")
         return redirect(url_for("pricing"))
 
     try:
-        # Retrieve the checkout session to get subscription details
         checkout_session = stripe.checkout.Session.retrieve(session_id)
-
-        if checkout_session.mode == 'subscription' and checkout_session.subscription:
-            metadata = checkout_session.metadata
-            user_id = metadata.get('user_id')
-            tier = metadata.get('tier')
-
-            if user_id and tier:
-                # Activate subscription in database
-                result = storage.create_paid_subscription(
-                    int(user_id), 
-                    tier, 
-                    checkout_session.subscription
-                )
-
-                if result.get('success'):
-                    flash("Subscription activated successfully!", "success")
-
-
-                else:
-                    flash("Subscription created but there was an issue updating your account. Please contact support.", "warning")
-            else:
-                flash("Subscription created but missing user information. Please contact support.", "warning")
-        else:
-            flash("Invalid subscription session.", "error")
-        session.pop('subscription_status', None)
+        if checkout_session.mode != "subscription":
+            flash("Invalid checkout session.", "error")
+            return redirect(url_for("pricing"))
+        flash("Thanks for subscribing! Your subscription is being activated — this may take a minute.", "success")
     except Exception as e:
-        print(f"Error processing subscription success: {e}")
-        flash("Subscription may have been created. Please check your account status.", "warning")
+        print(f"⚠️ Error retrieving checkout session: {e}")
+        flash("Payment processed, activation pending. Please check your dashboard shortly.", "warning")
 
     return redirect(url_for("dashboard"))
 
@@ -954,198 +966,187 @@ def subscription_success():
 @app.route("/manage-subscription")
 @require_login
 def manage_subscription():
-    """Redirect to Stripe Customer Portal for subscription management"""
+    """Redirect to Stripe Customer Portal for subscription management."""
     return redirect(url_for("create_customer_portal"))
-
-
-@app.route("/stripe-webhook", methods=["POST"])
-def stripe_webhook():
-    """Handle Stripe webhook events"""
-    payload = request.get_data(as_text=True)
-    sig_header = request.headers.get('Stripe-Signature')
-
-    try:
-        # Verify webhook signature
-        if STRIPE_WEBHOOK_SECRET:
-            event = stripe.Webhook.construct_event(
-                payload, sig_header, STRIPE_WEBHOOK_SECRET
-            )
-        else:
-            # For development - parse without verification
-            event = stripe.Event.construct_from(
-                request.get_json(), stripe.api_key
-            )
-        
-        print(f"🔔 Received Stripe webhook: {event['type']}")
-        
-        # Handle the event
-        if event['type'] == 'customer.subscription.created':
-            subscription = event['data']['object']
-            handle_subscription_created(subscription)
-            
-        elif event['type'] == 'customer.subscription.updated':
-            subscription = event['data']['object']
-            handle_subscription_updated(subscription)
-            
-        elif event['type'] == 'customer.subscription.deleted':
-            subscription = event['data']['object']
-            handle_subscription_deleted(subscription)
-            
-        elif event['type'] == 'invoice.payment_succeeded':
-            invoice = event['data']['object']
-            handle_payment_succeeded(invoice)
-            
-        elif event['type'] == 'invoice.payment_failed':
-            invoice = event['data']['object']
-            handle_payment_failed(invoice)
-            
-        else:
-            print(f"⚠️ Unhandled event type: {event['type']}")
-
-        return jsonify({'status': 'success'}), 200
-
-    except ValueError as e:
-        print(f"❌ Invalid payload: {e}")
-        return jsonify({'error': 'Invalid payload'}), 400
-    except stripe.error.SignatureVerificationError as e:
-        print(f"❌ Invalid signature: {e}")
-        return jsonify({'error': 'Invalid signature'}), 400
-    except Exception as e:
-        print(f"❌ Webhook error: {e}")
-        return jsonify({'error': 'Webhook error'}), 500
-
-
-def handle_subscription_created(subscription):
-    """Handle subscription creation webhook"""
-    try:
-        stripe_subscription_id = subscription['id']
-        customer_id = subscription['customer']
-        status = subscription['status']
-        
-        # Get user_id from subscription metadata
-        metadata = subscription.get('metadata', {})
-        user_id = metadata.get('user_id')
-        tier = metadata.get('tier', 'base')
-        
-        if not user_id:
-            print(f"⚠️ No user_id in subscription metadata: {stripe_subscription_id}")
-            return
-            
-        print(f"✅ Subscription created: {stripe_subscription_id} for user {user_id}")
-        
-        # Update subscription in database
-        result = storage.handle_subscription_created(stripe_subscription_id, int(user_id), tier)
-        if result.get('success'):
-            print(f"✅ Database updated for subscription creation")
-        else:
-            print(f"❌ Failed to update database: {result.get('error')}")
-            
-    except Exception as e:
-        print(f"❌ Error handling subscription created: {e}")
-
-
-def handle_subscription_updated(subscription):
-    """Handle subscription update webhook"""
-    try:
-        stripe_subscription_id = subscription['id']
-        status = subscription['status']
-        
-        print(f"🔄 Subscription updated: {stripe_subscription_id}, status: {status}")
-        
-        # Update subscription status in database
-        result = storage.handle_subscription_updated(stripe_subscription_id, status)
-        if result.get('success'):
-            print(f"✅ Database updated for subscription update")
-        else:
-            print(f"❌ Failed to update database: {result.get('error')}")
-            
-    except Exception as e:
-        print(f"❌ Error handling subscription updated: {e}")
-
-
-def handle_subscription_deleted(subscription):
-    """Handle subscription deletion webhook"""
-    try:
-        stripe_subscription_id = subscription['id']
-        
-        print(f"🗑️ Subscription deleted: {stripe_subscription_id}")
-        
-        # Mark subscription as cancelled in database
-        result = storage.handle_subscription_cancelled(stripe_subscription_id)
-        if result.get('success'):
-            print(f"✅ Database updated for subscription cancellation")
-        else:
-            print(f"❌ Failed to update database: {result.get('error')}")
-            
-    except Exception as e:
-        print(f"❌ Error handling subscription deleted: {e}")
-
-
-def handle_payment_succeeded(invoice):
-    """Handle successful payment webhook"""
-    try:
-        subscription_id = invoice.get('subscription')
-        if subscription_id:
-            print(f"💰 Payment succeeded for subscription: {subscription_id}")
-            
-            # Update payment status and ensure subscription is active
-            result = storage.handle_payment_succeeded(subscription_id)
-            if result.get('success'):
-                print(f"✅ Database updated for payment success")
-            else:
-                print(f"❌ Failed to update database: {result.get('error')}")
-                
-    except Exception as e:
-        print(f"❌ Error handling payment succeeded: {e}")
-
-
-def handle_payment_failed(invoice):
-    """Handle failed payment webhook"""
-    try:
-        subscription_id = invoice.get('subscription')
-        if subscription_id:
-            print(f"❌ Payment failed for subscription: {subscription_id}")
-            
-            # Update subscription status to past_due
-            result = storage.handle_payment_failed(subscription_id)
-            if result.get('success'):
-                print(f"✅ Database updated for payment failure")
-            else:
-                print(f"❌ Failed to update database: {result.get('error')}")
-                
-    except Exception as e:
-        print(f"❌ Error handling payment failed: {e}")
 
 
 @app.route("/create-customer-portal", methods=["POST"])
 @require_login
 def create_customer_portal():
-    """Create Stripe Customer Portal session for subscription management"""
-
+    """Create Stripe Customer Portal session (uses stored stripe_customer_id)."""
     user_id = session.get("user_id")
     subscription_info = storage.get_user_subscription_info(user_id)
 
-    if not subscription_info or not subscription_info.get('stripe_subscription_id'):
+    if not subscription_info or not subscription_info.get("stripe_customer_id"):
         flash("No active subscription found.", "error")
         return redirect(url_for("pricing"))
 
     try:
-        # Get the subscription to find the customer ID
-        subscription = stripe.Subscription.retrieve(subscription_info['stripe_subscription_id'])
-        customer_id = subscription.customer
-
-        # Create customer portal session
         portal_session = stripe.billing_portal.Session.create(
-            customer=customer_id,
-            return_url=request.host_url + 'pricing'
+            customer=subscription_info["stripe_customer_id"],
+            return_url=request.host_url + "pricing",
         )
-
         return redirect(portal_session.url)
 
     except Exception as e:
-        print(f"Error creating customer portal: {e}")
+        print(f"❌ Error creating customer portal: {e}")
         flash("Unable to access subscription management. Please contact support.", "error")
         return redirect(url_for("pricing"))
+
+
+# --- Stripe Webhook ---
+
+@app.route("/stripe-webhook", methods=["POST"])
+def stripe_webhook():
+    """Handle Stripe webhook events. This is the SINGLE source of truth."""
+    payload = request.get_data(as_text=True)
+    sig_header = request.headers.get("Stripe-Signature")
+
+    # Require a webhook secret in production
+    if not STRIPE_WEBHOOK_SECRET:
+        print("❌ STRIPE_WEBHOOK_SECRET is not set. Refusing webhook.")
+        return jsonify({"error": "Webhook not configured"}), 400
+
+    try:
+        event = stripe.Webhook.construct_event(payload, sig_header, STRIPE_WEBHOOK_SECRET)
+    except stripe.error.SignatureVerificationError as e:
+        print(f"❌ Invalid Stripe signature: {e}")
+        return jsonify({"error": "Invalid signature"}), 400
+    except ValueError as e:
+        print(f"❌ Invalid payload: {e}")
+        return jsonify({"error": "Invalid payload"}), 400
+    except Exception as e:
+        print(f"❌ Webhook construct error: {e}")
+        return jsonify({"error": "Webhook error"}), 400
+
+    event_type = event["type"]
+    obj = event["data"]["object"]
+    print(f"🔔 Received Stripe webhook: {event_type}")
+
+    try:
+        if event_type == "customer.subscription.created":
+            handle_subscription_created(obj)
+        elif event_type == "customer.subscription.updated":
+            handle_subscription_updated(obj)
+        elif event_type == "customer.subscription.deleted":
+            handle_subscription_deleted(obj)
+        elif event_type == "invoice.payment_succeeded":
+            handle_payment_succeeded(obj)
+        elif event_type == "invoice.payment_failed":
+            handle_payment_failed(obj)
+        else:
+            print(f"⚠️ Unhandled event type: {event_type}")
+    except Exception as e:
+        print(f"❌ Error handling {event_type}: {e}")
+
+    return jsonify({"status": "success"}), 200
+
+
+# --- Webhook Handlers ---
+
+def handle_subscription_created(subscription):
+    """Create/attach subscription on first creation. Idempotent."""
+    try:
+        stripe_subscription_id = subscription["id"]
+        customer_id = subscription["customer"]
+        status = subscription["status"]
+        metadata = subscription.get("metadata", {})
+        user_id = metadata.get("user_id")
+        tier = metadata.get("tier", "base")
+
+        if not user_id:
+            print(f"⚠️ No user_id in subscription metadata: {stripe_subscription_id}")
+            return
+
+        # Idempotency: skip if we already have this subscription recorded
+        try:
+            existing = storage.get_subscription_by_stripe_id(stripe_subscription_id)
+        except Exception as e:
+            existing = None
+            print(f"⚠️ DB check failed for {stripe_subscription_id}: {e}")
+
+        if existing:
+            print(f"ℹ️ Subscription {stripe_subscription_id} already exists, skipping insert")
+            return
+
+        # Promote "pending" to a real subscription (or create if pending missing)
+        result = storage.handle_subscription_created(
+            stripe_subscription_id=stripe_subscription_id,
+            user_id=int(user_id),
+            tier=tier,
+            stripe_customer_id=customer_id
+        )
+
+        if result.get("success"):
+            print(f"✅ DB updated for subscription creation: {stripe_subscription_id}")
+        else:
+            print(f"❌ DB update failed (created): {result.get('error')}")
+
+    except Exception as e:
+        print(f"❌ Error in handle_subscription_created: {e}")
+
+
+def handle_subscription_updated(subscription):
+    """Update status and metadata on any Stripe subscription changes."""
+    try:
+        stripe_subscription_id = subscription["id"]
+        status = subscription["status"]
+
+        result = storage.handle_subscription_updated(stripe_subscription_id, status)
+        if result.get("success"):
+            print(f"🔄 DB updated: {stripe_subscription_id} → {status}")
+        else:
+            print(f"❌ DB update failed (updated): {result.get('error')}")
+    except Exception as e:
+        print(f"❌ Error in handle_subscription_updated: {e}")
+
+
+def handle_subscription_deleted(subscription):
+    """Mark canceled in DB."""
+    try:
+        stripe_subscription_id = subscription["id"]
+
+        result = storage.handle_subscription_cancelled(stripe_subscription_id)
+        if result.get("success"):
+            print(f"🗑️ DB updated: {stripe_subscription_id} canceled")
+        else:
+            print(f"❌ DB update failed (deleted): {result.get('error')}")
+    except Exception as e:
+        print(f"❌ Error in handle_subscription_deleted: {e}")
+
+
+def handle_payment_succeeded(invoice):
+    """Payment succeeded — mark paid and ensure active status."""
+    try:
+        subscription_id = invoice.get("subscription")
+        if not subscription_id:
+            print("ℹ️ invoice.payment_succeeded without subscription id")
+            return
+
+        result = storage.handle_payment_succeeded(subscription_id)
+        if result.get("success"):
+            print(f"💰 Payment success recorded for {subscription_id}")
+        else:
+            print(f"❌ DB update failed (payment_succeeded): {result.get('error')}")
+    except Exception as e:
+        print(f"❌ Error in handle_payment_succeeded: {e}")
+
+
+def handle_payment_failed(invoice):
+    """Payment failed — mark past_due or similar."""
+    try:
+        subscription_id = invoice.get("subscription")
+        if not subscription_id:
+            print("ℹ️ invoice.payment_failed without subscription id")
+            return
+
+        result = storage.handle_payment_failed(subscription_id)
+        if result.get("success"):
+            print(f"⚠️ Payment failure recorded for {subscription_id}")
+        else:
+            print(f"❌ DB update failed (payment_failed): {result.get('error')}")
+    except Exception as e:
+        print(f"❌ Error in handle_payment_failed: {e}")
 
 
 

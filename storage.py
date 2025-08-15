@@ -316,19 +316,19 @@ def save_business_settings(user_id,
         if form_settings:
             data.update({
                 "form_primary_color":
-                form_settings.get("primary_color", "#3B82F6"),
+                form_settings.get("primary_color", "#3b82f6"),
                 "form_secondary_color":
-                form_settings.get("secondary_color", "#8B5CF6"),
+                form_settings.get("secondary_color", "#3b82f6"),
                 "form_logo_url":
                 form_settings.get("logo_url", ""),
                 "form_welcome_message":
                 form_settings.get("welcome_message", ""),
                 "form_background_style":
-                form_settings.get("background_style", "gradient"),
+                form_settings.get("background_style", "minimal"),
                 "form_gradient_start_color":
-                form_settings.get("gradient_start_color", "#667eea"),
+                form_settings.get("gradient_start_color"),
                 "form_gradient_end_color":
-                form_settings.get("gradient_end_color", "#764ba2"),
+                form_settings.get("gradient_end_color"),
             })
 
         if existing.data and len(existing.data) > 0:

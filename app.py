@@ -1,11 +1,12 @@
 import os
-import logging
+
 from functools import wraps
 from flask import (Flask, session, render_template, request, flash, redirect,
                    url_for, jsonify)
-import re # Added import for re
+
 import stripe
 import gunicorn
+
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
@@ -13,15 +14,13 @@ from flask_dance.contrib.google import make_google_blueprint, google
 import storage  # your Supabase wrapper
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret")
-#logging.basicConfig(level=logging.DEBUG)
+app.secret_key = os.environ.get("SESSION_SECRET")
+
 
 # Stripe configuration
-stripe.api_key = os.environ.get(
-    "STRIPE_SECRET_KEY",
-    "sk_test_51RtKi7BjU8tzBncUAqdviYQF4MKAy9KwwsFbMsApvjBGhYyhgAbk4FPBrnyIzC2rpSaezfawwMxZnlp3R9JKWf8300GcMuMV2a"
-)
-STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
+stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
+
+STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET")
 
 app.config.update(
     SESSION_COOKIE_SECURE=False,  # allow cookies over HTTP
@@ -107,9 +106,8 @@ def require_pro_subscription(f):
 
 #-- google --
 google_bp = make_google_blueprint(
-    client_id=
-    "91383092955-di8bp52510dvf2d17n6cqnpvam8bk47f.apps.googleusercontent.com",
-    client_secret="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",
+    client_id=os.environ.get("CLIENT_ID"),
+    client_secret=os.environ.get("CLIENT_SECRET"),
     scope=[
         "openid",
         "https://www.googleapis.com/auth/userinfo.email",

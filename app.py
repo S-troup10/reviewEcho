@@ -1,12 +1,12 @@
 import os
-
+from dotenv import load_dotenv
 from functools import wraps
 from flask import (Flask, session, render_template, request, flash, redirect,
                    url_for, jsonify)
 
 import stripe
 import gunicorn
-
+load_dotenv()
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
@@ -453,6 +453,9 @@ def support() :
 
 @app.route("/admin")
 def admin():
+    
+    if session.get("user_id", 0) != 1 :
+        return redirect(url_for("index"))
     users = storage.fetch("users")
     messages = storage.fetch("support_messages", {"pending" : True})
     return render_template("admin.html", messages = messages, users=users)

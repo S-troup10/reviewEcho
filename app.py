@@ -5,8 +5,7 @@ from flask import (Flask, session, render_template, request, flash, redirect,
                    url_for, jsonify)
 import re # Added import for re
 import stripe
-import hmac
-import hashlib
+import gunicorn
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 

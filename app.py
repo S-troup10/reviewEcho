@@ -11,7 +11,7 @@ load_dotenv()
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
 from flask_dance.contrib.google import make_google_blueprint, google
-import storage  # your Supabase wrapper
+import storage 
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET")
@@ -50,6 +50,8 @@ def require_login(f):
         return f(*args, **kwargs)
 
     return wrapper
+
+
 
 
 def require_subscription(f):
@@ -116,6 +118,9 @@ google_bp = make_google_blueprint(
     redirect_url="/login/google/success"  # Custom redirect after OAuth login
 )
 app.register_blueprint(google_bp, url_prefix="/auth")
+
+
+
 
 @app.route("/privacy")
 def privacy():
@@ -823,36 +828,6 @@ def pricing():
 
 
 
-
-
-import os
-import stripe
-from flask import (
-    Flask, request, jsonify, render_template, redirect,
-    url_for, flash, session
-)
-from functools import wraps
-
-# --- App + Stripe setup ---
-app = Flask(__name__)
-app.secret_key = os.getenv("FLASK_SECRET_KEY", "dev-secret")  # set in prod
-stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
-STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
-
-# Your storage abstraction — assumed available in your project
-# Methods referenced below should be implemented on your side.
-
-
-# --- Helpers ---
-def require_login(f):
-    @wraps(f)
-    def wrapped(*args, **kwargs):
-        if not session.get("user_id"):
-            flash("Please log in first.", "error")
-            return redirect(url_for("login"))
-        return f(*args, **kwargs)
-    return wrapped
-
 # Centralized price config (keep in code or load from env/DB)
 PRICES = {
     "base": {"amount": 3400, "name": "Base Plan"},   # $34.00
@@ -1407,6 +1382,7 @@ def not_found(error):
 def internal_error(error):
     return render_template("403.html",
                            error_message="Internal server error"), 500
+
 
 
 if __name__ == "__main__":

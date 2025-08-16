@@ -841,7 +841,7 @@ STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
 
 # Your storage abstraction — assumed available in your project
 # Methods referenced below should be implemented on your side.
-from storage import storage
+
 
 # --- Helpers ---
 def require_login(f):

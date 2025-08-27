@@ -5,25 +5,34 @@
 {% block content %}
 <div class="space-y-6 fade-in">
   <!-- Header -->
-  <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-    <div>
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">
-        <i class="fas fa-history text-purple-600 mr-3"></i>AI Reports History
-      </h1>
-      <p class="text-gray-600">View and compare your past AI business intelligence reports</p>
-    </div>
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+  <div>
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">
+      <i class="fas fa-history text-purple-600 mr-3"></i>AI Reports History
+    </h1>
+    <p class="text-gray-600">View and compare your past AI business intelligence reports</p>
 
-    <div class="flex gap-3">
-      <a onclick="showLoadingSpinner('Generating comprehensive AI analysis...')" href="{{ url_for('ai_review_summary') }}" 
-         class="btn-primary">
-        <i class="fas fa-plus mr-2"></i>Generate New Report
-      </a>
-      <a href="{{ url_for('dashboard') }}" 
-         class="btn-secondary">
-        <i class="fas fa-arrow-left mr-2"></i>Dashboard
-      </a>
-    </div>
+    {% if disabled %}
+      <p class="text-sm text-red-500 mt-2">
+        You need to collect more reviews before generating a new AI report.
+      </p>
+    {% endif %}
   </div>
+
+  <div class="flex gap-3">
+    <a 
+      onclick="{% if not disabled %}showLoadingSpinner('Generating comprehensive AI analysis...'){% endif %}" 
+      href="{% if not disabled %}{{ url_for('ai_review_summary') }}{% else %}#{% endif %}" 
+      class="btn-primary {% if disabled %}opacity-50 cursor-not-allowed pointer-events-none{% endif %}">
+      <i class="fas fa-plus mr-2"></i>Generate New Report
+    </a>
+    <a href="{{ url_for('dashboard') }}" 
+       class="btn-secondary">
+      <i class="fas fa-arrow-left mr-2"></i>Dashboard
+    </a>
+  </div>
+</div>
+
 
   {% if reports %}
   <!-- Reports Grid -->

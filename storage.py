@@ -228,8 +228,8 @@ def upsert(table: str, data):
     Performs a bulk upsert into the specified table using Supabase.
 
     Args:
-        table (str): Table name as a string.
-        data (List[Dict]): List of dictionaries representing rows to insert/update.
+        table (str): Table name.
+        data (List[Dict]): List of rows to insert/update.
 
     Returns:
         dict: { success: bool, data: list (on success), error: str (on failure) }
@@ -238,16 +238,17 @@ def upsert(table: str, data):
         if not data:
             raise ValueError("Data list is empty")
 
-        response = supabase.table(table).upsert(data).execute()
-        print('supabase response : ', response)
-        # If response.data is None or empty, treat as failure
+        response = supabase.table(table).upsert(data, on_conflict="user_id").execute()
+        print('Supabase response:', response)
+
         if response:
             return {'success': True, 'data': response.data}
 
-        return {'error': 'No data returned from upsert', 'success': False}
+        return {'success': False, 'error': 'No data returned from upsert'}
 
     except Exception as e:
-        return {'error': str(e), 'success': False}
+        return {'success': False, 'error': str(e)}
+
 
 
 # Initialize the database
@@ -694,26 +695,33 @@ def generate_ai_review_summary(user_id, force_regenerate=False):
     """Generate AI-powered review summary with SWOT analysis and caching"""
     try:
         # Get business info
-        business_settings = supabase.table("business_settings").select("*").eq(
-            "user_id", user_id
-        ).execute()
+        business_settings = supabase.table("business_settings").select("*").eq("user_id", user_id).execute()
         if not business_settings.data:
             return {'success': False, 'error': 'Business not found'}
+
+
 
         business_info = business_settings.data[0]
         business_id = business_info['id']
         business_name = business_info['business_name']
 
         # Get reviews
-        reviews_response = supabase.table("reviews").select("*").eq(
-            "business_id", business_id
-        ).order("created_at", desc=True).execute()
-        reviews = reviews_response.data
+        all_reviews_response = supabase.table("reviews").select("*").eq("business_id", business_id).execute()
+
+        reviews = [
+            r for r in all_reviews_response.data
+            if r.get("review_text")
+        ]
+
+
+        print(reviews)
+
 
         if not reviews or len(reviews) < 2:
             return {
                 'success': False,
-                'error': 'Need at least 2 reviews for meaningful analysis'
+                'error': 'Need at least 2 detailed reviews for meaningful analysis',
+                'limit':True
             }
 
         # Check cache unless forcing regeneration
@@ -726,7 +734,7 @@ def generate_ai_review_summary(user_id, force_regenerate=False):
         review_texts = [
             {
                 'rating': r['rating'],
-                'text': r['review_text'],
+                'text': r.get('review_text', ''),
                 'type': r['review_type'],
                 'date': r['created_at']
             }
@@ -739,7 +747,7 @@ Analyze the following customer reviews for {business_name} and provide a compreh
 
 Your analysis should include:
 1. Overall sentiment (positive/negative/mixed)
-2. Executive summary (2-3 sentences overview of business performance)
+2. Executive summary (3-4 sentences overview of business performance)
 3. Detailed analysis (10-20 sentences covering strengths, issues, and strategic recommendations)
 4. Key strengths (3-5 bullet points of what the business does well)
 5. Areas for improvement (3-5 bullet points of specific issues to address)
@@ -752,7 +760,7 @@ Your analysis should include:
 Return ONLY a JSON object in this exact format:
 {{
   "overall_sentiment": "positive|negative|mixed",
-  "executive_summary": "Brief 2-3 sentence overview of business performance and current state",
+  "executive_summary": "Brief 3-4 sentence overview of business performance and current state",
   "detailed_analysis": "A comprehensive 10-20 sentence analysis depending on review numbers that covers business strengths, identifies issues and problems, analyzes customer feedback patterns, and provides clear recommendations for what the company should do going forward to improve and grow",
   "key_strengths": ["Strength 1", "Strength 2" ...],
   "areas_for_improvement": ["Improvement area 1", "Improvement area 2" ...],
@@ -1123,6 +1131,8 @@ def create_paid_subscription(user_id, tier, stripe_subscription_id):
         return {'success': False, 'error': error_msg}
 
 
+from datetime import datetime, timezone
+
 def get_user_subscription_status(user_id):
     """Get user's current subscription status"""
     try:
@@ -1134,14 +1144,25 @@ def get_user_subscription_status(user_id):
                 'in_trial': False,
                 'tier': None,
                 'trial_days_left': 0,
-                'expires_at': None
+                'expires_at': None,
+                'status': None,
+                'cancel': False,
+                'cancel_date': None,
+                'cancel_date_formatted': None
             }
 
         subscription = response.data[0]
         now = datetime.now(timezone.utc)
 
+        cancel = subscription.get('cancel', False)
+        cancel_date = None
+        cancel_date_formatted = None
+        if subscription.get('cancel_date'):
+            cancel_date = datetime.fromisoformat(subscription['cancel_date'].replace('Z', '+00:00'))
+            cancel_date_formatted = cancel_date.strftime("%B %d, %Y")  # e.g. "August 27, 2025"
+
         # Check if in trial
-        if subscription['status'] == 'trialing' and subscription['trial_end']:
+        if subscription['status'] == 'trialing' and subscription.get('trial_end'):
             trial_end = datetime.fromisoformat(subscription['trial_end'].replace('Z', '+00:00'))
             if trial_end > now:
                 trial_days_left = (trial_end - now).days
@@ -1150,26 +1171,38 @@ def get_user_subscription_status(user_id):
                     'in_trial': True,
                     'tier': subscription['tier'],
                     'trial_days_left': trial_days_left,
-                    'expires_at': trial_end
+                    'expires_at': trial_end,
+                    'status': 'trialing',
+                    'cancel': cancel,
+                    'cancel_date': cancel_date,
+                    'cancel_date_formatted': cancel_date_formatted
                 }
 
-        # Check if has active paid subscription
-        if subscription['status'] == 'active':
+        # Check if has active paid subscription or pending
+        if subscription['status'] in ['active', 'pending']:
             return {
                 'has_active_subscription': True,
                 'in_trial': False,
                 'tier': subscription['tier'],
                 'trial_days_left': 0,
-                'expires_at': None  # For monthly subscriptions, we don't track exact end date
+                'expires_at': None,  # For monthly subscriptions, we don't track exact end date
+                'status': subscription['status'],
+                'cancel': cancel,
+                'cancel_date': cancel_date,
+                'cancel_date_formatted': cancel_date_formatted
             }
 
-        # Subscription expired or cancelled
+        # Subscription expired, cancelled, or past due
         return {
-            'has_active_subscription': False,
+            'has_active_subscription': subscription['status'] == 'past_due',  # Allow access for past_due
             'in_trial': False,
             'tier': subscription['tier'],
             'trial_days_left': 0,
-            'expires_at': None
+            'expires_at': None,
+            'status': subscription['status'],
+            'cancel': cancel,
+            'cancel_date': cancel_date,
+            'cancel_date_formatted': cancel_date_formatted
         }
 
     except Exception as e:
@@ -1179,8 +1212,13 @@ def get_user_subscription_status(user_id):
             'in_trial': False,
             'tier': None,
             'trial_days_left': 0,
-            'expires_at': None
+            'expires_at': None,
+            'status': None,
+            'cancel': False,
+            'cancel_date': None,
+            'cancel_date_formatted': None
         }
+
 
 
 def get_user_subscription_info(user_id):
@@ -1223,6 +1261,85 @@ def handle_subscription_cancelled(stripe_subscription_id):
         return {'success': False, 'error': str(e)}
 
 
+# Mapping Stripe price IDs to your internal tier names
+PRICE_TO_TIER = {
+    "price_1S0jJ2BYs79KBSyXwm7Wr1zJ": "base",
+    "price_1S0jJIBYs79KBSyXFgubpRUA": "pro",
+}
+
+def handle_subscription_updated(subscription, status):
+    """Handle webhook when Stripe subscription is updated"""
+    try:
+        stripe_subscription_id = subscription["id"]
+
+        # Handle subscription items
+        items_data = []
+        items = subscription.get("items")
+        if isinstance(items, dict) and "data" in items:
+            items_data = items["data"]
+        elif isinstance(items, list):
+            items_data = items
+        else:
+            print(f"⚠️ Subscription {stripe_subscription_id} has unexpected items format: {type(items)}")
+            return {'success': False, 'error': 'Unexpected items format'}
+
+        if not items_data:
+            print(f"⚠️ Subscription {stripe_subscription_id} has no items")
+            return {'success': False, 'error': 'No items in subscription'}
+
+        current_price_id = items_data[0]["price"]["id"]
+        tier = PRICE_TO_TIER.get(current_price_id, "base")
+        print(f"✅ Subscription {stripe_subscription_id} tier detected: {tier}")
+
+        update_data = {
+            "status": status,
+            "tier": tier,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "cancel": False,
+            "cancel_date": None
+        }
+
+        # Handle scheduled cancellation
+        if subscription.get("cancel_at_period_end"):
+            update_data["cancel"] = True
+            cancel_at = subscription.get("cancel_at")
+            if cancel_at:
+                update_data["cancel_date"] = datetime.fromtimestamp(cancel_at, tz=timezone.utc).isoformat()
+
+        # Update in Supabase
+        response = supabase.table("subscriptions") \
+            .update(update_data) \
+            .eq("stripe_subscription_id", stripe_subscription_id) \
+            .execute()
+
+        
+        
+        
+        return {'success': True, 'data': response.data, "tier":tier}
+
+    except Exception as e:
+        print(f"❌ Error handling subscription updated: {e}")
+        return {'success': False, 'error': str(e)}
+
+
+
+
+
+def handle_payment_succeeded(stripe_subscription_id):
+    """Handle webhook when payment succeeds"""
+    try:
+        update_data = {
+            "status": "active",
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }
+
+        response = supabase.table("subscriptions").update(update_data).eq("stripe_subscription_id", stripe_subscription_id).execute()
+        return {'success': True, 'data': response.data}
+    except Exception as e:
+        print(f"Error handling payment succeeded: {e}")
+        return {'success': False, 'error': str(e)}
+
+
 def handle_payment_failed(stripe_subscription_id):
     """Handle webhook when payment fails"""
     try:
@@ -1238,18 +1355,112 @@ def handle_payment_failed(stripe_subscription_id):
         return {'success': False, 'error': str(e)}
 
 
-def handle_subscription_created(stripe_subscription_id, user_id, tier):
+def get_subscription_by_stripe_id(stripe_subscription_id):
+    """Get subscription by Stripe subscription ID"""
+    try:
+        response = supabase.table("subscriptions").select("*").eq("stripe_subscription_id", stripe_subscription_id).limit(1).execute()
+        return response.data[0] if response.data else None
+    except Exception as e:
+        print(f"Error getting subscription by Stripe ID: {e}")
+        return None
+
+
+def mark_pending_subscription(user_id, tier):
+    """Mark subscription as pending for immediate UI feedback"""
+    try:
+        # Check if subscription exists
+        existing = supabase.table("subscriptions").select("*").eq("user_id", user_id).execute()
+        
+        pending_data = {
+            "user_id": user_id,
+            "tier": tier,
+            "status": "pending",
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }
+
+        if existing.data and len(existing.data) > 0:
+            # Update existing
+            response = supabase.table("subscriptions").update(pending_data).eq("user_id", user_id).execute()
+        else:
+            # Create new
+            pending_data["created_at"] = datetime.now(timezone.utc).isoformat()
+            response = supabase.table("subscriptions").insert(pending_data).execute()
+
+        return {'success': True, 'data': response.data}
+    except Exception as e:
+        print(f"Error marking pending subscription: {e}")
+        return {'success': False, 'error': str(e)}
+
+
+def get_user_subscription(user_id: int):
+    """
+    Fetch the subscription info for a given user from Supabase.
+    Returns a dict with stripe_subscription_id, tier, status, etc., or None if not found.
+    """
+    try:
+        response = supabase.table("subscriptions").select(
+            "*"
+        ).eq("user_id", user_id).single().execute()
+
+        if response.data:
+            return response.data
+        else:
+            return None
+
+    except Exception as e:
+        print(f"❌ Error fetching subscription for user {user_id}: {e}")
+        return None
+
+
+
+
+def update_subscription_tier(user_id: int, tier: str):
+    """
+    Update a user's subscription tier in Supabase.
+    """
+    try:
+        response = supabase.table("users").update({
+            "tier": tier
+        }).eq("id", user_id).execute()
+
+        if hasattr(response, "data") and response.data:
+            print(f"✅ Updated user {user_id} to tier '{tier}'")
+            return response.data[0]
+        else:
+            print(f"⚠️ No rows updated for user {user_id}")
+            return None
+
+    except Exception as e:
+        print(f"❌ Error updating subscription tier for user {user_id}: {e}")
+        return None
+
+
+
+
+def handle_subscription_created(stripe_subscription_id, user_id, tier, stripe_customer_id):
     """Handle webhook when Stripe subscription is created"""
     try:
-        update_data = {
+        # First check if subscription already exists
+        existing = supabase.table("subscriptions").select("*").eq("user_id", user_id).execute()
+        
+        subscription_data = {
+            "user_id": int(user_id),
             "stripe_subscription_id": stripe_subscription_id,
+            "stripe_customer_id": stripe_customer_id,
             "tier": tier,
             "status": "active",
             "trial_end": None,  # Clear trial when subscription starts
             "updated_at": datetime.now(timezone.utc).isoformat()
         }
 
-        response = supabase.table("subscriptions").update(update_data).eq("user_id", user_id).execute()
+        if existing.data and len(existing.data) > 0:
+            # Update existing subscription
+            response = supabase.table("subscriptions").update(subscription_data).eq("user_id", user_id).execute()
+        else:
+            # Create new subscription
+            subscription_data["created_at"] = datetime.now(timezone.utc).isoformat()
+            response = supabase.table("subscriptions").insert(subscription_data).execute()
+
         return {'success': True, 'data': response.data}
     except Exception as e:
         print(f"Error handling subscription created: {e}")
@@ -1405,9 +1616,9 @@ def get_customer_by_email_or_phone(user_id, email, phone):
         business_id = get_business_id(user_id)
         if not business_id:
             return None
-            
+
         query = supabase.table("customers").select("id").eq("business_id", business_id)
-        
+
         if email and phone:
             # Check for either email OR phone match
             response = query.or_(f"email.eq.{email},phone.eq.{phone}").execute()
@@ -1417,9 +1628,9 @@ def get_customer_by_email_or_phone(user_id, email, phone):
             response = query.eq("phone", phone).execute()
         else:
             return None
-            
+
         return response.data[0] if response.data else None
-        
+
     except Exception as e:
         print(f"Error checking customer duplicates: {e}")
         return None
@@ -1430,36 +1641,32 @@ def bulk_add_customers(business_id, customers_data):
     try:
         # Validate and prepare customer data
         valid_customers = []
-        
+
         for customer in customers_data:
             name = (customer.get('name') or '').strip() if customer else ''
             email = (customer.get('email') or '').strip() if customer else ''
             phone = (customer.get('phone') or '').strip() if customer else ''
 
-            
+
             # Name is optional - use email prefix if not provided
             if not name and email:
                 name = email.split('@')[0]
             elif not name:
                 name = 'Unknown'
-                
+
             if not email and not phone:
                 continue
-                
+
             # Validate email format if provided
             if email and not validate_email(email):
                 continue
-                
+
             # Validate phone format if provided  
             if phone and not validate_phone(phone):
                 continue
-            
+
             # Check for duplicate email in this business
-            if email:
-                existing = supabase.table("customers").select("id").eq("business_id", business_id).eq("email", email).execute()
-                if existing.data:
-                    continue
-            
+
             # Prepare customer data
             customer_data = {
                 "business_id": business_id,
@@ -1468,21 +1675,21 @@ def bulk_add_customers(business_id, customers_data):
                 "phone": phone if phone else None,
                 "created_at": datetime.now(timezone.utc).isoformat()
             }
-            
+
             valid_customers.append(customer_data)
-        
+
         if not valid_customers:
             return {'success': False, 'error': 'No valid customers to add'}
-        
+
         # Insert all customers at once
         response = supabase.table("customers").insert(valid_customers).execute()
-        
+
         return {
             'success': True,
             'added': len(valid_customers),
             'data': response.data
         }
-        
+
     except Exception as e:
         return {'success': False, 'error': str(e)}
 
@@ -1503,6 +1710,165 @@ def delete_customers(business_id, customer_ids):
         return {
             'success': True,
             'deleted': len(valid_ids)
+        }
+
+    except Exception as e:
+        return {'success': False, 'error': str(e)}
+
+
+import email_outreach
+import phone_outreach
+
+from datetime import datetime, timezone
+import time
+
+def send_feedback_requests(business_id, customer_ids, user_id):
+    """Send feedback requests to selected customers via email and/or SMS and log results."""
+    try:
+        sent_count = 0
+        failed_count = 0
+        failed_list = []
+        data_to_insert = []
+
+        # --- Get business settings ---
+        business_settings = supabase.table("business_settings").select("*").eq("id", business_id).execute()
+        if not business_settings.data:
+            return {'success': False, 'error': 'Business settings not found'}
+
+        business_name = business_settings.data[0].get('business_name', '')
+
+        # --- Get customer details ---
+        customers_res = supabase.table("customers").select("*").in_("id", customer_ids).execute()
+        customers = customers_res.data or []
+        cleaned_customers = [
+            {
+                "id": c.get("id"),
+                "name": (c.get("name") or "").strip(),
+                "email": (c.get("email") or "").strip(),
+                "phone": (c.get("phone") or "").strip()
+            }
+            for c in customers
+        ]
+
+        # --- Prepare lists for each method (a customer can appear in both lists) ---
+        customers_to_email = [c for c in cleaned_customers if c.get("email")]
+        customers_to_phone = [c for c in cleaned_customers if c.get("phone")]
+
+        # --- Fetch limits for user ---
+        limits = fetch("usage_limits", {"user_id": user_id})
+        limits = limits[0] if limits else None
+        if not limits:
+            return {"success": False, "error": "no limits found for user"}
+
+        phone_limit = int(limits.get("sms_limit") or 0)
+        phone_usage = int(limits.get("sms_usage") or 0)
+        email_limit = int(limits.get("email_limit") or 0)
+        email_usage = int(limits.get("email_usage") or 0)
+
+        phone_remaining = phone_limit - phone_usage
+        email_remaining = email_limit - email_usage
+
+        attempted_phone_count = len(customers_to_phone)
+        attempted_email_count = len(customers_to_email)
+
+        if phone_remaining < attempted_phone_count:
+            return {"success": False, "error": "phone limit reached", "phone_remaining": phone_remaining, "attempted": attempted_phone_count}
+
+        if email_remaining < attempted_email_count:
+            return {"success": False, "error": "email limit reached", "email_remaining": email_remaining, "attempted": attempted_email_count}
+
+        # --- Send emails ---
+        email_results = []
+        if customers_to_email:
+            email_results = email_outreach.send_feedback_emails(business_id, business_name, customers_to_email)
+            if isinstance(email_results, dict):
+                if email_results.get("success", False):
+                    email_results = [{"success": True} for _ in customers_to_email]
+                else:
+                    email_results = [{"success": False, "error": email_results.get("error")} for _ in customers_to_email]
+            if len(email_results) < len(customers_to_email):
+                email_results = list(email_results) + [{"success": False, "error": "no result returned"}] * (len(customers_to_email) - len(email_results))
+
+            for customer, log in zip(customers_to_email, email_results):
+                success = bool(log.get('success'))
+                request_data = {
+                    "customer_id": customer['id'],
+                    "business_id": business_id,
+                    "customer_name": customer.get('name', ''),
+                    "method": 'email',
+                    "status": "sent" if success else 'failed',
+
+                    "sent_at": datetime.now(timezone.utc).isoformat()
+                }
+                data_to_insert.append(request_data)
+                if success:
+                    sent_count += 1
+                else:
+                    failed_count += 1
+                    failed_list.append({"customer": customer, "reason": log.get("error") if isinstance(log, dict) else "failed"})
+
+        # --- Send SMS ---
+        sms_results = []
+        if customers_to_phone:
+            sms_results = phone_outreach.send_sms(business_id, business_name, customers_to_phone)
+            if isinstance(sms_results, dict):
+                if sms_results.get("success", False):
+                    sms_results = [{"success": True} for _ in customers_to_phone]
+                else:
+                    sms_results = [{"success": False, "error": sms_results.get("error")} for _ in customers_to_phone]
+            if len(sms_results) < len(customers_to_phone):
+                sms_results = list(sms_results) + [{"success": False, "error": "no result returned"}] * (len(customers_to_phone) - len(sms_results))
+
+            for customer, log in zip(customers_to_phone, sms_results):
+                success = bool(log.get('success'))
+                request_data = {
+                    "customer_id": customer.get('id', None),
+                    "business_id": business_id,
+                    "customer_name": customer.get('name', ''),
+                    "method": 'phone',
+                    "status": "sent" if success else 'failed',
+                    "sent_at": datetime.now(timezone.utc).isoformat()
+                }
+                data_to_insert.append(request_data)
+                if success:
+                    sent_count += 1
+                else:
+                    failed_count += 1
+                    failed_list.append({"customer": customer, "reason": log.get("error") if isinstance(log, dict) else "failed"})
+
+        # --- Insert logs ---
+        if data_to_insert:
+            supabase.table("feedback_requests").insert(data_to_insert).execute()
+
+        # --- Update usage_limits normally (read latest -> compute -> update) ---
+        actual_email_sent = sum(1 for row in data_to_insert if row.get("method") == "email" and row.get("status") == "sent")
+        actual_sms_sent = sum(1 for row in data_to_insert if row.get("method") == "phone" and row.get("status") == "sent")
+
+        if actual_email_sent or actual_sms_sent:
+            # re-fetch latest to reduce overwrite risk
+            latest_limits = fetch("usage_limits", {"user_id": user_id})
+            latest = latest_limits[0] if latest_limits else limits
+            new_email_usage = int(latest.get("email_usage", 0)) + actual_email_sent
+            new_sms_usage = int(latest.get("sms_usage", 0)) + actual_sms_sent
+
+            # simple retry loop for update (helps with transient conflicts)
+            update_payload = {"email_usage": new_email_usage, "sms_usage": new_sms_usage}
+            attempts = 0
+            while attempts < 3:
+                resp = supabase.table("usage_limits").update(update_payload).eq("user_id", user_id).execute()
+                # resp may contain an 'error' field depending on client; treat empty data as failure
+                if getattr(resp, "error", None) is None:
+                    break
+                attempts += 1
+                time.sleep(0.1 * attempts)  # small backoff
+
+        return {
+            'success': True,
+            'sent': sent_count,
+            'failed': failed_count,
+            'failed_list': failed_list,
+            'actual_email_sent': actual_email_sent,
+            'actual_sms_sent': actual_sms_sent
         }
 
     except Exception as e:

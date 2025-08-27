@@ -53,6 +53,77 @@
         </div>
       </div>
 
+
+
+
+
+
+{% if usage %}
+<div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
+  <h2 class="text-2xl font-semibold text-gray-900 mb-8 flex items-center">
+    <i class="fas fa-chart-pie mr-3 text-indigo-600"></i>
+    Usage Overview
+  </h2>
+
+  <div class="grid md:grid-cols-3 gap-8">
+    <!-- Email Limit -->
+    <div class="flex flex-col bg-gradient-to-br from-indigo-50 to-white border border-indigo-100 rounded-xl p-5 shadow-sm">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center space-x-2">
+          <i class="fas fa-envelope text-indigo-500"></i>
+          <span class="text-sm font-medium text-gray-700">Email Usage</span>
+        </div>
+        <span class="text-xs font-semibold text-indigo-700 bg-indigo-100 px-2 py-1 rounded-full">
+          {{ (usage.email_usage / usage.email_limit * 100) | round(0) if usage.email_limit else 0 }}%
+        </span>
+      </div>
+      <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+        <div class="bg-indigo-500 h-3 rounded-full transition-all duration-500"
+             style="width: {{ (usage.email_usage / usage.email_limit * 100) if usage.email_limit else 0 }}%"></div>
+      </div>
+      <p class="text-sm text-gray-700 mt-3 font-semibold">
+        {{ usage.email_usage }} / {{ usage.email_limit }}
+      </p>
+      <p class="text-gray-500 text-xs mt-1">Emails available this cycle</p>
+    </div>
+
+    <!-- SMS Limit -->
+    <div class="flex flex-col bg-gradient-to-br from-green-50 to-white border border-green-100 rounded-xl p-5 shadow-sm">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center space-x-2">
+          <i class="fas fa-sms text-green-500"></i>
+          <span class="text-sm font-medium text-gray-700">SMS Usage</span>
+        </div>
+        <span class="text-xs font-semibold text-green-700 bg-green-100 px-2 py-1 rounded-full">
+          {{ (usage.sms_usage / usage.sms_limit * 100) | round(0) if usage.sms_limit else 0 }}%
+        </span>
+      </div>
+      <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+        <div class="bg-green-500 h-3 rounded-full transition-all duration-500"
+             style="width: {{ (usage.sms_usage / usage.sms_limit * 100) if usage.sms_limit else 0 }}%"></div>
+      </div>
+      <p class="text-sm text-gray-700 mt-3 font-semibold">
+        {{ usage.sms_usage }} / {{ usage.sms_limit }}
+      </p>
+      <p class="text-gray-500 text-xs mt-1">SMS available this cycle</p>
+    </div>
+
+    <!-- Refresh Date -->
+    <div class="flex flex-col justify-center items-center bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-6 shadow-sm">
+      <i class="fas fa-sync-alt text-gray-600 text-2xl mb-3"></i>
+      <span class="text-sm font-medium text-gray-600">Refresh Date</span>
+      <span class="text-lg font-semibold text-gray-900 mt-1">{{ usage.refresh_date }}</span>
+      <p class="text-gray-500 text-xs mt-2">Your limits reset on this date</p>
+    </div>
+  </div>
+</div>
+
+
+
+{% endif %}
+
+
+
       <!-- Notification Preferences -->
       <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
         <h2 class="text-2xl font-semibold text-gray-900 mb-6 flex items-center">

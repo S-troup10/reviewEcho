@@ -157,6 +157,27 @@
                 </p>
             </div>
 
+
+                  {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="mb-6 space-y-3">
+        {% for category, msg in messages %}
+        <div class="card p-4 border-l-4 
+                {% if category == 'error' %}border-red-500 bg-red-50
+                {% elif category == 'success' %}border-green-500 bg-green-50
+                {% else %}border-blue-500 bg-blue-50{% endif %} 
+                fade-in" data-flash-message>
+          <div class="flex items-center">
+            <i class="fas fa-{% if category == 'error' %}exclamation-circle text-red-600{% elif category == 'success' %}check-circle text-green-600{% else %}info-circle text-blue-600{% endif %} mr-3"></i>
+            <span class="font-medium text-gray-900">{{ msg }}</span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% endwith %}
+
+      
             <!-- Review Form -->
             <div class="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-8 border border-white border-opacity-20">
                 <form method="POST" action="{{ url_for('submit_review', business_id=business.id) }}" class="space-y-8">
@@ -169,7 +190,7 @@
                                 type="text" 
                                 name="customer_name" 
                                 id="customer_name"
-                                required 
+                                
                                 class="w-full px-4 py-3 rounded-lg form-input focus:outline-none focus:ring-2 transition-all"
                                 style="focus:ring-color: var(--primary-color);"
                                 placeholder="Enter your full name">
@@ -183,7 +204,7 @@
                                 type="email" 
                                 name="customer_email" 
                                 id="customer_email"
-                                required 
+                                
                                 class="w-full px-4 py-3 rounded-lg form-input focus:outline-none focus:ring-2 transition-all"
                                 style="focus:ring-color: var(--primary-color);"
                                 placeholder="your@email.com">
@@ -280,7 +301,7 @@
             const name = document.getElementById('customer_name').value.trim();
             const email = document.getElementById('customer_email').value.trim();
 
-            submitBtn.disabled = !(rating && name && email);
+            submitBtn.disabled = !(rating);
         }
 
         // Add event listeners to other inputs

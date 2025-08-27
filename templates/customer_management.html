@@ -110,9 +110,6 @@
         <div class="space-y-6">
           <div class="bg-white border-2 border-gray-200 rounded-xl p-6 shadow-sm">
             <div class="text-center mb-4">
-              <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3">
-                <i class="fas fa-file-csv text-blue-600 text-xl"></i>
-              </div>
               <h3 class="text-lg font-semibold text-gray-900 mb-2">Upload CSV File</h3>
               <p class="text-sm text-gray-600">Select your customer data file - we'll help you map the columns next</p>
             </div>
@@ -294,7 +291,15 @@
   </div>
 
   <!-- Existing Customers Table -->
-  {% if customers %}
+  {% set visible_customers = [] %}
+{% for customer in customers %}
+  {% set has_feedback = feedback_requests|selectattr("customer_id", "equalto", customer.id)|list|length > 0 %}
+  {% if not has_feedback %}
+    {% set _ = visible_customers.append(customer) %}
+  {% endif %}
+{% endfor %}
+
+{% if visible_customers %}
   <div class="card">
     <div class="p-6 border-b border-gray-200">
       <div class="flex flex-col md:flex-row items-start md:items-center justify-between">
@@ -332,7 +337,7 @@
           </tr>
         </thead>
         <tbody id="tableBody" class="divide-y divide-gray-200">
-          {% for customer in customers %}
+          {% for customer in visible_customers %}
           <tr class="hover:bg-gray-50 customer-row transition-colors duration-200" data-customer-id="{{ customer.id }}">
             <td class="px-6 py-4">
               <input type="checkbox" class="customer-checkbox rounded border-gray-300" value="{{ customer.id }}"
@@ -367,19 +372,10 @@
               {{ customer.created_at if customer.created_at else 'Unknown' }}
             </td>
             <td class="px-6 py-4">
-              {% set has_feedback = feedback_requests|selectattr("customer_id", "equalto", customer.id)|list|length > 0
-              %}
-              {% if has_feedback %}
-              <span
-                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                <i class="fas fa-check mr-1"></i>Contacted
-              </span>
-              {% else %}
               <span
                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                 <i class="fas fa-clock mr-1"></i>Not Contacted
               </span>
-              {% endif %}
             </td>
           </tr>
           {% endfor %}
@@ -387,17 +383,18 @@
       </table>
     </div>
   </div>
-  {% else %}
+{% else %}
   <div class="card">
     <div class="text-center py-12">
       <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
         <i class="fas fa-users text-gray-400 text-2xl"></i>
-      </div>
-      <h3 class="text-lg font-medium text-gray-900 mb-2">No customers yet</h3>
-      <p class="text-gray-600">Use the form above to add your first customers</p>
-    </div>
+     </div>
+<h3 class="text-lg font-medium text-gray-900 mb-2">No customers yet</h3>
+<p class="text-gray-600">Use the form above to add your first customers.</p>
+<p class="text-gray-500 text-xs">Note: Customers you’ve contacted will appear in the recent feedback requests section below.</p>
+</div>
   </div>
-  {% endif %}
+{% endif %}
 
   <!-- Recent Feedback Requests -->
   {% if feedback_requests %}
@@ -425,7 +422,7 @@
               <div class="flex items-center text-sm text-gray-600">
                 {% if request.method == 'email' %}
                 <i class="fas fa-envelope mr-2 text-blue-500"></i>Email
-                {% elif request.method == 'sms' %}
+                {% elif request.method == 'phone' %}
                 <i class="fas fa-sms mr-2 text-green-500"></i>SMS
                 {% else %}
                 <i class="fas fa-paper-plane mr-2 text-purple-500"></i>Both
@@ -473,57 +470,87 @@
   </div>
 </div>
 
-<!-- Send Feedback Modal -->
+
 <div id="sendFeedbackModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
-  <div class="bg-white rounded-2xl p-8 max-w-lg w-full mx-4 transform transition-all duration-300">
-    <div class="flex items-center justify-between mb-6">
-      <h3 class="text-xl font-semibold text-gray-900">Send Feedback Requests</h3>
+  <div class="bg-white rounded-2xl p-6 max-w-3xl w-full mx-4 transform transition-all duration-300">
+    
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-semibold text-gray-900">Send Feedback Requests</h3>
       <button onclick="hideSendFeedbackModal()" class="text-gray-400 hover:text-gray-600 transition-colors duration-200">
-        <i class="fas fa-times text-xl"></i>
+        <i class="fas fa-times text-lg"></i>
       </button>
     </div>
 
     <form id="sendFeedbackForm" class="space-y-4">
-      <div>
-        <p class="text-sm text-gray-600 mb-4">
-          Sending to <span id="selectedCount">0</span> selected customers via all available contact methods
+      <!-- Selected Customers -->
+      <div class="flex justify-between items-center bg-gray-50 border border-gray-200 rounded-lg p-3">
+        <p class="text-sm text-gray-600">
+          Sending to <span id="selectedCount" class="font-semibold">0</span> selected customers via all available contact methods
         </p>
-      </div>
-
-      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <div class="flex items-start">
-          <i class="fas fa-info-circle text-blue-600 mr-2 mt-0.5"></i>
-          <div class="text-sm text-blue-800">
-            <p class="font-medium">Automatic Contact Method:</p>
-            <p>We'll send feedback requests to customers using all their available contact methods (email and/or phone).</p>
+        <div class="flex gap-6">
+          <div class="text-center">
+            <p class="text-xs text-gray-500">Emails to Send</p>
+            <p id="totalEmails" class="text-base font-semibold text-indigo-700">0</p>
+          </div>
+          <div class="text-center">
+            <p class="text-xs text-gray-500">SMS to Send</p>
+            <p id="totalPhones" class="text-base font-semibold text-green-700">0</p>
           </div>
         </div>
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Custom Message (Optional)</label>
-        <textarea name="custom_message" rows="4"
-          class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-          placeholder="Add a personal message to your feedback request..."></textarea>
-      </div>
-
-      <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-        <div class="flex items-start">
-          <i class="fas fa-exclamation-triangle text-yellow-600 mr-2 mt-0.5"></i>
-          <div class="text-sm text-yellow-800">
-            <p class="font-medium">Note:</p>
-            <p>This will send customers a request to leave a review. The message will include your review form link.</p>
+      <!-- Current Limits -->
+      <div class="grid grid-cols-2 gap-4">
+        <!-- Email Limit -->
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-xs text-gray-600">Emails Used</span>
+            <span class="text-xs font-semibold text-indigo-700">{{ usage.email_usage }} / {{ usage.email_limit }}</span>
+          </div>
+          <div class="w-full bg-gray-100 rounded-full h-1.5">
+            <div class="bg-indigo-500 h-1.5 rounded-full" style="width: {{ (usage.email_usage / usage.email_limit * 100) if usage.email_limit else 0 }}%"></div>
+          </div>
+        </div>
+        <!-- SMS Limit -->
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-xs text-gray-600">SMS Used</span>
+            <span class="text-xs font-semibold text-green-700">{{ usage.sms_usage }} / {{ usage.sms_limit }}</span>
+          </div>
+          <div class="w-full bg-gray-100 rounded-full h-1.5">
+            <div class="bg-green-500 h-1.5 rounded-full" style="width: {{ (usage.sms_usage / usage.sms_limit * 100) if usage.sms_limit else 0 }}%"></div>
           </div>
         </div>
       </div>
 
-      <div class="flex gap-3 pt-4">
-        <button type="button" onclick="hideSendFeedbackModal()" class="flex-1 btn-secondary transform transition-all duration-200 hover:scale-105">Cancel</button>
-        <button type="submit" class="flex-1 btn-primary transform transition-all duration-200 hover:scale-105">Send Requests</button>
+      <!-- Info Panels -->
+      <div id="notes" class="grid grid-cols-2 gap-3">
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-800 flex items-start">
+          <i class="fas fa-info-circle text-blue-600 mr-1 mt-0.5"></i>
+          <span>Automatic Contact: We'll send via email or phone automatically.</span>
+        </div>
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-xs text-yellow-800 flex items-start">
+          <i class="fas fa-exclamation-triangle text-yellow-600 mr-1 mt-0.5"></i>
+          <span>Note: Customers will receive a review request including your form link.</span>
+        </div>
+      </div>
+
+      <!-- Error Note -->
+      <div id="usage_note" class="bg-red-50 border border-red-200 rounded-lg p-3 text-xs text-red-800 hidden flex items-start">
+        <i class="fas fa-exclamation-circle text-red-600 mr-1 mt-0.5"></i>
+        <span>Usage Limits Exceeded — reduce selection or upgrade your plan.</span>
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex gap-3 pt-2">
+        <button type="button" onclick="hideSendFeedbackModal()" class="flex-1 btn-secondary">Cancel</button>
+        <button id="modal_btn" type="submit" class="flex-1 btn-primary">Send Requests</button>
       </div>
     </form>
   </div>
 </div>
+
 
 
 
@@ -694,37 +721,86 @@
     const errorElement = document.getElementById(fieldId + 'Error');
     errorElement.classList.add('hidden');
   }
-
+const allCustomers = {{ customers|tojson }};
   // Function to check if email or phone already exists in database
-  function checkExistingCustomer(email, phone) {
-    const existingCustomers = document.querySelectorAll('.customer-row');
-    
-    for (let row of existingCustomers) {
-      const rowData = row.textContent.toLowerCase();
-      
-      // Check email
-      if (email && rowData.includes(email.toLowerCase())) {
-        return { exists: true, type: 'email', value: email };
-      }
-      
-      // Check phone (normalize phone numbers for comparison)
-      if (phone) {
-        const normalizedPhone = phone.replace(/[\s\-\(\)\.]/g, '');
-        const rowPhone = rowData.match(/[\d\+\-\(\)\s\.]+/g);
-        
-        if (rowPhone) {
-          for (let existingPhone of rowPhone) {
-            const normalizedExisting = existingPhone.replace(/[\s\-\(\)\.]/g, '');
-            if (normalizedPhone === normalizedExisting) {
-              return { exists: true, type: 'phone', value: phone };
-            }
-          }
+function checkExistingCustomer(email, phone) {
+  const rows = document.querySelectorAll('.customer-row');
+  const inputEmail = email ? email.trim().toLowerCase() : null;
+  const inputPhone = phone ? phone.replace(/[^\d+]/g, '') : null;
+
+  const emailRegex = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
+  const phoneRegex = /(\+?\d[\d\-\s\(\)\.]{5,}\d)/g;
+
+  // ---- 1) Check visible customers (unchanged) ----
+  for (const row of rows) {
+    const rowId = row.getAttribute('data-customer-id') || null;
+    const contactCell = row.querySelector('td:nth-child(3)') || row;
+    const text = (contactCell.textContent || '').trim();
+
+    if (inputEmail) {
+      const emailMatches = text.match(emailRegex) || [];
+      for (const em of emailMatches) {
+        if (inputEmail === em.trim().toLowerCase()) {
+          return { exists: true, type: 'email', value: em.trim(), rowId, visible: true };
         }
       }
     }
-    
-    return { exists: false };
+
+    if (inputPhone) {
+      const phoneMatches = text.match(phoneRegex) || [];
+      for (const p of phoneMatches) {
+        const normalized = p.replace(/[^\d+]/g, '');
+        if (inputPhone === normalized) {
+          return { exists: true, type: 'phone', value: p.trim(), rowId, visible: true };
+        }
+      }
+    }
+
+    if (inputEmail) {
+      const fallbackEmail = (row.textContent || '').match(emailRegex) || [];
+      for (const em of fallbackEmail) {
+        if (inputEmail === em.trim().toLowerCase()) {
+          return { exists: true, type: 'email', value: em.trim(), rowId, visible: true };
+        }
+      }
+    }
+
+    if (inputPhone) {
+      const fallbackPhones = (row.textContent || '').match(phoneRegex) || [];
+      for (const p of fallbackPhones) {
+        const normalized = p.replace(/[^\d+]/g, '');
+        if (inputPhone === normalized) {
+          return { exists: true, type: 'phone', value: p.trim(), rowId, visible: true };
+        }
+      }
+    }
   }
+
+  // ---- 2) Check non-visible customers from JS copy ----
+  if (Array.isArray(allCustomers)) {
+    for (const customer of allCustomers) {
+      // skip visible ones since already checked
+      if (document.querySelector(`.customer-row[data-customer-id="${customer.id}"]`)) continue;
+
+      if (inputEmail && customer.email && inputEmail === customer.email.trim().toLowerCase()) {
+        // Return a different flag for non-visible
+        return { exists: true, type: 'email', value: customer.email, rowId: customer.id, visible: false, nonVisible: true };
+      }
+
+      if (inputPhone && customer.phone) {
+        const normalized = customer.phone.replace(/[^\d+]/g, '');
+        if (inputPhone === normalized) {
+          return { exists: true, type: 'phone', value: customer.phone, rowId: customer.id, visible: false, nonVisible: true };
+        }
+      }
+    }
+  }
+
+  return { exists: false };
+}
+
+
+
 
   // Manual entry button click handler with client-side validation
   document.getElementById('addToListBtn').addEventListener('click', function () {
@@ -765,16 +841,28 @@
 
     // Check if customer already exists in database
     const existingCheck = checkExistingCustomer(email, phone);
-    if (existingCheck.exists) {
-      if (existingCheck.type === 'email') {
-        showError('email', 'This email already exists in your database');
-        showCustomModal('warning', 'Duplicate Email', `A customer with the email "${existingCheck.value}" already exists in your database.`);
-      } else {
-        showError('phone', 'This phone number already exists in your database');
-        showCustomModal('warning', 'Duplicate Phone', `A customer with the phone number "${existingCheck.value}" already exists in your database.`);
-      }
-      return;
+
+if (existingCheck.exists) {
+  if (existingCheck.type === 'email') {
+    showError('email', 'This email already exists in your database');
+    if (existingCheck.nonVisible) {
+      showCustomModal('warning', 'Duplicate Email', `A customer with the email "${existingCheck.value}" exists and has already been contacted.`);
+    } else {
+      showCustomModal('warning', 'Duplicate Email', `A customer with the email "${existingCheck.value}" already exists in your database.`);
     }
+  } else {
+    showError('phone', 'This phone number already exists in your database');
+    if (existingCheck.nonVisible) {
+      showCustomModal('warning', 'Duplicate Phone', `A customer with the phone number "${existingCheck.value}" exists and has already been contacted.`);
+    } else {
+      showCustomModal('warning', 'Duplicate Phone', `A customer with the phone number "${existingCheck.value}" already exists in your database.`);
+    }
+  }
+
+  return;
+}
+
+
 
     // Check for duplicates in current list
     const isDuplicateInList = customersToAdd.some(customer =>
@@ -788,7 +876,7 @@
     }
 
     // Use email prefix as name if no name provided
-    const finalName = name || (email ? email.split('@')[0] : 'Unknown');
+    const finalName = name || (email ? email.split('@')[0] : '-');
 
     // Add to list
     customersToAdd.push({
@@ -997,7 +1085,7 @@
       const phone = row.phone.trim();
 
       // Auto-generate name from email if no name provided
-      const displayName = name || (email ? email.split('@')[0] : 'Unknown');
+      const displayName = name || (email ? email.split('@')[0] : '-');
 
       // Validate row
       let status = 'Valid';
@@ -1073,7 +1161,7 @@
       const phone = row.phone.trim();
 
       // Use email prefix as name if no name provided
-      const finalName = name || (email ? email.split('@')[0] : 'Unknown');
+      const finalName = name || (email ? email.split('@')[0] : '');
 
       // Check if exists in database
       const existingCheck = checkExistingCustomer(email, phone);
@@ -1309,11 +1397,57 @@ function validateBeforeAdd() {
 
   // Existing customer management functions
 
-  function sendFeedbackModal() {
-    const selected = document.querySelectorAll('.customer-checkbox:checked').length;
-    document.getElementById('selectedCount').textContent = selected;
-    document.getElementById('sendFeedbackModal').classList.remove('hidden');
+function sendFeedbackModal() {
+  const selected = document.querySelectorAll('.customer-checkbox:checked');
+  document.getElementById('selectedCount').textContent = selected.length;
+
+  let totalEmails = 0;
+  let totalPhones = 0;
+
+  const sms_remaining = Number("{{ usage.sms_limit - usage.sms_usage }}");
+  const email_remaining = Number("{{ usage.email_limit - usage.email_usage }}");
+
+  selected.forEach(checkbox => {
+    const row = checkbox.closest('tr');
+    const emailElement = row.querySelector('.fa-envelope');
+    const phoneElement = row.querySelector('.fa-phone');
+
+    if (emailElement) totalEmails++;
+    if (phoneElement && !emailElement) totalPhones++;
+  });
+
+  console.log("Emails:", totalEmails, "Phones:", totalPhones);
+
+  // Display in modal
+  document.getElementById('totalEmails').textContent = totalEmails;
+  document.getElementById('totalPhones').textContent = totalPhones;
+
+
+  const notes = document.getElementById("notes");
+  const usage_error = document.getElementById("usage_note");
+
+  // Enable/disable send button based on limits
+  const sendBtn = document.getElementById("modal_btn");
+  if (totalEmails > email_remaining || totalPhones > sms_remaining) {
+    sendBtn.disabled = true;
+    sendBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    
+    notes.classList.add("hidden");
+    
+    usage_error.classList.remove("hidden");
+  
+  } else {
+    notes.classList.remove("hidden");
+    usage_error.classList.add("hidden");
+    sendBtn.disabled = false;
+    sendBtn.classList.remove('opacity-50', 'cursor-not-allowed');
   }
+
+  // Show the modal
+  document.getElementById('sendFeedbackModal').classList.remove('hidden');
+}
+
+
 
   function hideSendFeedbackModal() {
     document.getElementById('sendFeedbackModal').classList.add('hidden');
@@ -1387,9 +1521,10 @@ function validateBeforeAdd() {
         if (data.success) {
           hideSendFeedbackModal();
           showCustomModal('success', 'Requests Sent', `Feedback requests sent successfully!\nSent: ${data.sent}\nFailed: ${data.failed}`);
+          hideSendFeedbackModal()
           setTimeout(() => {
             location.reload();
-          }, 2000);
+          }, 1500);
         } else {
           showCustomModal('error', 'Send Failed', data.error);
         }

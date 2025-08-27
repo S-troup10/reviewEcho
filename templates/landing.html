@@ -1,325 +1,1658 @@
-
 {% extends "base.html" %}
 
 {% block title %}ReviewEcho Platform - Professional Review Management{% endblock %}
 
 {% block content %}
 <div class="-mx-4 -my-8 px-4 py-16 text-gray-900">
-  <div class="max-w-7xl mx-auto space-y-16">
-    <!-- Hero Section -->
-    <section class="text-center space-y-8 fade-in">
-      <div class="relative">
-        <h1 class="text-6xl md:text-7xl font-bold mb-8 text-gray-900">
-          Transform Your 
-          <span class="bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
-            Review Management
+  <div class="max-w-7xl mx-auto space-y-24">
+
+    <!-- Hero Section with Enhanced Animation -->
+    <section class="relative text-center space-y-12 fade-in overflow-hidden">
+      <!-- Background Elements -->
+      <div class="absolute inset-0 -z-10">
+        <div
+          class="absolute top-20 left-20 w-32 h-32 bg-gradient-to-br from-blue-200 to-purple-200 rounded-full opacity-20 blur-xl animate-pulse">
+        </div>
+        <div
+          class="absolute top-40 right-20 w-48 h-48 bg-gradient-to-br from-green-200 to-blue-200 rounded-full opacity-20 blur-xl animate-pulse"
+          style="animation-delay: 1s;"></div>
+        <div
+          class="absolute bottom-20 left-1/2 transform -translate-x-1/2 w-64 h-64 bg-gradient-to-br from-purple-200 to-pink-200 rounded-full opacity-20 blur-xl animate-pulse"
+          style="animation-delay: 2s;"></div>
+      </div>
+
+      <div class="relative z-10">
+        <!-- Main Hero Content -->
+        <div
+          class="inline-flex items-center bg-gradient-to-r from-blue-50 to-purple-50 px-6 py-3 rounded-full border border-blue-200 mb-8">
+          <i class="fas fa-star text-yellow-500 mr-2"></i>
+          <span class="text-sm font-semibold text-gray-700">Trusted by 1000+ businesses worldwide</span>
+          <i class="fas fa-star text-yellow-500 ml-2"></i>
+        </div>
+
+        <h1 class="text-6xl md:text-8xl font-bold mb-12 text-gray-900 leading-tight">
+          Transform Your
+          <span class="bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 bg-clip-text text-transparent block">
+            Review Game
           </span>
         </h1>
-      </div>
 
-      <p class="text-xl md:text-2xl text-gray-700 max-w-4xl mx-auto leading-relaxed">
-        Smart review filtering that automatically directs <span class="text-indigo-600 font-semibold">positive reviews to Google</span> 
-        while keeping negative feedback private for improvement. Built for businesses that care about their reputation.
-      </p>
+        <p class="text-2xl md:text-3xl text-gray-700 max-w-5xl mx-auto leading-relaxed mb-12 font-light">
+          Smart review filtering that automatically directs <span class="text-indigo-600 font-semibold">positive reviews
+            to Google</span>
+          while keeping negative feedback private for improvement. Built for businesses that care about their
+          reputation.
+        </p>
 
-      <div class="flex flex-col sm:flex-row items-center justify-center gap-6 mt-12">
-        <a href="/signup" 
-           class="btn-primary text-xl px-10 py-4 pulse-glow">
-          <i class="fas fa-rocket mr-3"></i>Get Started Now
-        </a>
-        <a href="/pricing" 
-           class="btn-secondary text-xl px-10 py-4">
-          <i class="fas fa-tag mr-3"></i>View Pricing
-        </a>
+        <!-- CTA Buttons with Enhanced Design -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-8 mt-16">
+          <a href="/signup"
+            class="group relative overflow-hidden bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xl px-12 py-5 rounded-2xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-2xl pulse-glow">
+            <span class="relative z-10 flex items-center">
+              <i class="fas fa-rocket mr-3 group-hover:rotate-12 transition-transform"></i>
+              Start Free Trial
+            </span>
+            <div
+              class="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            </div>
+          </a>
+
+          <a href=""
+            class="group bg-white border-2 border-gray-200 text-gray-700 text-xl px-12 py-5 rounded-2xl font-semibold hover:bg-gray-50 hover:border-indigo-300 transition-all duration-300 hover:scale-105">
+            <i class="fas fa-play mr-3 group-hover:text-indigo-600 transition-colors"></i>
+            Watch Demo
+          </a>
+        </div>
+
+        <!-- Trust Indicators -->
+        <div class="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 opacity-60">
+          <div class="text-center">
+            <div class="text-3xl font-bold text-indigo-600">99.9%</div>
+            <div class="text-sm text-gray-600">Uptime</div>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-bold text-green-600">1000+</div>
+            <div class="text-sm text-gray-600">Happy Clients</div>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-bold text-purple-600">50K+</div>
+            <div class="text-sm text-gray-600">Reviews Managed</div>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-bold text-blue-600">24/7</div>
+            <div class="text-sm text-gray-600">Support</div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- Key Value Proposition -->
+    <!-- Key Value Proposition with Enhanced Cards -->
     <section class="grid grid-cols-1 md:grid-cols-3 gap-8 fade-in" style="animation-delay: 0.2s;">
-      <div class="card rounded-2xl p-8 text-center scale-hover border-2 border-green-100">
-        <div class="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
-          <i class="fas fa-filter text-2xl text-white"></i>
+      <div
+        class="group card rounded-3xl p-10 text-center scale-hover border-2 border-green-100 hover:border-green-300 hover:shadow-2xl transition-all duration-300 relative overflow-hidden">
+        <div
+          class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-green-100 to-emerald-100 rounded-full -translate-y-8 translate-x-8 opacity-50">
         </div>
-        <h3 class="text-2xl font-bold text-green-600 mb-2">Smart Filtering</h3>
-        <p class="text-gray-600">4+ star reviews go to Google automatically. Lower ratings stay private for your improvement.</p>
+        <div class="relative z-10">
+          <div
+            class="w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+            <i class="fas fa-filter text-3xl text-white"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-green-600 mb-4">Smart Filtering</h3>
+          <p class="text-gray-600 text-lg leading-relaxed">4+ star reviews go to Google automatically. Lower ratings
+            stay private for your improvement.</p>
+        </div>
       </div>
 
-      <div class="card rounded-2xl p-8 text-center scale-hover border-2 border-purple-100">
-        <div class="w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
-          <i class="fas fa-brain text-2xl text-white"></i>
+      <div
+        class="group card rounded-3xl p-10 text-center scale-hover border-2 border-purple-100 hover:border-purple-300 hover:shadow-2xl transition-all duration-300 relative overflow-hidden">
+        <div
+          class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full -translate-y-8 translate-x-8 opacity-50">
         </div>
-        <h3 class="text-2xl font-bold text-purple-600 mb-2">AI Analysis</h3>
-        <p class="text-gray-600">Get comprehensive business insights, SWOT analysis, and actionable recommendations.</p>
+        <div class="relative z-10">
+          <div
+            class="w-20 h-20 bg-gradient-to-br from-purple-400 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+            <i class="fas fa-brain text-3xl text-white"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-purple-600 mb-4">AI Analysis</h3>
+          <p class="text-gray-600 text-lg leading-relaxed">Get comprehensive business insights, SWOT analysis, and
+            actionable recommendations.</p>
+        </div>
       </div>
 
-      <div class="card rounded-2xl p-8 text-center scale-hover border-2 border-yellow-100">
-        <div class="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
-          <i class="fas fa-paper-plane text-2xl text-white"></i>
+      <div
+        class="group card rounded-3xl p-10 text-center scale-hover border-2 border-yellow-100 hover:border-yellow-300 hover:shadow-2xl transition-all duration-300 relative overflow-hidden">
+        <div
+          class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-full -translate-y-8 translate-x-8 opacity-50">
         </div>
-        <h3 class="text-2xl font-bold text-yellow-600 mb-2">Customer Outreach</h3>
-        <p class="text-gray-600">Automated SMS and email campaigns to request feedback from your customers.</p>
+        <div class="relative z-10">
+          <div
+            class="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+            <i class="fas fa-paper-plane text-3xl text-white"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-yellow-600 mb-4">Customer Outreach</h3>
+          <p class="text-gray-600 text-lg leading-relaxed">Automated SMS and email campaigns to request feedback from
+            your customers.</p>
+        </div>
       </div>
     </section>
 
-    <!-- Main Features Section -->
-    <section id="features" class="space-y-12 fade-in" style="animation-delay: 0.4s;">
-      <div class="text-center">
-        <h2 class="text-4xl font-bold mb-6 text-gray-900">Everything You Need to Manage Reviews</h2>
+    <!-- Demo Video Section -->
+    <section id="demo" class="text-center space-y-12 fade-in" style="animation-delay: 0.4s;">
+      <div class="space-y-6">
+        <h2 class="text-5xl font-bold text-gray-900">See ReviewEcho in Action</h2>
         <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+          Watch how ReviewEcho transforms review management in just 2 minutes
+        </p>
+      </div>
+
+      <div class="relative max-w-4xl mx-auto">
+        <div
+          class="aspect-video bg-gradient-to-br from-indigo-100 to-purple-100 rounded-3xl border-4 border-white shadow-2xl overflow-hidden">
+          <div class="flex items-center justify-center h-full">
+            <button
+              class="group w-24 h-24 bg-white rounded-full shadow-xl flex items-center justify-center hover:scale-110 transition-transform duration-300">
+              <i class="fas fa-play text-indigo-600 text-2xl ml-1 group-hover:text-purple-600 transition-colors"></i>
+            </button>
+          </div>
+        </div>
+        <div class="absolute -top-4 -left-4 w-8 h-8 bg-yellow-400 rounded-full opacity-80"></div>
+        <div class="absolute -bottom-4 -right-4 w-12 h-12 bg-green-400 rounded-full opacity-60"></div>
+      </div>
+    </section>
+
+    <!-- Enhanced Features Section -->
+    <section id="features" class="space-y-16 fade-in" style="animation-delay: 0.6s;">
+      <div class="text-center space-y-6">
+        <div
+          class="inline-flex items-center bg-gradient-to-r from-indigo-50 to-purple-50 px-6 py-3 rounded-full border border-indigo-200">
+          <i class="fas fa-sparkles text-indigo-600 mr-2"></i>
+          <span class="text-sm font-semibold text-indigo-700">Powerful Features</span>
+        </div>
+        <h2 class="text-5xl font-bold text-gray-900">Everything You Need to Dominate Reviews</h2>
+        <p class="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
           Professional tools designed to boost your online reputation and gather valuable customer insights
         </p>
       </div>
 
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div class="grid lg:grid-cols-3 gap-10">
         <!-- QR Code Generation -->
-        <div class="group card p-8 scale-hover text-center border-2 border-gray-100">
-          <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform">
-            <i class="fas fa-qrcode text-3xl text-white"></i>
+        <div class="group relative">
+          <div
+            class="absolute inset-0 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-3xl transform rotate-1 group-hover:rotate-2 transition-transform duration-300">
           </div>
-          <h3 class="text-2xl font-bold mb-4 text-blue-600">QR Code & Posters</h3>
-          <p class="text-gray-600 leading-relaxed">
-            Generate branded QR codes and professional posters to collect reviews at your business location.
-          </p>
+          <div
+            class="relative bg-white card p-8 rounded-3xl border-2 border-gray-100 hover:border-blue-200 transition-all duration-300">
+            <div
+              class="w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl flex items-center justify-center mb-8 mx-auto group-hover:scale-110 transition-transform duration-300 shadow-lg">
+              <i class="fas fa-qrcode text-4xl text-white"></i>
+            </div>
+            <h3 class="text-2xl font-bold mb-4 text-blue-600">QR Code & Posters</h3>
+            <p class="text-gray-600 leading-relaxed text-lg">
+              Generate branded QR codes and professional posters to collect reviews at your business location.
+            </p>
+            <div class="mt-6 pt-6 border-t border-gray-100">
+              <span class="inline-flex items-center text-blue-600 font-semibold">
+                Learn More <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+              </span>
+            </div>
+          </div>
         </div>
 
         <!-- Custom Review Forms -->
-        <div class="group card p-8 scale-hover text-center border-2 border-gray-100">
-          <div class="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform">
-            <i class="fas fa-palette text-3xl text-white"></i>
+        <div class="group relative">
+          <div
+            class="absolute inset-0 bg-gradient-to-r from-purple-100 to-pink-100 rounded-3xl transform -rotate-1 group-hover:-rotate-2 transition-transform duration-300">
           </div>
-          <h3 class="text-2xl font-bold mb-4 text-purple-600">Custom Forms</h3>
-          <p class="text-gray-600 leading-relaxed">
-            Fully customizable review forms with your branding, colors, and personalized messaging.
-          </p>
+          <div
+            class="relative bg-white card p-8 rounded-3xl border-2 border-gray-100 hover:border-purple-200 transition-all duration-300">
+            <div
+              class="w-24 h-24 bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl flex items-center justify-center mb-8 mx-auto group-hover:scale-110 transition-transform duration-300 shadow-lg">
+              <i class="fas fa-palette text-4xl text-white"></i>
+            </div>
+            <h3 class="text-2xl font-bold mb-4 text-purple-600">Custom Forms</h3>
+            <p class="text-gray-600 leading-relaxed text-lg">
+              Fully customizable review forms with your branding, colors, and personalized messaging.
+            </p>
+            <div class="mt-6 pt-6 border-t border-gray-100">
+              <span class="inline-flex items-center text-purple-600 font-semibold">
+                Learn More <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+              </span>
+            </div>
+          </div>
         </div>
 
         <!-- Analytics Dashboard -->
-        <div class="group card p-8 scale-hover text-center border-2 border-gray-100">
-          <div class="w-20 h-20 bg-gradient-to-br from-green-500 to-teal-400 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform">
-            <i class="fas fa-chart-bar text-3xl text-white"></i>
+        <div class="group relative">
+          <div
+            class="absolute inset-0 bg-gradient-to-r from-green-100 to-teal-100 rounded-3xl transform rotate-1 group-hover:rotate-2 transition-transform duration-300">
           </div>
-          <h3 class="text-2xl font-bold mb-4 text-green-600">Analytics Dashboard</h3>
-          <p class="text-gray-600 leading-relaxed">
-            Track satisfaction rates, monitor trends, and get detailed insights into your customer feedback.
-          </p>
+          <div
+            class="relative bg-white card p-8 rounded-3xl border-2 border-gray-100 hover:border-green-200 transition-all duration-300">
+            <div
+              class="w-24 h-24 bg-gradient-to-br from-green-500 to-teal-400 rounded-3xl flex items-center justify-center mb-8 mx-auto group-hover:scale-110 transition-transform duration-300 shadow-lg">
+              <i class="fas fa-chart-bar text-4xl text-white"></i>
+            </div>
+            <h3 class="text-2xl font-bold mb-4 text-green-600">Analytics Dashboard</h3>
+            <p class="text-gray-600 leading-relaxed text-lg">
+              Track satisfaction rates, monitor trends, and get detailed insights into your customer feedback.
+            </p>
+            <div class="mt-6 pt-6 border-t border-gray-100">
+              <span class="inline-flex items-center text-green-600 font-semibold">
+                Learn More <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+              </span>
+            </div>
+          </div>
         </div>
 
         <!-- AI Business Intelligence -->
-        <div class="group card p-8 scale-hover text-center border-2 border-gray-100">
-          <div class="w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform">
-            <i class="fas fa-lightbulb text-3xl text-white"></i>
+        <div class="group relative">
+          <div
+            class="absolute inset-0 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-3xl transform -rotate-1 group-hover:-rotate-2 transition-transform duration-300">
           </div>
-          <h3 class="text-2xl font-bold mb-4 text-indigo-600">AI Reports</h3>
-          <p class="text-gray-600 leading-relaxed">
-            Comprehensive SWOT analysis, competitive positioning, and strategic recommendations powered by AI.
-          </p>
+          <div
+            class="relative bg-white card p-8 rounded-3xl border-2 border-gray-100 hover:border-indigo-200 transition-all duration-300">
+            <div
+              class="w-24 h-24 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl flex items-center justify-center mb-8 mx-auto group-hover:scale-110 transition-transform duration-300 shadow-lg">
+              <i class="fas fa-lightbulb text-4xl text-white"></i>
+            </div>
+            <h3 class="text-2xl font-bold mb-4 text-indigo-600">AI Reports</h3>
+            <p class="text-gray-600 leading-relaxed text-lg">
+              Comprehensive SWOT analysis, competitive positioning, and strategic recommendations powered by AI.
+            </p>
+            <div class="mt-6 pt-6 border-t border-gray-100">
+              <span class="inline-flex items-center text-indigo-600 font-semibold">
+                Learn More <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+              </span>
+            </div>
+          </div>
         </div>
 
         <!-- Customer Management -->
-        <div class="group card p-8 scale-hover text-center border-2 border-gray-100">
-          <div class="w-20 h-20 bg-gradient-to-br from-red-500 to-pink-500 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform">
-            <i class="fas fa-users text-3xl text-white"></i>
+        <div class="group relative">
+          <div
+            class="absolute inset-0 bg-gradient-to-r from-red-100 to-pink-100 rounded-3xl transform rotate-1 group-hover:rotate-2 transition-transform duration-300">
           </div>
-          <h3 class="text-2xl font-bold mb-4 text-red-600">Customer Database</h3>
-          <p class="text-gray-600 leading-relaxed">
-            Manage customer contacts and send targeted feedback requests via SMS and email campaigns.
-          </p>
+          <div
+            class="relative bg-white card p-8 rounded-3xl border-2 border-gray-100 hover:border-red-200 transition-all duration-300">
+            <div
+              class="w-24 h-24 bg-gradient-to-br from-red-500 to-pink-500 rounded-3xl flex items-center justify-center mb-8 mx-auto group-hover:scale-110 transition-transform duration-300 shadow-lg">
+              <i class="fas fa-users text-4xl text-white"></i>
+            </div>
+            <h3 class="text-2xl font-bold mb-4 text-red-600">Customer Database</h3>
+            <p class="text-gray-600 leading-relaxed text-lg">
+              Manage customer contacts and send targeted feedback requests via SMS and email campaigns.
+            </p>
+            <div class="mt-6 pt-6 border-t border-gray-100">
+              <span class="inline-flex items-center text-red-600 font-semibold">
+                Learn More <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+              </span>
+            </div>
+          </div>
         </div>
 
         <!-- Data Export -->
-        <div class="group card p-8 scale-hover text-center border-2 border-gray-100">
-          <div class="w-20 h-20 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform">
-            <i class="fas fa-download text-3xl text-white"></i>
+        <div class="group relative">
+          <div
+            class="absolute inset-0 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-3xl transform -rotate-1 group-hover:-rotate-2 transition-transform duration-300">
           </div>
-          <h3 class="text-2xl font-bold mb-4 text-yellow-600">Data Export</h3>
-          <p class="text-gray-600 leading-relaxed">
-            Export all your review data and insights in multiple formats for further analysis or reporting.
-          </p>
+          <div
+            class="relative bg-white card p-8 rounded-3xl border-2 border-gray-100 hover:border-yellow-200 transition-all duration-300">
+            <div
+              class="w-24 h-24 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-3xl flex items-center justify-center mb-8 mx-auto group-hover:scale-110 transition-transform duration-300 shadow-lg">
+              <i class="fas fa-download text-4xl text-white"></i>
+            </div>
+            <h3 class="text-2xl font-bold mb-4 text-yellow-600">Data Export</h3>
+            <p class="text-gray-600 leading-relaxed text-lg">
+              Export all your review data and insights in multiple formats for further analysis or reporting.
+            </p>
+            <div class="mt-6 pt-6 border-t border-gray-100">
+              <span class="inline-flex items-center text-yellow-600 font-semibold">
+                Learn More <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- How It Works -->
-    <section class="space-y-12 fade-in" style="animation-delay: 0.6s;">
-      <div class="text-center">
-        <h2 class="text-4xl font-bold mb-6 text-gray-900">How ReviewEcho Works</h2>
-        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+    <!-- How It Works with Timeline -->
+    <section class="space-y-16 fade-in" style="animation-delay: 0.8s;">
+      <div class="text-center space-y-6">
+        <div
+          class="inline-flex items-center bg-gradient-to-r from-green-50 to-blue-50 px-6 py-3 rounded-full border border-green-200">
+          <i class="fas fa-cogs text-green-600 mr-2"></i>
+          <span class="text-sm font-semibold text-green-700">Simple Process</span>
+        </div>
+        <h2 class="text-5xl font-bold text-gray-900">How ReviewEcho Works</h2>
+        <p class="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
           Simple 3-step process to transform your review management
         </p>
       </div>
 
-      <div class="grid md:grid-cols-3 gap-8">
-        <div class="text-center">
-          <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6">
-            <span class="text-2xl font-bold text-white">1</span>
-          </div>
-          <h3 class="text-xl font-bold mb-4">Setup Your Business</h3>
-          <p class="text-gray-600">Configure your business details, Google Review link, and customize your review form with your branding.</p>
+      <div class="relative">
+        <!-- Timeline Line -->
+        <div
+          class="hidden md:block absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-blue-200 via-purple-200 to-green-200 transform -translate-y-1/2">
         </div>
 
-        <div class="text-center">
-          <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-6">
-            <span class="text-2xl font-bold text-white">2</span>
-          </div>
-          <h3 class="text-xl font-bold mb-4">Collect Reviews</h3>
-          <p class="text-gray-600">Share your custom link, display QR codes, or send automated requests. Happy customers go to Google, others provide private feedback.</p>
-        </div>
-
-        <div class="text-center">
-          <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-6">
-            <span class="text-2xl font-bold text-white">3</span>
-          </div>
-          <h3 class="text-xl font-bold mb-4">Get Insights</h3>
-          <p class="text-gray-600">Monitor your dashboard, analyze AI reports, and implement recommendations to continuously improve your business.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Testimonials Section -->
-    <section class="fade-in" style="animation-delay: 0.8s;">
-      <div class="text-center mb-12">
-        <h2 class="text-4xl font-bold mb-6 text-gray-900">Trusted by Businesses Worldwide</h2>
-      </div>
-
-      <div class="grid md:grid-cols-2 gap-8">
-        <div class="card rounded-2xl p-8 scale-hover border-2 border-gray-100">
-          <div class="flex items-center mb-6">
-            <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center mr-4">
-              <i class="fas fa-user text-white"></i>
+        <div class="grid md:grid-cols-3 gap-12 relative">
+          <!-- Step 1 -->
+          <div class="group text-center relative">
+            <div
+              class="w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl group-hover:scale-110 transition-transform duration-300 relative z-10">
+              <span class="text-3xl font-bold text-white">1</span>
             </div>
-            <div>
-              <h4 class="font-bold text-gray-900">Alex Chen</h4>
-              <p class="text-gray-500">Restaurant Owner</p>
+            <div
+              class="bg-white rounded-3xl p-8 border-2 border-blue-100 hover:border-blue-300 transition-all duration-300 shadow-lg">
+              <h3 class="text-2xl font-bold mb-4 text-blue-600">Setup Your Business</h3>
+              <p class="text-gray-600 leading-relaxed">Configure your business details, Google Review link, and
+                customize your review form with your branding.</p>
             </div>
           </div>
-          <p class="text-gray-700 italic mb-4">
-            "ReviewEcho's smart filtering has doubled our Google reviews while helping us identify and fix service issues privately. The AI insights are incredibly valuable."
-          </p>
-          <div class="flex">
-            <i class="fas fa-star text-yellow-400"></i>
-            <i class="fas fa-star text-yellow-400"></i>
-            <i class="fas fa-star text-yellow-400"></i>
-            <i class="fas fa-star text-yellow-400"></i>
-            <i class="fas fa-star text-yellow-400"></i>
-          </div>
-        </div>
 
-        <div class="card rounded-2xl p-8 scale-hover border-2 border-gray-100">
-          <div class="flex items-center mb-6">
-            <div class="w-12 h-12 bg-gradient-to-br from-pink-400 to-red-500 rounded-full flex items-center justify-center mr-4">
-              <i class="fas fa-user text-white"></i>
+          <!-- Step 2 -->
+          <div class="group text-center relative">
+            <div
+              class="w-24 h-24 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl group-hover:scale-110 transition-transform duration-300 relative z-10">
+              <span class="text-3xl font-bold text-white">2</span>
             </div>
-            <div>
-              <h4 class="font-bold text-gray-900">Sarah Johnson</h4>
-              <p class="text-gray-500">Retail Manager</p>
+            <div
+              class="bg-white rounded-3xl p-8 border-2 border-purple-100 hover:border-purple-300 transition-all duration-300 shadow-lg">
+              <h3 class="text-2xl font-bold mb-4 text-purple-600">Collect Reviews</h3>
+              <p class="text-gray-600 leading-relaxed">Share your custom link, display QR codes, or send automated
+                requests. Happy customers go to Google, others provide private feedback.</p>
             </div>
           </div>
-          <p class="text-gray-700 italic mb-4">
-            "The automated customer outreach and comprehensive analytics have transformed how we handle feedback. Our satisfaction scores have improved dramatically."
-          </p>
-          <div class="flex">
-            <i class="fas fa-star text-yellow-400"></i>
-            <i class="fas fa-star text-yellow-400"></i>
-            <i class="fas fa-star text-yellow-400"></i>
-            <i class="fas fa-star text-yellow-400"></i>
-            <i class="fas fa-star text-yellow-400"></i>
+
+          <!-- Step 3 -->
+          <div class="group text-center relative">
+            <div
+              class="w-24 h-24 bg-gradient-to-br from-green-500 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl group-hover:scale-110 transition-transform duration-300 relative z-10">
+              <span class="text-3xl font-bold text-white">3</span>
+            </div>
+            <div
+              class="bg-white rounded-3xl p-8 border-2 border-green-100 hover:border-green-300 transition-all duration-300 shadow-lg">
+              <h3 class="text-2xl font-bold mb-4 text-green-600">Get Insights</h3>
+              <p class="text-gray-600 leading-relaxed">Monitor your dashboard, analyze AI reports, and implement
+                recommendations to continuously improve your business.</p>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Pricing Preview -->
- <section class="fade-in animate-fade-in delay-1000">
-  <div class="text-center mb-12">
-    <h2 class="text-4xl font-bold mb-6 text-gray-900">
-      Simple, Transparent Pricing
-    </h2>
-    <p class="text-xl text-gray-600">
-      Choose the plan that fits your business needs
-    </p>
-  </div>
-<div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-  <!-- Base Plan -->
-  <div class="card p-8 text-center border-2 border-gray-200 hover:border-indigo-300 transition-all rounded-xl shadow-sm flex flex-col">
-    <h3 class="text-2xl font-bold mb-4 text-indigo-600">Base</h3>
-    <div class="mb-6">
-      <span class="text-4xl font-bold text-gray-900">$34</span>
-      <span class="text-gray-500">/month</span>
-    </div>
-    <ul class="text-left space-y-3 mb-8">
-      <li class="flex items-center">
-        <i class="fas fa-check text-green-500 mr-3"></i>Smart review filtering
-      </li>
-      <li class="flex items-center">
-        <i class="fas fa-check text-green-500 mr-3"></i>Custom forms & QR codes
-      </li>
-      <li class="flex items-center">
-        <i class="fas fa-check text-green-500 mr-3"></i>Analytics dashboard
-      </li>
-      <li class="flex items-center">
-        <i class="fas fa-check text-green-500 mr-3"></i>Data export
-      </li>
-    </ul>
-    <a href="/pricing" class="btn-primary w-full mt-auto">Get Started</a>
-  </div>
-
-  <!-- Pro Plan -->
-  <div class="card p-8 text-center border-2 border-purple-300 hover:border-purple-400 transition-all rounded-xl shadow-sm relative flex flex-col">
-    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
-      <span class="bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-4 py-1 rounded-full text-sm font-bold">
-        Most Popular
-      </span>
-    </div>
-    <h3 class="text-2xl font-bold mb-4 text-purple-600 mt-4">Pro</h3>
-    <div class="mb-6">
-      <span class="text-4xl font-bold text-gray-900">$48</span>
-      <span class="text-gray-500">/month</span>
-    </div>
-    <ul class="text-left space-y-3 mb-8">
-      <li class="flex items-center">
-        <i class="fas fa-check text-green-500 mr-3"></i>Everything in Base
-      </li>
-      <li class="flex items-center">
-        <i class="fas fa-check text-purple-500 mr-3"></i>SMS & Email outreach
-      </li>
-      <li class="flex items-center">
-        <i class="fas fa-check text-purple-500 mr-3"></i>AI-powered insights
-      </li>
-      <li class="flex items-center">
-        <i class="fas fa-check text-purple-500 mr-3"></i>Priority support
-      </li>
-    </ul>
-    <a href="/pricing" class="btn-primary w-full mt-auto">Get Started</a>
-  </div>
-</div>
-
-  </div>
-</section>
-
-
-    <!-- CTA Section -->
-    <section class="text-center py-16 fade-in" style="animation-delay: 1.2s;">
-      <div class="max-w-4xl mx-auto">
-        <h2 class="text-4xl font-bold mb-6 text-gray-900">
-          Ready to Transform Your 
-          <span class="text-indigo-600">Review Management</span>?
-        </h2>
-        <p class="text-xl text-gray-600 mb-8 leading-relaxed">
-          Join thousands of businesses using ReviewEcho to build stronger customer relationships, 
-          improve their online reputation, and gain valuable business insights.
+    <!-- Enhanced Testimonials Section -->
+    <section class="fade-in" style="animation-delay: 1s;">
+      <div class="text-center mb-16 space-y-6">
+        <div
+          class="inline-flex items-center bg-gradient-to-r from-yellow-50 to-orange-50 px-6 py-3 rounded-full border border-yellow-200">
+          <i class="fas fa-quote-left text-yellow-600 mr-2"></i>
+          <span class="text-sm font-semibold text-yellow-700">Customer Stories</span>
+        </div>
+        <h2 class="text-5xl font-bold text-gray-900">Trusted by Businesses Worldwide</h2>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+          See how ReviewEcho has transformed review management for thousands of businesses
         </p>
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-6">
-          <a href="/signup" 
-             class="btn-primary text-xl px-12 py-4 pulse-glow">
-            <i class="fas fa-rocket mr-3"></i>Start Now
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-8">
+        <!-- Testimonial 1 -->
+        <div
+          class="group bg-white rounded-3xl p-8 border-2 border-gray-100 hover:border-blue-200 hover:shadow-2xl transition-all duration-300 relative overflow-hidden">
+          <div
+            class="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full -translate-y-6 translate-x-6 opacity-50">
+          </div>
+          <div class="relative z-10">
+            <div class="flex items-center mb-6">
+              <div
+                class="w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-500 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
+                <i class="fas fa-user text-white text-xl"></i>
+              </div>
+              <div>
+                <h4 class="font-bold text-gray-900 text-lg">Alex Chen</h4>
+                <p class="text-gray-500">Restaurant Owner</p>
+              </div>
+            </div>
+            <p class="text-gray-700 italic mb-6 text-lg leading-relaxed">
+              "ReviewEcho's smart filtering has doubled our Google reviews while helping us identify and fix service
+              issues privately. The AI insights are incredibly valuable."
+            </p>
+            <div class="flex mb-4">
+              <i class="fas fa-star text-yellow-400 text-lg"></i>
+              <i class="fas fa-star text-yellow-400 text-lg ml-1"></i>
+              <i class="fas fa-star text-yellow-400 text-lg ml-1"></i>
+              <i class="fas fa-star text-yellow-400 text-lg ml-1"></i>
+              <i class="fas fa-star text-yellow-400 text-lg ml-1"></i>
+            </div>
+            <div class="text-sm text-gray-500">
+              <i class="fas fa-map-marker-alt mr-1"></i>
+              San Francisco, CA
+            </div>
+          </div>
+        </div>
+
+        <!-- Testimonial 2 -->
+        <div
+          class="group bg-white rounded-3xl p-8 border-2 border-gray-100 hover:border-green-200 hover:shadow-2xl transition-all duration-300 relative overflow-hidden">
+          <div
+            class="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-green-100 to-teal-100 rounded-full -translate-y-6 translate-x-6 opacity-50">
+          </div>
+          <div class="relative z-10">
+            <div class="flex items-center mb-6">
+              <div
+                class="w-16 h-16 bg-gradient-to-br from-pink-400 to-red-500 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
+                <i class="fas fa-user text-white text-xl"></i>
+              </div>
+              <div>
+                <h4 class="font-bold text-gray-900 text-lg">Sarah Johnson</h4>
+                <p class="text-gray-500">Retail Manager</p>
+              </div>
+            </div>
+            <p class="text-gray-700 italic mb-6 text-lg leading-relaxed">
+              "The automated customer outreach and comprehensive analytics have transformed how we handle feedback. Our
+              satisfaction scores have improved dramatically."
+            </p>
+            <div class="flex mb-4">
+              <i class="fas fa-star text-yellow-400 text-lg"></i>
+              <i class="fas fa-star text-yellow-400 text-lg ml-1"></i>
+              <i class="fas fa-star text-yellow-400 text-lg ml-1"></i>
+              <i class="fas fa-star text-yellow-400 text-lg ml-1"></i>
+              <i class="fas fa-star text-yellow-400 text-lg ml-1"></i>
+            </div>
+            <div class="text-sm text-gray-500">
+              <i class="fas fa-map-marker-alt mr-1"></i>
+              New York, NY
+            </div>
+          </div>
+        </div>
+
+        <!-- Testimonial 3 -->
+        <div
+          class="group bg-white rounded-3xl p-8 border-2 border-gray-100 hover:border-purple-200 hover:shadow-2xl transition-all duration-300 relative overflow-hidden">
+          <div
+            class="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full -translate-y-6 translate-x-6 opacity-50">
+          </div>
+          <div class="relative z-10">
+            <div class="flex items-center mb-6">
+              <div
+                class="w-16 h-16 bg-gradient-to-br from-green-400 to-teal-500 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
+                <i class="fas fa-user text-white text-xl"></i>
+              </div>
+              <div>
+                <h4 class="font-bold text-gray-900 text-lg">Mike Rodriguez</h4>
+                <p class="text-gray-500">Dental Practice</p>
+              </div>
+            </div>
+            <p class="text-gray-700 italic mb-6 text-lg leading-relaxed">
+              "ReviewEcho has streamlined our entire feedback process. We've seen a 300% increase in positive reviews
+              and valuable insights for improvement."
+            </p>
+            <div class="flex mb-4">
+              <i class="fas fa-star text-yellow-400 text-lg"></i>
+              <i class="fas fa-star text-yellow-400 text-lg ml-1"></i>
+              <i class="fas fa-star text-yellow-400 text-lg ml-1"></i>
+              <i class="fas fa-star text-yellow-400 text-lg ml-1"></i>
+              <i class="fas fa-star text-yellow-400 text-lg ml-1"></i>
+            </div>
+            <div class="text-sm text-gray-500">
+              <i class="fas fa-map-marker-alt mr-1"></i>
+              Austin, TX
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Enhanced Pricing Section -->
+    <section class="fade-in" style="animation-delay: 1.2s;">
+      <div class="text-center mb-16 space-y-6">
+        <div
+          class="inline-flex items-center bg-gradient-to-r from-indigo-50 to-purple-50 px-6 py-3 rounded-full border border-indigo-200">
+          <i class="fas fa-tag text-indigo-600 mr-2"></i>
+          <span class="text-sm font-semibold text-indigo-700">Simple Pricing</span>
+        </div>
+        <h2 class="text-5xl font-bold text-gray-900">Choose Your Plan</h2>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+          Transparent pricing that grows with your business
+        </p>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
+        <!-- Base Plan -->
+        <div class="group relative">
+          <div
+            class="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl transform rotate-1 group-hover:rotate-2 transition-transform duration-300">
+          </div>
+          <div
+            class="relative bg-white rounded-3xl p-10 border-2 border-gray-200 hover:border-indigo-300 transition-all duration-300 shadow-xl">
+            <div class="text-center mb-8">
+              <h3 class="text-3xl font-bold mb-4 text-indigo-600">Base</h3>
+              <div class="mb-6">
+                <span class="text-5xl font-bold text-gray-900">$34</span>
+                <span class="text-gray-500 text-xl">/month</span>
+              </div>
+              <p class="text-gray-600">Perfect for small businesses getting started</p>
+            </div>
+
+            <ul class="space-y-4 mb-10">
+              <li class="flex items-center">
+                <i class="fas fa-check text-green-500 mr-3 text-lg"></i>
+                <span class="text-gray-700">Smart review filtering</span>
+              </li>
+              <li class="flex items-center">
+                <i class="fas fa-check text-green-500 mr-3 text-lg"></i>
+                <span class="text-gray-700">Custom forms & QR codes</span>
+              </li>
+              <li class="flex items-center">
+                <i class="fas fa-check text-green-500 mr-3 text-lg"></i>
+                <span class="text-gray-700">Analytics dashboard</span>
+              </li>
+              <li class="flex items-center">
+                <i class="fas fa-check text-green-500 mr-3 text-lg"></i>
+                <span class="text-gray-700">Data export</span>
+              </li>
+            </ul>
+
+            <a href="/pricing"
+              class="block w-full text-center bg-indigo-600 text-white py-4 rounded-2xl font-semibold hover:bg-indigo-700 transition-colors duration-300">
+              Get Started
+            </a>
+          </div>
+        </div>
+
+        <!-- Pro Plan -->
+        <div class="group relative">
+          <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 z-20">
+            <span
+              class="bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg">
+              Most Popular
+            </span>
+          </div>
+          <div
+            class="absolute inset-0 bg-gradient-to-br from-purple-200 to-indigo-200 rounded-3xl transform -rotate-1 group-hover:-rotate-2 transition-transform duration-300">
+          </div>
+          <div
+            class="relative bg-white rounded-3xl p-10 border-2 border-purple-300 hover:border-purple-400 transition-all duration-300 shadow-2xl">
+            <div class="text-center mb-8 mt-4">
+              <h3 class="text-3xl font-bold mb-4 text-purple-600">Pro</h3>
+              <div class="mb-6">
+                <span class="text-5xl font-bold text-gray-900">$48</span>
+                <span class="text-gray-500 text-xl">/month</span>
+              </div>
+              <p class="text-gray-600">Everything in Base plus advanced features</p>
+            </div>
+
+            <ul class="space-y-4 mb-10">
+              <li class="flex items-center">
+                <i class="fas fa-check text-green-500 mr-3 text-lg"></i>
+                <span class="text-gray-700">Everything in Base</span>
+              </li>
+              <li class="flex items-center">
+                <i class="fas fa-check text-purple-500 mr-3 text-lg"></i>
+                <span class="text-gray-700">SMS & Email outreach</span>
+              </li>
+              <li class="flex items-center">
+                <i class="fas fa-check text-purple-500 mr-3 text-lg"></i>
+                <span class="text-gray-700">AI-powered insights</span>
+              </li>
+              <li class="flex items-center">
+                <i class="fas fa-check text-purple-500 mr-3 text-lg"></i>
+                <span class="text-gray-700">Priority support</span>
+              </li>
+            </ul>
+
+            <a href="/pricing"
+              class="block w-full text-center bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-4 rounded-2xl font-semibold hover:from-purple-700 hover:to-indigo-700 transition-all duration-300">
+              Get Started
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Enhanced CTA Section -->
+    <section class="relative text-center py-24 fade-in overflow-hidden" style="animation-delay: 1.4s;">
+      <!-- Background Elements -->
+      <div class="absolute inset-0 -z-10">
+        <div
+          class="absolute top-10 left-10 w-40 h-40 bg-gradient-to-br from-blue-200 to-purple-200 rounded-full opacity-30 blur-2xl animate-pulse">
+        </div>
+        <div
+          class="absolute top-20 right-10 w-56 h-56 bg-gradient-to-br from-green-200 to-blue-200 rounded-full opacity-30 blur-2xl animate-pulse"
+          style="animation-delay: 1s;"></div>
+        <div
+          class="absolute bottom-10 left-1/2 transform -translate-x-1/2 w-72 h-72 bg-gradient-to-br from-purple-200 to-pink-200 rounded-full opacity-30 blur-2xl animate-pulse"
+          style="animation-delay: 2s;"></div>
+      </div>
+
+      <div class="relative z-10 max-w-5xl mx-auto space-y-12">
+        <div class="space-y-8">
+          <h2 class="text-6xl md:text-7xl font-bold text-gray-900 leading-tight">
+            Ready to Transform Your
+            <span class="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent block">
+              Review Strategy?
+            </span>
+          </h2>
+          <p class="text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+            Join thousands of businesses using ReviewEcho to build stronger customer relationships,
+            improve their online reputation, and gain valuable business insights.
+          </p>
+        </div>
+
+        <!-- Enhanced CTA Buttons -->
+        <div class="flex flex-col lg:flex-row items-center justify-center gap-8">
+          <a href="/signup"
+            class="group relative overflow-hidden bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-2xl px-16 py-6 rounded-3xl font-bold transition-all duration-300 hover:scale-105 hover:shadow-2xl pulse-glow">
+            <span class="relative z-10 flex items-center">
+              <i class="fas fa-rocket mr-4 group-hover:rotate-12 transition-transform text-2xl"></i>
+              Start Free Trial
+            </span>
+            <div
+              class="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            </div>
           </a>
-          <a href="/pricing" 
-             class="btn-secondary text-xl px-12 py-4">
-            <i class="fas fa-info-circle mr-3"></i>Learn More
+
+          <a href="/pricing"
+            class="group bg-white border-3 border-gray-300 text-gray-700 text-2xl px-16 py-6 rounded-3xl font-bold hover:bg-gray-50 hover:border-indigo-400 transition-all duration-300 hover:scale-105 shadow-lg">
+            <i class="fas fa-info-circle mr-4 group-hover:text-indigo-600 transition-colors text-2xl"></i>
+            Learn More
           </a>
+        </div>
+
+        <!-- Trust Indicators -->
+        <div class="flex flex-col lg:flex-row items-center justify-center gap-8 text-sm text-gray-500 pt-8">
+          <div class="flex items-center">
+            <i class="fas fa-shield-alt text-green-500 mr-2"></i>
+            <span>7-day free trial</span>
+          </div>
+          <div class="flex items-center">
+            <i class="fas fa-credit-card text-blue-500 mr-2"></i>
+            <span>No credit card required</span>
+          </div>
+          <div class="flex items-center">
+            <i class="fas fa-times-circle text-red-500 mr-2"></i>
+            <span>Cancel anytime</span>
+          </div>
         </div>
       </div>
     </section>
   </div>
 </div>
+
+<!-- Feature Modals -->
+<!-- QR Code Modal -->
+<div id="qrCodeModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4 transition-all duration-300 opacity-0">
+  <div class="bg-white rounded-3xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-95 translate-y-4">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-3xl font-bold text-blue-600 flex items-center">
+        <i class="fas fa-qrcode mr-3"></i>
+        QR Code & Posters
+      </h2>
+      <button onclick="closeModal('qrCodeModal')" class="text-gray-400 hover:text-gray-600 transition-all duration-200 hover:scale-110 hover:rotate-90">
+        <i class="fas fa-times text-2xl"></i>
+      </button>
+    </div>
+    
+    <div class="grid md:grid-cols-2 gap-8">
+      <div class="space-y-6">
+        <div class="bg-blue-50 rounded-2xl p-6">
+          <h3 class="text-xl font-bold text-blue-800 mb-4 flex items-center">
+            <i class="fas fa-magic mr-2"></i>
+            Instant QR Generation
+          </h3>
+          <p class="text-blue-700 leading-relaxed">
+            Generate professional QR codes instantly for your review collection. Each code is uniquely linked to your business and automatically tracks usage statistics.
+          </p>
+        </div>
+        
+        <div class="bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl p-6">
+          <h3 class="text-xl font-bold text-blue-800 mb-4 flex items-center">
+            <i class="fas fa-palette mr-2"></i>
+            Custom Branding
+          </h3>
+          <ul class="space-y-2 text-blue-700">
+            <li class="flex items-center"><i class="fas fa-check mr-2"></i>Add your logo and colors</li>
+            <li class="flex items-center"><i class="fas fa-check mr-2"></i>Customize messages and calls-to-action</li>
+            <li class="flex items-center"><i class="fas fa-check mr-2"></i>Multiple size formats available</li>
+            <li class="flex items-center"><i class="fas fa-check mr-2"></i>Print-ready high resolution</li>
+          </ul>
+        </div>
+        
+        <div class="bg-blue-50 rounded-2xl p-6">
+          <h3 class="text-xl font-bold text-blue-800 mb-4 flex items-center">
+            <i class="fas fa-chart-line mr-2"></i>
+            Analytics & Tracking
+          </h3>
+          <p class="text-blue-700 leading-relaxed">
+            Track scan rates, conversion metrics, and customer engagement. See which locations and campaigns perform best with detailed analytics.
+          </p>
+        </div>
+      </div>
+      
+      <div class="space-y-6">
+        <div class="bg-white border-2 border-blue-200 rounded-2xl p-6">
+          <h3 class="text-xl font-bold text-gray-800 mb-4">Professional Poster Templates</h3>
+          <div class="space-y-4">
+            <div class="flex items-start space-x-3">
+              <i class="fas fa-file-image text-blue-500 mt-1"></i>
+              <div>
+                <h4 class="font-semibold">Table Tents</h4>
+                <p class="text-gray-600 text-sm">Perfect for restaurants and cafes</p>
+              </div>
+            </div>
+            <div class="flex items-start space-x-3">
+              <i class="fas fa-image text-blue-500 mt-1"></i>
+              <div>
+                <h4 class="font-semibold">Wall Posters</h4>
+                <p class="text-gray-600 text-sm">Eye-catching displays for any business</p>
+              </div>
+            </div>
+            <div class="flex items-start space-x-3">
+              <i class="fas fa-credit-card text-blue-500 mt-1"></i>
+              <div>
+                <h4 class="font-semibold">Business Cards</h4>
+                <p class="text-gray-600 text-sm">Portable review request cards</p>
+              </div>
+            </div>
+            <div class="flex items-start space-x-3">
+              <i class="fas fa-window-maximize text-blue-500 mt-1"></i>
+              <div>
+                <h4 class="font-semibold">Window Clings</h4>
+                <p class="text-gray-600 text-sm">Storefront display options</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-gradient-to-r from-green-100 to-blue-100 rounded-2xl p-6 text-center">
+          <i class="fas fa-download text-3xl text-green-600 mb-4"></i>
+          <h3 class="text-xl font-bold text-gray-800 mb-2">Easy Download & Print</h3>
+          <p class="text-gray-700">
+            Download in multiple formats (PDF, PNG, JPG) ready for professional printing or home use.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Custom Forms Modal -->
+<div id="customFormsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4 transition-all duration-300 opacity-0">
+  <div class="bg-white rounded-3xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-95 translate-y-4">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-3xl font-bold text-purple-600 flex items-center">
+        <i class="fas fa-palette mr-3"></i>
+        Custom Review Forms
+      </h2>
+      <button onclick="closeModal('customFormsModal')" class="text-gray-400 hover:text-gray-600 transition-all duration-200 hover:scale-110 hover:rotate-90">
+        <i class="fas fa-times text-2xl"></i>
+      </button>
+    </div>
+    
+    <div class="grid md:grid-cols-2 gap-8">
+      <div class="space-y-6">
+        <div class="bg-purple-50 rounded-2xl p-6">
+          <h3 class="text-xl font-bold text-purple-800 mb-4 flex items-center">
+            <i class="fas fa-paint-brush mr-2"></i>
+            Complete Branding Control
+          </h3>
+          <ul class="space-y-3 text-purple-700">
+            <li class="flex items-start">
+              <i class="fas fa-check mr-2 mt-1"></i>
+              <div>
+                <strong>Custom Colors:</strong> Match your brand colors perfectly with our advanced color picker
+              </div>
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-check mr-2 mt-1"></i>
+              <div>
+                <strong>Logo Integration:</strong> Upload and position your logo exactly where you want it
+              </div>
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-check mr-2 mt-1"></i>
+              <div>
+                <strong>Typography:</strong> Choose from professional fonts or upload your own
+              </div>
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-check mr-2 mt-1"></i>
+              <div>
+                <strong>Layout Options:</strong> Multiple pre-designed layouts to choose from
+              </div>
+            </li>
+          </ul>
+        </div>
+        
+        <div class="bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl p-6">
+          <h3 class="text-xl font-bold text-purple-800 mb-4 flex items-center">
+            <i class="fas fa-cog mr-2"></i>
+            Advanced Customization
+          </h3>
+          <div class="space-y-3 text-purple-700">
+            <div class="flex items-center">
+              <i class="fas fa-comment-alt mr-2"></i>
+              <span>Custom welcome messages and thank you notes</span>
+            </div>
+            <div class="flex items-center">
+              <i class="fas fa-star mr-2"></i>
+              <span>Adjustable rating thresholds (3, 4, or 5 star minimums)</span>
+            </div>
+            <div class="flex items-center">
+              <i class="fas fa-language mr-2"></i>
+              <span>Multi-language support for global businesses</span>
+            </div>
+            <div class="flex items-center">
+              <i class="fas fa-mobile-alt mr-2"></i>
+              <span>Responsive design for all devices</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="space-y-6">
+        <div class="bg-white border-2 border-purple-200 rounded-2xl p-6">
+          <h3 class="text-xl font-bold text-gray-800 mb-4">Form Features</h3>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="text-center p-3 bg-purple-50 rounded-lg">
+              <i class="fas fa-smile text-purple-500 text-2xl mb-2"></i>
+              <h4 class="font-semibold text-sm">Emoji Ratings</h4>
+            </div>
+            <div class="text-center p-3 bg-purple-50 rounded-lg">
+              <i class="fas fa-star text-purple-500 text-2xl mb-2"></i>
+              <h4 class="font-semibold text-sm">Star Ratings</h4>
+            </div>
+            <div class="text-center p-3 bg-purple-50 rounded-lg">
+              <i class="fas fa-thumbs-up text-purple-500 text-2xl mb-2"></i>
+              <h4 class="font-semibold text-sm">Thumbs Up/Down</h4>
+            </div>
+            <div class="text-center p-3 bg-purple-50 rounded-lg">
+              <i class="fas fa-chart-bar text-purple-500 text-2xl mb-2"></i>
+              <h4 class="font-semibold text-sm">Scale Ratings</h4>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-gradient-to-r from-purple-100 to-indigo-100 rounded-2xl p-6">
+          <h3 class="text-xl font-bold text-purple-800 mb-4 flex items-center">
+            <i class="fas fa-shield-alt mr-2"></i>
+            Security & Compliance
+          </h3>
+          <ul class="space-y-2 text-purple-700">
+            <li class="flex items-center"><i class="fas fa-check mr-2"></i>GDPR compliant data handling</li>
+            <li class="flex items-center"><i class="fas fa-check mr-2"></i>SSL encryption for all forms</li>
+            <li class="flex items-center"><i class="fas fa-check mr-2"></i>Anti-spam protection</li>
+            <li class="flex items-center"><i class="fas fa-check mr-2"></i>Privacy policy integration</li>
+          </ul>
+        </div>
+        
+        <div class="bg-green-50 rounded-2xl p-6 text-center">
+          <i class="fas fa-eye text-3xl text-green-600 mb-4"></i>
+          <h3 class="text-xl font-bold text-gray-800 mb-2">Live Preview</h3>
+          <p class="text-gray-700">
+            See exactly how your form looks as you customize it with our real-time preview feature.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Analytics Dashboard Modal -->
+<div id="analyticsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4 transition-all duration-300 opacity-0">
+  <div class="bg-white rounded-3xl p-8 max-w-5xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-95 translate-y-4">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-3xl font-bold text-green-600 flex items-center">
+        <i class="fas fa-chart-bar mr-3"></i>
+        Analytics Dashboard
+      </h2>
+      <button onclick="closeModal('analyticsModal')" class="text-gray-400 hover:text-gray-600 transition-all duration-200 hover:scale-110 hover:rotate-90">
+        <i class="fas fa-times text-2xl"></i>
+      </button>
+    </div>
+    
+    <div class="space-y-8">
+      <!-- Key Metrics -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-blue-50 rounded-2xl p-6 text-center">
+          <i class="fas fa-star text-3xl text-blue-600 mb-3"></i>
+          <h3 class="text-2xl font-bold text-blue-800">4.8</h3>
+          <p class="text-blue-600">Average Rating</p>
+        </div>
+        <div class="bg-green-50 rounded-2xl p-6 text-center">
+          <i class="fas fa-thumbs-up text-3xl text-green-600 mb-3"></i>
+          <h3 class="text-2xl font-bold text-green-800">847</h3>
+          <p class="text-green-600">Total Reviews</p>
+        </div>
+        <div class="bg-purple-50 rounded-2xl p-6 text-center">
+          <i class="fas fa-percentage text-3xl text-purple-600 mb-3"></i>
+          <h3 class="text-2xl font-bold text-purple-800">73%</h3>
+          <p class="text-purple-600">Response Rate</p>
+        </div>
+        <div class="bg-yellow-50 rounded-2xl p-6 text-center">
+          <i class="fas fa-trend-up text-3xl text-yellow-600 mb-3"></i>
+          <h3 class="text-2xl font-bold text-yellow-800">+24%</h3>
+          <p class="text-yellow-600">Monthly Growth</p>
+        </div>
+      </div>
+      
+      <div class="grid md:grid-cols-2 gap-8">
+        <div class="space-y-6">
+          <div class="bg-green-50 rounded-2xl p-6">
+            <h3 class="text-xl font-bold text-green-800 mb-4 flex items-center">
+              <i class="fas fa-chart-line mr-2"></i>
+              Performance Tracking
+            </h3>
+            <ul class="space-y-3 text-green-700">
+              <li class="flex items-start">
+                <i class="fas fa-check mr-2 mt-1"></i>
+                <div>
+                  <strong>Review Volume:</strong> Track daily, weekly, and monthly review counts
+                </div>
+              </li>
+              <li class="flex items-start">
+                <i class="fas fa-check mr-2 mt-1"></i>
+                <div>
+                  <strong>Rating Trends:</strong> Monitor your average rating over time
+                </div>
+              </li>
+              <li class="flex items-start">
+                <i class="fas fa-check mr-2 mt-1"></i>
+                <div>
+                  <strong>Response Rates:</strong> See how many customers leave feedback
+                </div>
+              </li>
+              <li class="flex items-start">
+                <i class="fas fa-check mr-2 mt-1"></i>
+                <div>
+                  <strong>Conversion Metrics:</strong> Track public vs private feedback ratios
+                </div>
+              </li>
+            </ul>
+          </div>
+          
+          <div class="bg-gradient-to-r from-green-100 to-teal-100 rounded-2xl p-6">
+            <h3 class="text-xl font-bold text-green-800 mb-4 flex items-center">
+              <i class="fas fa-filter mr-2"></i>
+              Advanced Filtering
+            </h3>
+            <div class="space-y-2 text-green-700">
+              <div class="flex items-center">
+                <i class="fas fa-calendar mr-2"></i>
+                <span>Date range filtering with custom periods</span>
+              </div>
+              <div class="flex items-center">
+                <i class="fas fa-star mr-2"></i>
+                <span>Filter by rating levels and review types</span>
+              </div>
+              <div class="flex items-center">
+                <i class="fas fa-map-marker-alt mr-2"></i>
+                <span>Location-based analytics for multi-location businesses</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="space-y-6">
+          <div class="bg-white border-2 border-green-200 rounded-2xl p-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Visual Reports</h3>
+            <div class="space-y-4">
+              <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center">
+                  <i class="fas fa-chart-pie text-green-500 mr-3"></i>
+                  <span class="font-medium">Rating Distribution</span>
+                </div>
+                <span class="text-sm text-gray-600">Pie Charts</span>
+              </div>
+              <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center">
+                  <i class="fas fa-chart-line text-blue-500 mr-3"></i>
+                  <span class="font-medium">Trend Analysis</span>
+                </div>
+                <span class="text-sm text-gray-600">Line Graphs</span>
+              </div>
+              <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center">
+                  <i class="fas fa-chart-bar text-purple-500 mr-3"></i>
+                  <span class="font-medium">Comparison Reports</span>
+                </div>
+                <span class="text-sm text-gray-600">Bar Charts</span>
+              </div>
+              <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center">
+                  <i class="fas fa-table text-orange-500 mr-3"></i>
+                  <span class="font-medium">Detailed Tables</span>
+                </div>
+                <span class="text-sm text-gray-600">Data Tables</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-gradient-to-r from-blue-100 to-green-100 rounded-2xl p-6 text-center">
+            <i class="fas fa-download text-3xl text-blue-600 mb-4"></i>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Export & Sharing</h3>
+            <p class="text-gray-700 mb-4">
+              Export reports in PDF, Excel, or CSV formats. Schedule automated reports via email.
+            </p>
+            <div class="flex justify-center space-x-4 text-sm">
+              <span class="bg-white px-3 py-1 rounded-full">PDF</span>
+              <span class="bg-white px-3 py-1 rounded-full">Excel</span>
+              <span class="bg-white px-3 py-1 rounded-full">CSV</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AI Reports Modal -->
+<div id="aiReportsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4 transition-all duration-300 opacity-0">
+  <div class="bg-white rounded-3xl p-8 max-w-5xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-95 translate-y-4">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-3xl font-bold text-indigo-600 flex items-center">
+        <i class="fas fa-lightbulb mr-3"></i>
+        AI-Powered Business Intelligence
+      </h2>
+      <button onclick="closeModal('aiReportsModal')" class="text-gray-400 hover:text-gray-600 transition-all duration-200 hover:scale-110 hover:rotate-90">
+        <i class="fas fa-times text-2xl"></i>
+      </button>
+    </div>
+    
+    <div class="space-y-8">
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-6 text-center">
+          <i class="fas fa-brain text-4xl text-indigo-600 mb-4"></i>
+          <h3 class="text-xl font-bold text-indigo-800 mb-2">SWOT Analysis</h3>
+          <p class="text-indigo-700">
+            AI-generated strengths, weaknesses, opportunities, and threats analysis
+          </p>
+        </div>
+        <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 text-center">
+          <i class="fas fa-search text-4xl text-purple-600 mb-4"></i>
+          <h3 class="text-xl font-bold text-purple-800 mb-2">Sentiment Analysis</h3>
+          <p class="text-purple-700">
+            Deep dive into customer emotions and satisfaction patterns
+          </p>
+        </div>
+        <div class="bg-gradient-to-br from-pink-50 to-red-50 rounded-2xl p-6 text-center">
+          <i class="fas fa-target text-4xl text-pink-600 mb-4"></i>
+          <h3 class="text-xl font-bold text-pink-800 mb-2">Action Items</h3>
+          <p class="text-pink-700">
+            Specific, actionable recommendations for business improvement
+          </p>
+        </div>
+      </div>
+      
+      <div class="grid md:grid-cols-2 gap-8">
+        <div class="space-y-6">
+          <div class="bg-indigo-50 rounded-2xl p-6">
+            <h3 class="text-xl font-bold text-indigo-800 mb-4 flex items-center">
+              <i class="fas fa-robot mr-2"></i>
+              Advanced AI Features
+            </h3>
+            <ul class="space-y-3 text-indigo-700">
+              <li class="flex items-start">
+                <i class="fas fa-check mr-2 mt-1"></i>
+                <div>
+                  <strong>Natural Language Processing:</strong> Understand the true meaning behind customer feedback
+                </div>
+              </li>
+              <li class="flex items-start">
+                <i class="fas fa-check mr-2 mt-1"></i>
+                <div>
+                  <strong>Trend Prediction:</strong> Forecast future performance based on current data
+                </div>
+              </li>
+              <li class="flex items-start">
+                <i class="fas fa-check mr-2 mt-1"></i>
+                <div>
+                  <strong>Competitive Analysis:</strong> Compare your performance against industry standards
+                </div>
+              </li>
+              <li class="flex items-start">
+                <i class="fas fa-check mr-2 mt-1"></i>
+                <div>
+                  <strong>Theme Detection:</strong> Automatically identify recurring customer concerns
+                </div>
+              </li>
+            </ul>
+          </div>
+          
+          <div class="bg-gradient-to-r from-indigo-100 to-purple-100 rounded-2xl p-6">
+            <h3 class="text-xl font-bold text-indigo-800 mb-4 flex items-center">
+              <i class="fas fa-chart-line mr-2"></i>
+              Predictive Insights
+            </h3>
+            <div class="space-y-2 text-indigo-700">
+              <div class="flex items-center">
+                <i class="fas fa-crystal-ball mr-2"></i>
+                <span>Customer satisfaction forecasting</span>
+              </div>
+              <div class="flex items-center">
+                <i class="fas fa-exclamation-triangle mr-2"></i>
+                <span>Early warning system for potential issues</span>
+              </div>
+              <div class="flex items-center">
+                <i class="fas fa-rocket mr-2"></i>
+                <span>Growth opportunity identification</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="space-y-6">
+          <div class="bg-white border-2 border-indigo-200 rounded-2xl p-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Report Types</h3>
+            <div class="space-y-3">
+              <div class="flex items-center p-3 bg-indigo-50 rounded-lg">
+                <i class="fas fa-file-alt text-indigo-500 mr-3"></i>
+                <div>
+                  <h4 class="font-semibold">Monthly Business Health Report</h4>
+                  <p class="text-sm text-gray-600">Comprehensive monthly analysis</p>
+                </div>
+              </div>
+              <div class="flex items-center p-3 bg-purple-50 rounded-lg">
+                <i class="fas fa-lightbulb text-purple-500 mr-3"></i>
+                <div>
+                  <h4 class="font-semibold">Improvement Recommendations</h4>
+                  <p class="text-sm text-gray-600">Actionable insights for growth</p>
+                </div>
+              </div>
+              <div class="flex items-center p-3 bg-pink-50 rounded-lg">
+                <i class="fas fa-users text-pink-500 mr-3"></i>
+                <div>
+                  <h4 class="font-semibold">Customer Persona Analysis</h4>
+                  <p class="text-sm text-gray-600">Understand your customer base</p>
+                </div>
+              </div>
+              <div class="flex items-center p-3 bg-blue-50 rounded-lg">
+                <i class="fas fa-trophy text-blue-500 mr-3"></i>
+                <div>
+                  <h4 class="font-semibold">Competitive Benchmarking</h4>
+                  <p class="text-sm text-gray-600">Compare against competitors</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-gradient-to-r from-green-100 to-blue-100 rounded-2xl p-6 text-center">
+            <i class="fas fa-clock text-3xl text-green-600 mb-4"></i>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Automated Delivery</h3>
+            <p class="text-gray-700">
+              Schedule reports to be delivered automatically to your inbox. Choose weekly, monthly, or quarterly delivery.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Customer Database Modal -->
+<div id="customerDatabaseModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4 transition-all duration-300 opacity-0">
+  <div class="bg-white rounded-3xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-95 translate-y-4">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-3xl font-bold text-red-600 flex items-center">
+        <i class="fas fa-users mr-3"></i>
+        Customer Database & Outreach
+      </h2>
+      <button onclick="closeModal('customerDatabaseModal')" class="text-gray-400 hover:text-gray-600 transition-all duration-200 hover:scale-110 hover:rotate-90">
+        <i class="fas fa-times text-2xl"></i>
+      </button>
+    </div>
+    
+    <div class="grid md:grid-cols-2 gap-8">
+      <div class="space-y-6">
+        <div class="bg-red-50 rounded-2xl p-6">
+          <h3 class="text-xl font-bold text-red-800 mb-4 flex items-center">
+            <i class="fas fa-database mr-2"></i>
+            Customer Management
+          </h3>
+          <ul class="space-y-3 text-red-700">
+            <li class="flex items-start">
+              <i class="fas fa-check mr-2 mt-1"></i>
+              <div>
+                <strong>Contact Import:</strong> Bulk import from CSV, Excel, or popular CRM systems
+              </div>
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-check mr-2 mt-1"></i>
+              <div>
+                <strong>Smart Segmentation:</strong> Automatically group customers by behavior and preferences
+              </div>
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-check mr-2 mt-1"></i>
+              <div>
+                <strong>Contact Profiles:</strong> Detailed customer history and interaction tracking
+              </div>
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-check mr-2 mt-1"></i>
+              <div>
+                <strong>Duplicate Detection:</strong> Automatic identification and merging of duplicate contacts
+              </div>
+            </li>
+          </ul>
+        </div>
+        
+        <div class="bg-gradient-to-r from-red-100 to-pink-100 rounded-2xl p-6">
+          <h3 class="text-xl font-bold text-red-800 mb-4 flex items-center">
+            <i class="fas fa-paper-plane mr-2"></i>
+            Multi-Channel Outreach
+          </h3>
+          <div class="space-y-3">
+            <div class="bg-white rounded-lg p-3 flex items-center">
+              <i class="fas fa-envelope text-blue-500 mr-3"></i>
+              <div>
+                <h4 class="font-semibold">Email Campaigns</h4>
+                <p class="text-sm text-gray-600">Professional email templates with tracking</p>
+              </div>
+            </div>
+            <div class="bg-white rounded-lg p-3 flex items-center">
+              <i class="fas fa-sms text-green-500 mr-3"></i>
+              <div>
+                <h4 class="font-semibold">SMS Messaging</h4>
+                <p class="text-sm text-gray-600">Direct text messages with high open rates</p>
+              </div>
+            </div>
+            <div class="bg-white rounded-lg p-3 flex items-center">
+              <i class="fas fa-clock text-orange-500 mr-3"></i>
+              <div>
+                <h4 class="font-semibold">Automated Sequences</h4>
+                <p class="text-sm text-gray-600">Follow-up campaigns based on customer actions</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="space-y-6">
+        <div class="bg-white border-2 border-red-200 rounded-2xl p-6">
+          <h3 class="text-xl font-bold text-gray-800 mb-4">Campaign Features</h3>
+          <div class="space-y-4">
+            <div class="flex items-start space-x-3">
+              <i class="fas fa-calendar-alt text-red-500 mt-1"></i>
+              <div>
+                <h4 class="font-semibold">Smart Scheduling</h4>
+                <p class="text-gray-600 text-sm">Send messages at optimal times for each customer</p>
+              </div>
+            </div>
+            <div class="flex items-start space-x-3">
+              <i class="fas fa-user-tag text-red-500 mt-1"></i>
+              <div>
+                <h4 class="font-semibold">Personalization</h4>
+                <p class="text-gray-600 text-sm">Dynamic content based on customer data</p>
+              </div>
+            </div>
+            <div class="flex items-start space-x-3">
+              <i class="fas fa-chart-bar text-red-500 mt-1"></i>
+              <div>
+                <h4 class="font-semibold">Campaign Analytics</h4>
+                <p class="text-gray-600 text-sm">Track open rates, click-through rates, and conversions</p>
+              </div>
+            </div>
+            <div class="flex items-start space-x-3">
+              <i class="fas fa-ban text-red-500 mt-1"></i>
+              <div>
+                <h4 class="font-semibold">Unsubscribe Management</h4>
+                <p class="text-gray-600 text-sm">Automatic handling of opt-outs and preferences</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-gradient-to-r from-green-100 to-blue-100 rounded-2xl p-6">
+          <h3 class="text-xl font-bold text-red-800 mb-4 flex items-center">
+            <i class="fas fa-sync mr-2"></i>
+            CRM Integration
+          </h3>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-white rounded-lg p-3 text-center">
+              <i class="fas fa-cloud text-blue-500 mb-2"></i>
+              <p class="text-sm font-medium">Salesforce</p>
+            </div>
+            <div class="bg-white rounded-lg p-3 text-center">
+              <i class="fas fa-envelope text-green-500 mb-2"></i>
+              <p class="text-sm font-medium">Mailchimp</p>
+            </div>
+            <div class="bg-white rounded-lg p-3 text-center">
+              <i class="fas fa-table text-purple-500 mb-2"></i>
+              <p class="text-sm font-medium">Excel/CSV</p>
+            </div>
+            <div class="bg-white rounded-lg p-3 text-center">
+              <i class="fas fa-plus text-gray-500 mb-2"></i>
+              <p class="text-sm font-medium">More...</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-yellow-50 rounded-2xl p-6 text-center">
+          <i class="fas fa-shield-check text-3xl text-yellow-600 mb-4"></i>
+          <h3 class="text-xl font-bold text-gray-800 mb-2">Compliance Ready</h3>
+          <p class="text-gray-700">
+            GDPR, CAN-SPAM, and TCPA compliant. Built-in consent management and opt-out handling.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Data Export Modal -->
+<div id="dataExportModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4 transition-all duration-300 opacity-0">
+  <div class="bg-white rounded-3xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-95 translate-y-4">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-3xl font-bold text-yellow-600 flex items-center">
+        <i class="fas fa-download mr-3"></i>
+        Data Export & Integration
+      </h2>
+      <button onclick="closeModal('dataExportModal')" class="text-gray-400 hover:text-gray-600 transition-all duration-200 hover:scale-110 hover:rotate-90">
+        <i class="fas fa-times text-2xl"></i>
+      </button>
+    </div>
+    
+    <div class="grid md:grid-cols-2 gap-8">
+      <div class="space-y-6">
+        <div class="bg-yellow-50 rounded-2xl p-6">
+          <h3 class="text-xl font-bold text-yellow-800 mb-4 flex items-center">
+            <i class="fas fa-file-export mr-2"></i>
+            Export Formats
+          </h3>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-white rounded-lg p-4 text-center border-2 border-yellow-200">
+              <i class="fas fa-file-pdf text-red-500 text-2xl mb-2"></i>
+              <h4 class="font-semibold">PDF Reports</h4>
+              <p class="text-xs text-gray-600">Professional formatted reports</p>
+            </div>
+            <div class="bg-white rounded-lg p-4 text-center border-2 border-yellow-200">
+              <i class="fas fa-file-excel text-green-500 text-2xl mb-2"></i>
+              <h4 class="font-semibold">Excel Files</h4>
+              <p class="text-xs text-gray-600">Spreadsheets with formulas</p>
+            </div>
+            <div class="bg-white rounded-lg p-4 text-center border-2 border-yellow-200">
+              <i class="fas fa-file-csv text-blue-500 text-2xl mb-2"></i>
+              <h4 class="font-semibold">CSV Data</h4>
+              <p class="text-xs text-gray-600">Raw data for analysis</p>
+            </div>
+            <div class="bg-white rounded-lg p-4 text-center border-2 border-yellow-200">
+              <i class="fas fa-code text-purple-500 text-2xl mb-2"></i>
+              <h4 class="font-semibold">JSON/XML</h4>
+              <p class="text-xs text-gray-600">API-ready formats</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-gradient-to-r from-yellow-100 to-orange-100 rounded-2xl p-6">
+          <h3 class="text-xl font-bold text-yellow-800 mb-4 flex items-center">
+            <i class="fas fa-filter mr-2"></i>
+            Advanced Filtering
+          </h3>
+          <ul class="space-y-2 text-yellow-700">
+            <li class="flex items-center"><i class="fas fa-check mr-2"></i>Date range selection</li>
+            <li class="flex items-center"><i class="fas fa-check mr-2"></i>Rating-based filtering</li>
+            <li class="flex items-center"><i class="fas fa-check mr-2"></i>Review type (public/private)</li>
+            <li class="flex items-center"><i class="fas fa-check mr-2"></i>Customer segments</li>
+            <li class="flex items-center"><i class="fas fa-check mr-2"></i>Custom field selection</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="space-y-6">
+        <div class="bg-white border-2 border-yellow-200 rounded-2xl p-6">
+          <h3 class="text-xl font-bold text-gray-800 mb-4">What You Can Export</h3>
+          <div class="space-y-4">
+            <div class="flex items-start space-x-3">
+              <i class="fas fa-star text-yellow-500 mt-1"></i>
+              <div>
+                <h4 class="font-semibold">Review Data</h4>
+                <p class="text-gray-600 text-sm">All reviews with ratings, comments, and metadata</p>
+              </div>
+            </div>
+            <div class="flex items-start space-x-3">
+              <i class="fas fa-users text-yellow-500 mt-1"></i>
+              <div>
+                <h4 class="font-semibold">Customer Information</h4>
+                <p class="text-gray-600 text-sm">Contact details and interaction history</p>
+              </div>
+            </div>
+            <div class="flex items-start space-x-3">
+              <i class="fas fa-chart-line text-yellow-500 mt-1"></i>
+              <div>
+                <h4 class="font-semibold">Analytics Data</h4>
+                <p class="text-gray-600 text-sm">Performance metrics and trend data</p>
+              </div>
+            </div>
+            <div class="flex items-start space-x-3">
+              <i class="fas fa-brain text-yellow-500 mt-1"></i>
+              <div>
+                <h4 class="font-semibold">AI Insights</h4>
+                <p class="text-gray-600 text-sm">Generated reports and recommendations</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-gradient-to-r from-blue-100 to-purple-100 rounded-2xl p-6">
+          <h3 class="text-xl font-bold text-yellow-800 mb-4 flex items-center">
+            <i class="fas fa-plug mr-2"></i>
+            API Access
+          </h3>
+          <p class="text-yellow-700 mb-4">
+            Full REST API access for custom integrations and real-time data sync.
+          </p>
+          <div class="bg-white rounded-lg p-4">
+            <code class="text-sm text-gray-700">
+              GET /api/v1/reviews?format=json&date_from=2024-01-01
+            </code>
+          </div>
+        </div>
+        
+        <div class="bg-green-50 rounded-2xl p-6 text-center">
+          <i class="fas fa-clock text-3xl text-green-600 mb-4"></i>
+          <h3 class="text-xl font-bold text-gray-800 mb-2">Scheduled Exports</h3>
+          <p class="text-gray-700">
+            Set up automatic exports delivered to your email or cloud storage on a schedule.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Modal functions with smooth animations
+function openModal(modalId) {
+  const modal = document.getElementById(modalId);
+  const modalContent = modal.querySelector('.bg-white');
+  
+  modal.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+  
+  // Trigger entrance animation
+  requestAnimationFrame(() => {
+    modal.classList.remove('opacity-0');
+    modal.classList.add('opacity-100');
+    modalContent.classList.remove('scale-95', 'translate-y-4');
+    modalContent.classList.add('scale-100', 'translate-y-0');
+  });
+}
+
+function closeModal(modalId) {
+  const modal = document.getElementById(modalId);
+  const modalContent = modal.querySelector('.bg-white');
+  
+  // Trigger exit animation
+  modal.classList.remove('opacity-100');
+  modal.classList.add('opacity-0');
+  modalContent.classList.remove('scale-100', 'translate-y-0');
+  modalContent.classList.add('scale-95', 'translate-y-4');
+  
+  // Hide modal after animation completes
+  setTimeout(() => {
+    modal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+  }, 300);
+}
+
+// Add click handlers to feature cards
+document.addEventListener('DOMContentLoaded', function() {
+  // QR Code modal
+  document.querySelector('[onclick*="qrCodeModal"]')?.addEventListener('click', function(e) {
+    e.preventDefault();
+    openModal('qrCodeModal');
+  });
+  
+  // Add click handlers for each "Learn More" button
+  const featureCards = document.querySelectorAll('#features .group');
+  featureCards.forEach((card, index) => {
+    const learnMoreBtn = card.querySelector('.inline-flex');
+    if (learnMoreBtn) {
+      learnMoreBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        const modalIds = [
+          'qrCodeModal',
+          'customFormsModal', 
+          'analyticsModal',
+          'aiReportsModal',
+          'customerDatabaseModal',
+          'dataExportModal'
+        ];
+        
+        if (modalIds[index]) {
+          openModal(modalIds[index]);
+        }
+      });
+    }
+  });
+});
+
+// Close modals when clicking outside
+document.querySelectorAll('[id$="Modal"]').forEach(modal => {
+  modal.addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeModal(this.id);
+    }
+  });
+});
+
+// Close modals with Escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('[id$="Modal"]').forEach(modal => {
+      if (!modal.classList.contains('hidden')) {
+        closeModal(modal.id);
+      }
+    });
+  }
+});
+</script>
+
+<style>
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .fade-in {
+    animation: fadeInUp 0.6s ease-out;
+  }
+
+  @keyframes float {
+
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  .float-animation {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .scale-hover {
+    transition: transform 0.3s ease;
+  }
+
+  .scale-hover:hover {
+    transform: scale(1.05);
+  }
+
+  .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes pulse-glow {
+    from {
+      box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
+    }
+
+    to {
+      box-shadow: 0 0 40px rgba(102, 126, 234, 0.8);
+    }
+  }
+
+  .border-3 {
+    border-width: 3px;
+  }
+
+  /* Enhanced modal animations */
+  [id$="Modal"] {
+    backdrop-filter: blur(4px);
+  }
+
+  [id$="Modal"] .bg-white {
+    animation-fill-mode: both;
+  }
+
+  /* Subtle bounce effect for modal content */
+  @keyframes modalBounceIn {
+    0% {
+      opacity: 0;
+      transform: scale(0.9) translateY(20px);
+    }
+    50% {
+      transform: scale(1.02) translateY(-5px);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  /* Smooth slide out animation */
+  @keyframes modalSlideOut {
+    0% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(0.95) translateY(10px);
+    }
+  }
+
+  /* Add hover effects to modal content sections */
+  [id$="Modal"] .bg-white > div > div {
+    transition: transform 0.2s ease;
+  }
+
+  [id$="Modal"] .bg-white > div > div:hover {
+    transform: translateY(-1px);
+  }
+</style>
 {% endblock %}

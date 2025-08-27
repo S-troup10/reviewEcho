@@ -18,50 +18,64 @@
         </div>
 
         <!-- Current Subscription Status -->
-        {% if subscription_status %}
-        <div class="relative mb-12">
-            <div class="card p-8">
-                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-                    <div class="flex items-center space-x-6">
-                        <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-                            <i class="fas fa-crown text-white text-2xl"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-2xl font-bold text-gray-900 mb-2">
-                                Current Plan: {{ subscription_status.tier.title() if subscription_status.tier else 'None' }}
-                            </h3>
-                            <div class="flex items-center space-x-4">
-                                {% if subscription_status.in_trial %}
+{% if subscription_status %}
+<div class="relative mb-12">
+    <div class="card p-8">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+            <div class="flex items-center space-x-6">
+                <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                    <i class="fas fa-crown text-white text-2xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">
+                        Current Plan: {{
+                            'Trial'
+                            if subscription_status.in_trial
+                            else (subscription_status.tier.title() if subscription_status.has_active_subscription and subscription_status.tier else 'None')
+                        }}
+                    </h3>
+                    <div class="flex flex-col space-y-2">
+                        <div class="flex items-center space-x-4">
+                            {% if subscription_status.in_trial %}
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 border border-green-200">
-                                    <i class="fas fa-gift mr-2"></i>None
+                                    <i class="fas fa-gift mr-2"></i>Trialing
                                 </span>
                                 <span class="text-gray-600">{{ subscription_status.trial_days_left }} days remaining</span>
-                                {% elif subscription_status.has_active_subscription %}
+                            {% elif subscription_status.has_active_subscription %}
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 border border-green-200">
                                     <i class="fas fa-check-circle mr-2"></i>Active
                                 </span>
-                                {% if subscription_status.expires_at %}
-                                <span class="text-gray-600">Renews {{ subscription_status.expires_at.strftime('%B %d, %Y') }}</span>
+                                {% if subscription_status.cancel %}
+                                    <div class="mt-2 inline-flex items-center px-3 py-1 rounded-lg text-sm font-medium bg-red-100 text-red-800 border border-red-200 shadow-sm">
+                                        <i class="fas fa-ban mr-2"></i>
+                                        Cancels on 
+                                        <span class="ml-1 font-semibold">
+                                            {{ subscription_status.cancel_date.strftime('%B %d, %Y') if subscription_status.cancel_date else 'end of period' }}
+                                        </span>
+                                    </div>
                                 {% endif %}
-                                {% else %}
+
+                            {% else %}
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800 border border-red-200">
                                     <i class="fas fa-exclamation-triangle mr-2"></i>Expired
                                 </span>
-                                {% endif %}
-                            </div>
+                            {% endif %}
                         </div>
                     </div>
-                    {% if subscription_status.has_active_subscription and not subscription_status.in_trial %}
-                    <form method="POST" action="{{ url_for('create_customer_portal') }}" class="mt-6 lg:mt-0">
-                        <button type="submit" class="btn-secondary">
-                            <i class="fas fa-cog mr-2"></i>Manage Subscription
-                        </button>
-                    </form>
-                    {% endif %}
                 </div>
             </div>
+            {% if subscription_status.has_active_subscription and not subscription_status.in_trial %}
+            <form method="POST" action="{{ url_for('create_customer_portal') }}" class="mt-6 lg:mt-0">
+                <button type="submit" class="btn-secondary">
+                    <i class="fas fa-cog mr-2"></i>Manage Subscription
+                </button>
+            </form>
+            {% endif %}
         </div>
-        {% endif %}
+    </div>
+</div>
+{% endif %}
+
 
         <!-- Pricing Plans -->
         <div class="grid lg:grid-cols-2 gap-8 mb-16">
@@ -128,7 +142,7 @@
                     </ul>
 
                     <div class="mt-auto">
-                        {% if subscription_status and subscription_status.tier == 'base' %}
+                        {% if subscription_status and subscription_status.tier == 'base' and not subscription_status.in_trial and subscription_status.status != 'cancelled'%}
                         <button class="w-full py-4 bg-gray-100 border border-gray-300 rounded-lg font-medium text-gray-500 cursor-not-allowed">
                             <i class="fas fa-check mr-2"></i>Current Plan
                         </button>
@@ -214,7 +228,7 @@
                     </ul>
 
                     <div class="mt-auto">
-                        {% if subscription_status and subscription_status.tier == 'pro' %}
+                        {% if subscription_status and subscription_status.tier == 'pro' and subscription_status.status != 'cancelled' %}
                         <button class="w-full py-4 bg-gray-100 border border-gray-300 rounded-lg font-medium text-gray-500 cursor-not-allowed">
                             <i class="fas fa-check mr-2"></i>Current Plan
                         </button>

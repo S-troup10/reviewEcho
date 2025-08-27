@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from functools import wraps
 from flask import (Flask, session, render_template, request, flash, redirect,
                    url_for, jsonify)
-
+from datetime import datetime, timedelta, timezone
 import stripe
 import gunicorn
 load_dotenv()
@@ -25,7 +25,8 @@ STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET")
 app.config.update(
     SESSION_COOKIE_SECURE=False,  # allow cookies over HTTP
     SESSION_COOKIE_SAMESITE='Lax',  # normal default
-    SESSION_PERMANENT=True  # keep session persistent
+    SESSION_PERMANENT=True,  # keep session persistent
+    PERMANENT_SESSION_LIFETIME=timedelta(hours=18)
 )
 
 
@@ -104,7 +105,7 @@ def require_pro_subscription(f):
         return f(*args, **kwargs)
 
     return wrapper
- 
+
 
 #-- google --
 google_bp = make_google_blueprint(
@@ -124,12 +125,13 @@ app.register_blueprint(google_bp, url_prefix="/auth")
 
 @app.route("/privacy")
 def privacy():
-    return render_template("privacy.html")
     
+    return render_template("privacy.html")
+
 @app.route("/terms")
 def terms():
     return render_template("terms.html")
-    
+
 
 @app.route("/login/google/success")
 def google_login_success():
@@ -352,7 +354,7 @@ def signup():
                 user_id = result["id"]
                 # Create 7-day trial subscription
                 storage.create_trial_subscription(user_id)
-                
+
                 # Log user in immediately and redirect to welcome demo
                 session["logged_in"] = True
                 session["user_id"] = user_id
@@ -387,6 +389,7 @@ def login_page():
 @app.route("/dashboard")
 @require_subscription
 def dashboard():
+    print(session)
     user_id = session.get("user_id")
     user_data = storage.fetch("users", {"id": user_id})
     if user_data and len(user_data) > 0:
@@ -410,6 +413,7 @@ def dashboard():
         show_welcome_demo = session.pop("show_welcome_demo", False)
 
         return render_template("dashboard.html",
+                               tier=session.get("subscription_status").get("tier"),
                                current_user=user_data[0],
                                business_settings=business_settings,
                                stats=stats,
@@ -458,7 +462,7 @@ def support() :
 
 @app.route("/admin")
 def admin():
-    
+
     if session.get("user_id", 0) != 1 :
         return redirect(url_for("index"))
     users = storage.fetch("users")
@@ -510,12 +514,12 @@ def review_form(business_id):
 
 @app.route("/submit-review/<int:business_id>", methods=["POST"])
 def submit_review(business_id):
-    customer_name = request.form.get("customer_name")
-    customer_email = request.form.get("customer_email")
+    customer_name = request.form.get("customer_name", '')
+    customer_email = request.form.get("customer_email", '')
     rating = int(request.form.get("rating", 0))
-    review_text = request.form.get("review_text")
+    review_text = request.form.get("review_text", '')
 
-    if not all([customer_name, customer_email, rating, review_text]):
+    if not rating:
         flash("Please fill out all fields.", "error")
         return redirect(url_for("review_form", business_id=business_id))
 
@@ -578,7 +582,7 @@ def submit_private_feedback(business_id):
     private_feedback = request.form.get("private_feedback", "")
 
     # Save as private feedback
-    full_feedback = f"Original Review: {review_text}\n\nAdditional Feedback: {private_feedback}"
+    full_feedback = f"{review_text}, {private_feedback}"
 
     result = storage.save_review_submission(business_id, customer_name,
                                             customer_email, rating,
@@ -619,12 +623,16 @@ def settings():
     user_data = storage.fetch("users", {"id": user_id})
     current_user = user_data[0] if user_data else None
 
+    usage = storage.fetch("usage_limits", {"user_id":user_id})
+    print(usage, user_id)
+    usage = usage[0] if usage else None
     # Get user settings
     user_settings = storage.get_user_settings(user_id)
 
     return render_template("settings.html",
                            current_user=current_user,
-                           settings=user_settings)
+                           settings=user_settings,
+                           usage=usage)
 
 
 @app.route("/reviews")
@@ -644,7 +652,7 @@ def view_reviews():
 
 
 
-from datetime import datetime, timedelta, timezone
+
 
 @app.route("/ai-review-summary")
 @require_pro_subscription
@@ -665,7 +673,7 @@ def ai_review_summary():
     elapsed = now - last_generated if last_generated else timedelta(minutes=9999)
 
     # If last generation was less than 5 minutes ago, redirect immediately
-    if elapsed < timedelta(minutes=5):
+    if elapsed < timedelta(minutes=1):
         flash("You can only generate one report every 5 minutes. Please try again later.", "warning")
         return redirect(url_for("ai_reports_history"))
 
@@ -685,11 +693,16 @@ def ai_review_summary():
             is_cached=is_cached,
             report_id=rep_id
         )
+    elif summary_result.get("limit", False):
+        flash("There aren’t enough reviews yet to generate a meaningful summary. Please try again once more reviews are available", "warning")
+        return redirect(url_for("ai_reports_history", disabled="true"))
+
+
+
     else:
+
         flash(f"AI Analysis Error: {summary_result.get('error')}", "error")
         return redirect(url_for("view_reviews"))
-
-
 
 
 
@@ -703,10 +716,14 @@ def ai_reports_history():
 
     if reports_result.get('success'):
         reports = reports_result.get('data', [])
-        return render_template("ai_reports_history.html", reports=reports)
+        # read the query param
+        disabled = request.args.get("disabled") == "true"
+
+        return render_template("ai_reports_history.html", reports=reports, disabled=disabled)
     else:
         flash("Error loading reports history.", "error")
         return redirect(url_for("dashboard"))
+
 
 
 @app.route("/ai-report/<int:report_id>")
@@ -820,6 +837,7 @@ def pricing():
 
     user_id = session.get("user_id")
     subscription_status = storage.get_user_subscription_status(user_id)
+    print(subscription_status)
     return render_template("pricing.html",
                            subscription_status=subscription_status)
 
@@ -830,90 +848,63 @@ def pricing():
 
 # Centralized price config (keep in code or load from env/DB)
 PRICES = {
-    "base": {"amount": 3400, "name": "Base Plan"},   # $34.00
-    "pro":  {"amount": 4800, "name": "Pro Plan"},    # $48.00
+    "base": {"price_id": "price_1Rzz83BjU8tzBncU8DGgmKX2", "name": "Base Plan"},
+    "pro":  {"price_id": "price_1RtKpiBjU8tzBncUkUIFFClK", "name": "Pro Plan"},
 }
-CURRENCY = "usd"
-BILLING_INTERVAL = "month"
+
+
 
 # --- Routes ---
 
 @app.route("/create-checkout-session", methods=["POST"])
 @require_login
 def create_checkout_session():
-    tier = request.form.get("tier")
-    if not tier:
-        flash("Invalid plan selected.", "error")
-        return redirect(url_for("pricing"))
-    return redirect(url_for("subscribe", tier=tier))
-
-
-@app.route("/subscribe/<tier>")
-@require_login
-def subscribe(tier):
-    """Create a Checkout Session and mark a pending subscription in DB."""
-    if not stripe.api_key:
-        flash("Payment system not configured. Please contact support.", "error")
-        return redirect(url_for("pricing"))
-
-    user_id = session.get("user_id")
-    user_data = storage.fetch("users", {"id": user_id})
-    if not user_data:
-        flash("User not found.", "error")
-        return redirect(url_for("pricing"))
-    user = user_data[0]
-
-    if tier not in PRICES:
-        flash("Invalid plan selected.", "error")
-        return redirect(url_for("pricing"))
-
     try:
-        # Create a Stripe Checkout Session for a MONTHLY subscription
-        checkout_session = stripe.checkout.Session.create(
-            customer_email=user["email"],
-            payment_method_types=["card"],
-            mode="subscription",
-            line_items=[{
-                "price_data": {
-                    "currency": CURRENCY,
-                    "product_data": {
-                        "name": PRICES[tier]["name"],
-                        "description": f"{PRICES[tier]['name']} - Monthly Subscription",
-                    },
-                    "unit_amount": PRICES[tier]["amount"],
-                    "recurring": {"interval": BILLING_INTERVAL},
-                },
-                "quantity": 1,
-            }],
-            success_url=request.host_url + "subscription-success?session_id={CHECKOUT_SESSION_ID}",
-            cancel_url=request.host_url + "pricing",
-            metadata={
-                "user_id": str(user_id),
-                "tier": tier,
-                "business_name": user.get("business", "N/A"),
-            },
-            subscription_data={
-                "metadata": {
-                    "user_id": str(user_id),
-                    "tier": tier,
+        tier = request.form.get("tier")
+        user_id = session["user_id"]
+
+        # Get current subscription from DB
+        current_subscription = storage.get_user_subscription(user_id)
+        print(current_subscription)
+
+        session.pop('subscription_status', None)
+
+        
+        if current_subscription and current_subscription.get("stripe_subscription_id"):
+            # ✅ Existing subscription → send to Stripe Billing Portal
+            customer_id = current_subscription["stripe_customer_id"]
+            #also clear subscriptiuon in the session to force it to recheck the subscription
+            portal_session = stripe.billing_portal.Session.create(
+                customer=customer_id,
+                return_url=url_for("pricing", _external=True),
+            )
+            return redirect(portal_session.url, code=303)
+
+        else:
+            # 🆕 New subscription → create Checkout session
+            checkout_session = stripe.checkout.Session.create(
+                payment_method_types=["card"],
+                mode="subscription",
+                line_items=[{"price": PRICES[tier]["price_id"], "quantity": 1}],
+                success_url=url_for("subscription_success", _external=True) + "?session_id={CHECKOUT_SESSION_ID}",
+                cancel_url=url_for("pricing", _external=True),
+                subscription_data={
+                    "metadata": {
+                        "user_id": str(user_id),
+                        "tier": tier
+                    }
                 }
-            },
-        )
-
-        # Mark "pending" so the dashboard can reflect immediate state
-        try:
-            storage.mark_pending_subscription(int(user_id), tier)
-        except Exception as db_e:
-            # Non-fatal; webhook is still the source of truth
-            print(f"⚠️ Could not mark pending subscription for user {user_id}: {db_e}")
-
-        print(f"📝 Created checkout session for user {user_id} with tier {tier}")
-        return redirect(checkout_session.url)
+            )
+            return redirect(checkout_session.url, code=303)
 
     except Exception as e:
-        print(f"❌ Stripe checkout error: {e}")
-        flash("Error creating checkout session. Please try again.", "error")
-        return redirect(url_for("pricing"))
+        print(f"❌ Stripe error: {e}")
+        return str(e), 400
+
+
+
+
+
 
 
 @app.route("/subscription-success")
@@ -925,12 +916,27 @@ def subscription_success():
         flash("Invalid session.", "error")
         return redirect(url_for("pricing"))
 
+    
+
+    
     try:
-        checkout_session = stripe.checkout.Session.retrieve(session_id)
+        checkout_session = stripe.checkout.Session.retrieve(session_id, expand=["line_items.data.price.product"])
+        
+
+        #base or pro
+        
         if checkout_session.mode != "subscription":
             flash("Invalid checkout session.", "error")
             return redirect(url_for("pricing"))
         flash("Thanks for subscribing! Your subscription is being activated — this may take a minute.", "success")
+        #here clear the session and set the tier higher
+        #session['subscription_status'] = storage.get_user_subscription_status(user_id)
+        product_name = checkout_session.line_items.data[0].price.product.name
+        print(product_name)
+        session['subscription_status']['tier'] = product_name
+        
+        print(session)
+        
     except Exception as e:
         print(f"⚠️ Error retrieving checkout session: {e}")
         flash("Payment processed, activation pending. Please check your dashboard shortly.", "warning")
@@ -938,14 +944,8 @@ def subscription_success():
     return redirect(url_for("dashboard"))
 
 
-@app.route("/manage-subscription")
-@require_login
-def manage_subscription():
-    """Redirect to Stripe Customer Portal for subscription management."""
-    return redirect(url_for("create_customer_portal"))
 
-
-@app.route("/create-customer-portal", methods=["POST"])
+@app.route("/create-customer-portal", methods=["GET", "POST"])
 @require_login
 def create_customer_portal():
     """Create Stripe Customer Portal session (uses stored stripe_customer_id)."""
@@ -1054,6 +1054,23 @@ def handle_subscription_created(subscription):
 
         if result.get("success"):
             print(f"✅ DB updated for subscription creation: {stripe_subscription_id}")
+            if tier == 'pro':
+                # Assign SMS and email limits for Pro users
+                res = storage.upsert(
+                    "usage_limits",
+                    [{
+                        "user_id": int(user_id),
+                        "sms_limit": 100,
+                        "sms_usage": 0,
+                        "email_limit": 1000,
+                        "email_usage": 0,
+                        "refresh_date": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
+                    }]
+                )
+                if not res.get("success"):
+                    print(f"❌ Error creating usage limits: {res.get('error')}")
+
+
         else:
             print(f"❌ DB update failed (created): {result.get('error')}")
 
@@ -1063,17 +1080,62 @@ def handle_subscription_created(subscription):
 
 def handle_subscription_updated(subscription):
     """Update status and metadata on any Stripe subscription changes."""
-    try:
-        stripe_subscription_id = subscription["id"]
-        status = subscription["status"]
+    print("➡️ Subscription received:", subscription)
 
-        result = storage.handle_subscription_updated(stripe_subscription_id, status)
-        if result.get("success"):
-            print(f"🔄 DB updated: {stripe_subscription_id} → {status}")
+    try:
+        metadata = subscription.get("metadata", {})
+        user_id = metadata.get("user_id")
+        if not user_id:
+            print("❌ No user_id in subscription metadata")
+            return
+
+        stripe_subscription_id = subscription.get("id")
+        status = subscription.get("status")
+
+        if not stripe_subscription_id or not status:
+            print("❌ Missing subscription id or status")
+            return
+
+        # Update subscription info in Supabase
+        result = storage.handle_subscription_updated(subscription, status)
+
+        if not result.get("success"):
+            print(f"❌ DB update failed: {result.get('error')}")
+            return
+
+        print(f"🔄 DB updated: {stripe_subscription_id} → {status}")
+
+        # Extract tier from returned data
+        tier = None
+        data = result.get("data")
+        if data and isinstance(data, list) and "tier" in data[0]:
+            tier = data[0]["tier"]
+        if not tier:
+            tier = "base"
+
+        # Prepare usage limits
+        usage_data = {
+            "user_id": int(user_id),
+            "sms_usage": 0,
+            "email_usage": 0,
+            "sms_limit": 100 if tier == "pro" else 0,
+            "email_limit": 1000 if tier == "pro" else 0,
+            "refresh_date": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
+                            if tier == "pro" else None
+        }
+
+        # Upsert usage limits (create or update by user_id)
+        res = storage.upsert("usage_limits", [usage_data])
+        if res.get("success"):
+            print(f"🔄 Usage limits updated for tier '{tier}'")
         else:
-            print(f"❌ DB update failed (updated): {result.get('error')}")
+            print(f"❌ Failed to update usage limits: {res.get('error')}")
+
     except Exception as e:
         print(f"❌ Error in handle_subscription_updated: {e}")
+
+
+
 
 
 def handle_subscription_deleted(subscription):
@@ -1143,15 +1205,30 @@ def customer_management():
 
     # Get customers for this business
     customers_result = storage.get_customers_for_business(business_id)
+    print(customers_result)
     customers = customers_result.get('data', []) if customers_result.get('success') else []
 
     # Get recent feedback requests
     feedback_requests = storage.get_recent_feedback_requests(business_id)
 
+    usage = storage.fetch("usage_limits", {"user_id":user_id})
+    print(usage)
+    usage = usage[0] if usage else None
+
+    print(customers, feedback_requests)
+
     return render_template("customer_management.html", 
                          customers=customers,
                          feedback_requests=feedback_requests,
-                         business_id=business_id)
+                         business_id=business_id,
+                         usage=usage
+                         )
+
+
+
+
+
+
 
 
 @app.route("/add-customer", methods=["POST"])
@@ -1223,26 +1300,48 @@ def import_customers():
 
 @app.route("/send-feedback-requests", methods=["POST"])
 @require_login
-def send_feedback_requests():
+def send_feedback_requests_route():
     user_id = session.get("user_id")
     business_id = storage.get_business_id(user_id)
 
     if not business_id:
-        return jsonify({'success': False, 'error': 'Business not found'}), 400
+        # Output if the logged-in user has no associated business
+        return jsonify({
+            'success': False,
+            'error': 'Business not found'
+        }), 400
 
+    # Get list of customer IDs from form data
     customer_ids = request.form.getlist('customer_ids')
-    method = request.form.get('method', 'both')  # Default to 'both' for automatic contact method selection
-    custom_message = request.form.get('custom_message', '').strip()
 
     if not customer_ids:
-        return jsonify({'success': False, 'error': 'No customers selected'}), 400
+        # Output if no customers were selected
+        return jsonify({
+            'success': False,
+            'error': 'No customers selected'
+        }), 400
 
-    # Always use 'both' method to send via all available contact methods
-    method = 'both'
+    # Call the main function to send feedback requests
+    result = storage.send_feedback_requests(business_id, customer_ids, user_id)
 
-    # Send feedback requests
-    result = storage.send_feedback_requests(business_id, customer_ids, method, custom_message)
+    """
+    Possible `result` outputs from storage.send_feedback_requests:
 
+    1. Success case:
+       {
+           'success': True,
+           'sent': <number of successful messages>,
+           'failed': <number of failed messages>,
+           'failed_list': [<list of customer dicts that failed>]
+       }
+
+    2. Failure case due to exception:
+       {
+           'success': False,
+           'error': <exception message>
+       }
+    """
+    print(result)
     return jsonify(result)
 
 
@@ -1256,7 +1355,7 @@ def bulk_add_customers():
             return jsonify({'success': False, 'error': 'Invalid data format'})
 
         user_id = session.get('user_id')
-        
+
         # Get business_id from user_id
         business_id = storage.get_business_id(user_id)
         if not business_id:
@@ -1264,7 +1363,7 @@ def bulk_add_customers():
 
         # Use the bulk_add_customers function from storage
         result = storage.bulk_add_customers(business_id, customers_data)
-        
+
         if result.get('success'):
             return jsonify({'success': True, 'added': result.get('added', 0)})
         else:

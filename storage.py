@@ -743,51 +743,61 @@ def generate_ai_review_summary(user_id, force_regenerate=False):
 
         # Enhanced AI prompt with comprehensive business analysis structure
         ai_prompt = f"""
-Analyze the following customer reviews for {business_name} and provide a comprehensive business intelligence report in JSON format.
+You are provided with customer reviews for {business_name}.
+Focus on interpreting what the reviews reveal about the business, its performance, and areas for improvement. 
+Do not summarize reviews directly or mention individual reviewers. 
+Instead, explain what the feedback indicates about the business and how it can act on these insights.
+Do not critique or comment on the review system, the reviewers, or how reviews are written. 
 
-Your analysis should include:
-1. Overall sentiment (positive/negative/mixed)
-2. Executive summary (3-4 sentences overview of business performance)
-3. Detailed analysis (10-20 sentences covering strengths, issues, and strategic recommendations)
-4. Key strengths (3-5 bullet points of what the business does well)
-5. Areas for improvement (3-5 bullet points of specific issues to address)
-6. Customer satisfaction insights (patterns and trends analysis)
-7. Competitive positioning (how the business stands in the market based on feedback)
-8. Risk assessment (potential threats or concerns from customer feedback)
-9. Growth opportunities (specific areas for expansion or improvement)
-10. Actionable recommendations (5-7 specific action items the business should implement)
+Return a comprehensive business intelligence report in JSON format with the following structure:
+
+1. overall_sentiment: Summarize whether the reviews overall are positive, negative, or mixed.
+2. executive_summary: Provide a 3-4 sentence overview of the business's current performance and reputation based on the reviews.
+3. detailed_analysis: Write a 14-20 sentence analysis that interprets the feedback, explaining what the strengths and weaknesses mean for the business, what customers value, what concerns exist, and how the business can respond strategically. Keep the focus on the business impact and improvements rather than the reviews themselves.
+4. key_strengths: List 3-5 strengths of the business reflected in customer feedback.
+5. areas_for_improvement: List 3-5 weaknesses or issues that the business should address.
+6. customer_satisfaction_insights: Provide 2-3 sentences summarizing what the feedback indicates about customer satisfaction patterns and trends.
+7. competitive_positioning: Provide 2-3 sentences on how the business is perceived relative to competitors, but only if explicitly implied in the reviews.
+8. risk_assessment: Provide 2-3 sentences highlighting risks or recurring concerns for the business.
+9. growth_opportunities: Provide 2-3 sentences outlining opportunities for growth or expansion that arise from customer needs and preferences.
+10. actionable_recommendations: Suggest 5-7 specific, practical actions the business should take, clearly tied to the feedback themes.
 
 Return ONLY a JSON object in this exact format:
 {{
   "overall_sentiment": "positive|negative|mixed",
-  "executive_summary": "Brief 3-4 sentence overview of business performance and current state",
-  "detailed_analysis": "A comprehensive 10-20 sentence analysis depending on review numbers that covers business strengths, identifies issues and problems, analyzes customer feedback patterns, and provides clear recommendations for what the company should do going forward to improve and grow",
-  "key_strengths": ["Strength 1", "Strength 2" ...],
-  "areas_for_improvement": ["Improvement area 1", "Improvement area 2" ...],
-  "customer_satisfaction_insights": "2-3 sentences analyzing customer satisfaction patterns, trends, and overall experience quality",
-  "competitive_positioning": "2-3 sentences about how the business positions against competitors based on customer feedback",
-  "risk_assessment": "2-3 sentences identifying potential risks, threats, or recurring issues that need attention",
-  "growth_opportunities": "2-3 sentences outlining specific opportunities for business growth and expansion",
-  "actionable_recommendations": ["Action 1", "Action 2" ...]
+  "executive_summary": "3-4 sentence summary",
+  "detailed_analysis": "14-20 sentence analysis focused on what feedback means for the business and its improvement",
+  "key_strengths": ["Strength 1", "Strength 2", ...],
+  "areas_for_improvement": ["Improvement 1", "Improvement 2", ...],
+  "customer_satisfaction_insights": "2-3 sentences",
+  "competitive_positioning": "2-3 sentences",
+  "risk_assessment": "2-3 sentences",
+  "growth_opportunities": "2-3 sentences",
+  "actionable_recommendations": ["Action 1", "Action 2", ...]
 }}
 
-Customer feedback data:
+Customer reviews:
 {review_texts}
 """
 
+
+
         # Call OpenAI
         response = openai.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {
-                    "role": "system",
-                    "content": "You are a business analyst expert specializing in customer feedback analysis. Provide only valid JSON output."
-                },
-                {"role": "user", "content": ai_prompt}
-            ],
-            max_tokens=4000,
-            temperature=0.3
-        )
+        model="gpt-5-mini",  # 👈 change to "gpt-5" if you want full GPT-5
+        messages=[
+            {
+                "role": "system",
+                "content": "You are a business analyst expert specializing in customer feedback analysis. Provide only valid JSON output."
+            },
+            {
+                "role": "user",
+                "content": ai_prompt
+            }
+        ],
+        response_format={"type": "json_object"},  # 👈 guarantees valid JSON
+        
+    )
 
         ai_analysis = response.choices[0].message.content.strip()
 

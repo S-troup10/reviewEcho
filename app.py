@@ -848,8 +848,8 @@ def pricing():
 
 # Centralized price config (keep in code or load from env/DB)
 PRICES = {
-    "base": {"price_id": "price_1Rzz83BjU8tzBncU8DGgmKX2", "name": "Base Plan"},
-    "pro":  {"price_id": "price_1RtKpiBjU8tzBncUkUIFFClK", "name": "Pro Plan"},
+    "base": {"price_id": "price_1S0jJ2BYs79KBSyXwm7Wr1zJ", "name": "Base Plan"},
+    "pro":  {"price_id": "price_1S0jJIBYs79KBSyXFgubpRUA", "name": "Pro Plan"},
 }
 
 
@@ -877,6 +877,7 @@ def create_checkout_session():
             portal_session = stripe.billing_portal.Session.create(
                 customer=customer_id,
                 return_url=url_for("pricing", _external=True),
+                
             )
             return redirect(portal_session.url, code=303)
 
@@ -893,7 +894,8 @@ def create_checkout_session():
                         "user_id": str(user_id),
                         "tier": tier
                     }
-                }
+                },
+                allow_promotion_codes=True
             )
             return redirect(checkout_session.url, code=303)
 

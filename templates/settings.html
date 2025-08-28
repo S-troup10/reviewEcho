@@ -112,12 +112,34 @@
     <div class="flex flex-col justify-center items-center bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-6 shadow-sm">
       <i class="fas fa-sync-alt text-gray-600 text-2xl mb-3"></i>
       <span class="text-sm font-medium text-gray-600">Refresh Date</span>
-      <span class="text-lg font-semibold text-gray-900 mt-1">{{ usage.refresh_date }}</span>
+      <span id="refresh_date" class="text-lg font-semibold text-gray-900 mt-1">{{ usage.refresh_date }}</span>
       <p class="text-gray-500 text-xs mt-2">Your limits reset on this date</p>
     </div>
   </div>
 </div>
 
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+    const el = document.getElementById("refresh_date");
+    const rawDate = el.textContent.trim();
+
+    // Convert string to Date object
+    const date = new Date(rawDate);
+
+    // Format options
+    const options = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    };
+
+    // Format date into readable string
+    const formatted = date.toLocaleString(undefined, options);
+
+    // Update the span content
+    el.textContent = formatted;
+  });
+</script>
 
 
 {% endif %}

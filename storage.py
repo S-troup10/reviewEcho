@@ -923,7 +923,7 @@ def save_ai_summary_cache(user_id, summary_data):
         print(f"Error saving report: {e}")
 
 
-def get_ai_reports_history(user_id, limit=10):
+def get_ai_reports_history(user_id, limit=6):
     """Get AI reports history for a business"""
     try:
         business_settings = supabase.table("business_settings").select("*").eq(
